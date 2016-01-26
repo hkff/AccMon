@@ -2,6 +2,7 @@ import inspect
 import sys
 from fodtlmon.fodtl.fodtlmon import *
 
+
 class Monitor:
     def __init__(self, formula=None, debug=False, povo=True):
         self.formula = formula
