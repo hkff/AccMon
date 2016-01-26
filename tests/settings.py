@@ -3,7 +3,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'fodtlmon_middleware.middleware.SniffDomainMiddleware',
+    'fodtlmon_middleware.middleware.FodtlmonMiddleware',
 )
 
 

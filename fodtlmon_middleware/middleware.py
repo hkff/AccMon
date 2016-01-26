@@ -15,14 +15,48 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+from django.http import HttpResponse
+from django.contrib.auth import *
+from django.contrib.auth.models import User
+from django.shortcuts import render
 
 
-class SniffDomainMiddleware(object):
+class FodtlmonMiddleware(object):
+
+    def __init__(self):
+        self.monitors = []
+
     def process_request(self, request):
-        print("%s hahah evil" % request)
+        """
+        Request intercepting
+        :param request:
+        :return:
+        """
+        print("hahah evil %s user %s" % (request, request.user.id))
+        print(User.objects.filter(id=request.user.id))
+
+    def process_view(self, request, view, args, kwargs):
+        """
+        View intercepting
+        :param request:
+        :param view:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        print("%s %s %s %s" % (request, view.__name__, args, kwargs))
+        # return HttpResponse("Your are trying to cheat !")
+        # return render(request, "index.html")
 
     def process_response(self, request, response):
+        """
+        Response intercepting
+        :param request:
+        :param response:
+        :return:
+        """
         response["VCLOCK"] = "{true}"
         print(response)
         return response
+
 
