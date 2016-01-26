@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from django.test import TestCase
 from django.test import Client
-
+from fodtlmon.fodtl.fodtlmon import *
 
 class FodtlmonMiddlewareTestCase(TestCase):
 
