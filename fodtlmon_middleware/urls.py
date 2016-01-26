@@ -1,5 +1,5 @@
 """
-views
+urls
 Copyright (C) 2016 Walid Benghabrit
 
 This program is free software: you can redistribute it and/or modify
@@ -15,11 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.conf.urls import include, url
+from fodtlmon_middleware import views
 
-def index(request):
-    return render(request, 'index.html')
-
-def index2(request):
-    return HttpResponse("kkkkk")
+urlpatterns = [
+    url(r'^$', views.index, name='index'),
+    url(r'^index2/$', views.index2),
+]
