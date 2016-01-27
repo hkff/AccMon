@@ -20,7 +20,7 @@ from django.http import HttpResponse
 from fodtlmon_middleware.middleware import *
 
 def index(request):
-    return render(request, 'stats.html', {"monitors": Sysmon.http_monitors + Sysmon.fx_monitors} )
+    return render(request, 'monitors_page.html', {"monitors": Sysmon.http_monitors + Sysmon.fx_monitors} )
 
 def index2(request):
     return HttpResponse("kkkkk")
