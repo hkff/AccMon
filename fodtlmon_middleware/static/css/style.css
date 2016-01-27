@@ -18,6 +18,18 @@ body {
     background-color: #d9534f;
 }
 
+.panel-green .panel-heading {
+    border-color: #5cb85c;
+    color: #fff;
+    background-color: #5cb85c;
+}
+
+.panel-grey .panel-heading {
+    border-color: #777;
+    color: #fff;
+    background-color: #777;
+}
+
 .mon_details_row_name {
     font-weight: bold;
 }
@@ -31,4 +43,13 @@ body {
     width: 25px;
     align-content: center;
     display:block;
+}
+
+.huge {
+    font-size: 3em;
+}
+
+.b3stat_icon {
+    font-size: 4em;
+    font-weight: bold;
 }

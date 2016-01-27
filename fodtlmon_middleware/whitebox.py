@@ -5,6 +5,7 @@ from enum import Enum
 from datetime import datetime
 import time
 
+
 ########################################################
 # Monitors
 ########################################################
@@ -174,3 +175,7 @@ class Sysmon:
         Sysmon.main_mon.trace.push_event(e)
         # Store the event into the db
         pass
+
+    @staticmethod
+    def get_mons():
+        return Sysmon.fx_monitors + Sysmon.http_monitors
