@@ -25,6 +25,13 @@ class Monitor:
         self.debug = debug
         self.povo = povo
         self.enabled = True
+        self.violations = []
+
+    def monitor(self):
+        return self.mon.monitor(once=True)
+
+    def audit(self):
+        pass
 
 
 class mon_fx(Monitor):
@@ -166,7 +173,7 @@ class Sysmon:
     def monitor_http_rules():
         for m in Sysmon.http_monitors:
             if m.enabled:
-                res = m.mon.monitor(once=True)
+                res = m.monitor()
                 print(res)
 
     @staticmethod
