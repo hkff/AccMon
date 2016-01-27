@@ -17,3 +17,12 @@ body {
     color: #fff;
     background-color: #d9534f;
 }
+
+.mon_details_row_name {
+    font-weight: bold;
+}
+
+#trace_vis {
+    padding-left: 10px;
+    padding-right: 10px;
+}

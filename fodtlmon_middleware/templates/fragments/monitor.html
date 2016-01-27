@@ -1,0 +1,84 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title"> {{ monitor.name }} </h3>
+    </div>
+    <div class="panel-body">
+        <table class="table">
+            <tbody>
+                <tr>
+                  <td class="mon_details_row_name"> Name </td>
+                  <td>{{ monitor.name }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Id </td>
+                  <td>{{ monitor.id }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Target </td>
+                  <td>{{ monitor.target }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Location </td>
+                  <td>{{ monitor.location }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Kind </td>
+                  <td>{{ monitor.kind }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Formula </td>
+                  <td>{{ monitor.formula }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Enabled </td>
+                  <td>{{ monitor.enabled }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Result </td>
+                  <td>{{ monitor.mon.last }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Global step </td>
+                  <td>{{ monitor.mon.counter }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> last result step </td>
+                  <td>{{ monitor.mon.counter2 }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Result </td>
+                  <td>{{ monitor.mon.last }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Rewritten formula </td>
+                  <td>{{ monitor.mon.rewrite }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Trace : </td>
+                  <td></td>
+                </tr>
+            </tbody>
+          </table>
+    </div>
+        <div id="trace_vis"></div>
+</div>
+
+<script type="application/javascript">
+  var container = document.getElementById('trace_vis');
+
+  // Create a DataSet
+  var items = new vis.DataSet([
+    {% for e in monitor.mon.trace.events %}
+        {id: {{ forloop.counter }}, content: '{{ e }}', start: new Date("{{ e.step.isoformat }}")},
+    {% endfor %}
+  ]);
+
+  // Configuration for the Timeline
+  var options = {
+      autoResize: false,
+      maxHeight: '200px'
+  };
+
+  // Create the Timeline
+  var timeline = new vis.Timeline(container, items, options);
+</script>

@@ -2,6 +2,7 @@ import inspect
 import sys
 from fodtlmon.fodtl.fodtlmon import *
 from enum import Enum
+from datetime import datetime
 
 
 ########################################################
@@ -11,11 +12,12 @@ class Monitor:
     """
     Generic monitor
     """
-    def __init__(self, name="", target="", location="LOCAL", kind=None, formula=None, debug=False, povo=True):
+    def __init__(self, name="", description="", target="", location="LOCAL", kind=None, formula=None, debug=False, povo=True):
         self.id = name
         self.name = name
         self.target = target
         self.location = location
+        self.description = description
         self.kind = kind
         self.formula = formula
         self.mon = Fotlmon(self.formula, Trace())
@@ -134,7 +136,7 @@ class Sysmon:
         pass
 
     @staticmethod
-    def register_mon(name, formula, target, location, kind):
+    def register_mon(name, formula, target, location, kind, description):
         """
         Register a monitor
         :param name:
@@ -142,26 +144,28 @@ class Sysmon:
         :param target:
         :param location:
         :param kind:
+        :param description:
         :return:
         """
         pass
 
     @staticmethod
-    def add_http_rule(name, formula):
+    def get_mon_by_id(id):
+        return next(filter(lambda x: x.id == id, Sysmon.http_monitors + Sysmon.fx_monitors), None)
+
+    @staticmethod
+    def add_http_rule(name, formula, description=""):
         print("Adding http rule %s" % name)
-        mon = Monitor(name=name, target="HTTP", location="LOCAL", kind=Sysmon.MonType.HTTP, formula=formula, debug=False, povo=True)
+        mon = Monitor(name=name, target="HTTP", location="LOCAL", kind=Sysmon.MonType.HTTP, formula=formula,
+                      description=description, debug=False, povo=True)
         Sysmon.http_monitors.append(mon)
 
     @staticmethod
     def monitor_http_rules():
         for m in Sysmon.http_monitors:
             if m.enabled:
-                m.mon.trace.push_event(Event("{};"))
+                e = Event.parse("{P(a)}")
+                e.step = datetime.now()
+                m.mon.trace.push_event(e)
                 res = m.mon.monitor(once=True)
                 print(res)
-
-"""
-Usage :
- adding an http rule   : Sysmon.add_http_rule("rule1", "G(dzadzdz)")
- monitoring a function : @mon_fx(formula)
-"""

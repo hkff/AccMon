@@ -18,9 +18,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from django.shortcuts import render
 from django.http import HttpResponse
 from fodtlmon_middleware.middleware import *
+from django.contrib.auth.decorators import login_required
 
+
+@login_required
 def index(request):
-    return render(request, 'monitors_page.html', {"monitors": Sysmon.http_monitors + Sysmon.fx_monitors} )
+    return render(request, 'index.html')
+
 
 def index2(request):
     return HttpResponse("kkkkk")
+
+
+def show_monitors(request):
+    return render(request, 'pages/monitors.html', {"monitors": Sysmon.http_monitors + Sysmon.fx_monitors} )
+
+
+def show_stats(request):
+    return render(request, 'pages/stats.html')
+
+def show_mon_details(request, mon_id):
+    m = Sysmon.get_mon_by_id(mon_id)
+    return render(request, 'pages/monitor.html', {"monitor": m})

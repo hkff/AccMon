@@ -21,6 +21,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render
 from fodtlmon_middleware.whitebox import *
 
+
 class FodtlmonMiddleware(object):
 
     def __init__(self):

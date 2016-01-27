@@ -13,7 +13,6 @@
             <th>Name</th>
             <th>target</th>
             <th>location</th>
-            <th>kind</th>
             <th>Formula</th>
             <th>Status</th>
             <th>Result</th>
@@ -22,11 +21,10 @@
         <tbody>
          {% for m in monitors %}
           <tr>
-            <td>{{ m.id}}</td>
+            <td><a href="{% url 'monitor_details' m.id %}"> {{ m.id }} </a></td>
             <td>{{ m.name}}</td>
             <td>{{ m.target }}</td>
             <td>{{ m.location }}</td>
-            <td>{{ m.kind }}</td>
             <td>{{ m.formula }}</td>
             <td>{{ m.enabled }}</td>
             <td>{{ m.mon.last }}</td>

@@ -1,0 +1,12 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+{% block title %} Monitor {% endblock %}
+
+{% block body %}
+
+<h2>Monitor details : {{ monitor.name }}</h2>
+
+{% include "fragments/monitor.html" with monitor=monitor %}
+
+{% endblock %}
+

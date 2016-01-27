@@ -1,5 +1,5 @@
-"""
-urls
+/*
+Js
 Copyright (C) 2016 Walid Benghabrit
 
 This program is free software: you can redistribute it and/or modify
@@ -14,13 +14,4 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
-from django.conf.urls import include, url
-from fodtlmon_middleware import views
-
-urlpatterns = [
-    url(r'^$', views.index, name='sysmon'),
-    url(r'^/monitors/$', views.show_monitors, name="monitors"),
-    url(r'^/stats/$', views.show_stats, name="stats"),
-    url(r'^/monitors/mon_details/(?P<mon_id>.*)/$', views.show_mon_details, name="monitor_details"),
-]
+*/
