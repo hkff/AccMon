@@ -3,7 +3,7 @@ import sys
 from fodtlmon.fodtl.fodtlmon import *
 from enum import Enum
 from datetime import datetime
-
+import time
 
 ########################################################
 # Monitors

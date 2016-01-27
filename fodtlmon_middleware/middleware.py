@@ -20,7 +20,7 @@ from django.contrib.auth import *
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from fodtlmon_middleware.whitebox import *
-
+import threading
 
 class FodtlmonMiddleware(object):
 
@@ -52,15 +52,14 @@ class FodtlmonMiddleware(object):
         predicates.append(P("CONTENT_TYPE", args=[Constant(str(request.META.get("CONTENT_TYPE")))]))
 
         arg = str(request.META.get("QUERY_STRING"))
-        predicates.append(P("QUERY_STRING", args=[Constant(arg)]))
+        args = [] if arg == '' else [Constant(arg)]
+        predicates.append(P("QUERY_STRING", args=args))
 
-        predicates.append(P("P", args=[Constant('x')]))
+        # pushing the event
         Sysmon.push_event(Event(predicates, step=now))
-        print(Sysmon.main_mon.trace)
 
-
-        # Trigger monitors TODO use future to not slow down the answer
-        Sysmon.monitor_http_rules()
+        # Trigger monitors
+        threading.Thread(target=Sysmon.monitor_http_rules).start()
 
     def process_view(self, request, view, args, kwargs):
         """
