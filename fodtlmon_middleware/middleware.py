@@ -33,8 +33,33 @@ class FodtlmonMiddleware(object):
         :param request:
         :return:
         """
-        print("hahah evil %s user %s" % (request, request.user.id))
-        print(User.objects.filter(id=request.user.id))
+        # print("hahah evil %s user %s" % (request, request.user.id))
+        # print(User.objects.filter(id=request.user.id))
+
+        ####
+        # Adding HTTP request events
+        ####
+        now = datetime.now()
+        # TODO make it in a customizable list for the user
+        predicates = list()
+        # Request
+        predicates.append(P(request.method, args=[Constant(request.path)]))
+        predicates.append(P("SCHEME", args=[Constant(request.scheme)]))
+        # Logged user
+        predicates.append(P("USER", args=[Constant(str(request.user))]))
+        # Meta
+        predicates.append(P("REMOTE_ADDR", args=[Constant(str(request.META.get("REMOTE_ADDR")))]))
+        predicates.append(P("CONTENT_TYPE", args=[Constant(str(request.META.get("CONTENT_TYPE")))]))
+
+        arg = str(request.META.get("QUERY_STRING"))
+        predicates.append(P("QUERY_STRING", args=[Constant(arg)]))
+
+        predicates.append(P("P", args=[Constant('x')]))
+        Sysmon.push_event(Event(predicates, step=now))
+        print(Sysmon.main_mon.trace)
+
+
+        # Trigger monitors TODO use future to not slow down the answer
         Sysmon.monitor_http_rules()
 
     def process_view(self, request, view, args, kwargs):

@@ -20,7 +20,7 @@ class Monitor:
         self.description = description
         self.kind = kind
         self.formula = formula
-        self.mon = Fotlmon(self.formula, Trace())
+        self.mon = Fodtlmon(self.formula, Sysmon.main_mon.trace)
         self.debug = debug
         self.povo = povo
         self.enabled = True
@@ -126,6 +126,7 @@ class Sysmon:
     """
     fx_monitors = []
     http_monitors = []
+    main_mon = Fodtlmon("true", Trace())
 
     class MonType(Enum):
         GENERIC = 0,
@@ -150,8 +151,8 @@ class Sysmon:
         pass
 
     @staticmethod
-    def get_mon_by_id(id):
-        return next(filter(lambda x: x.id == id, Sysmon.http_monitors + Sysmon.fx_monitors), None)
+    def get_mon_by_id(mon_id):
+        return next(filter(lambda x: x.id == mon_id, Sysmon.http_monitors + Sysmon.fx_monitors), None)
 
     @staticmethod
     def add_http_rule(name, formula, description=""):
@@ -164,8 +165,15 @@ class Sysmon:
     def monitor_http_rules():
         for m in Sysmon.http_monitors:
             if m.enabled:
-                e = Event.parse("{P(a)}")
-                e.step = datetime.now()
-                m.mon.trace.push_event(e)
+                # e = Event.parse("{P(a)}")
+                # e.step = datetime.now()
+                # Sysmon.main_mon.trace.push_event(e)
                 res = m.mon.monitor(once=True)
                 print(res)
+
+    @staticmethod
+    def push_event(e):
+        # Push the event to the main mon
+        Sysmon.main_mon.trace.push_event(e)
+        # Store the event into the db
+        pass

@@ -69,14 +69,18 @@
   // Create a DataSet
   var items = new vis.DataSet([
     {% for e in monitor.mon.trace.events %}
-        {id: {{ forloop.counter }}, content: '{{ e }}', start: new Date("{{ e.step.isoformat }}")},
+        {% with i=forloop.counter %}
+            {% for p in e.predicates %}
+                {id: '{{ i }}_{{ forloop.counter }}', content: '{{ p }}', start: new Date("{{ e.step.isoformat }}")},
+            {% endfor %}
+        {% endwith %}
     {% endfor %}
   ]);
 
   // Configuration for the Timeline
   var options = {
-      autoResize: false,
-      maxHeight: '200px'
+      autoResize: true,
+      minHeight: '200px'
   };
 
   // Create the Timeline

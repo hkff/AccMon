@@ -37,6 +37,7 @@ def show_monitors(request):
 def show_stats(request):
     return render(request, 'pages/stats.html')
 
+
 def show_mon_details(request, mon_id):
     m = Sysmon.get_mon_by_id(mon_id)
     return render(request, 'pages/monitor.html', {"monitor": m})
