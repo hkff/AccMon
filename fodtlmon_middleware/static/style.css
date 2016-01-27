@@ -1,3 +1,19 @@
 body {
-    background-color: red;
+    padding-top: 50px;
+}
+.main_content {
+    padding: 40px 15px;
+}
+
+.panel-heading {
+    padding: 10px 15px;
+    border-bottom: 1px solid transparent;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.panel-red .panel-heading {
+    border-color: #d9534f;
+    color: #fff;
+    background-color: #d9534f;
 }

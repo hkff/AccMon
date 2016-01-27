@@ -1,20 +1,32 @@
 import inspect
 import sys
 from fodtlmon.fodtl.fodtlmon import *
+from enum import Enum
 
 
+########################################################
+# Monitors
+########################################################
 class Monitor:
-    def __init__(self, formula=None, debug=False, povo=True):
+    """
+    Generic monitor
+    """
+    def __init__(self, name="", target="", location="LOCAL", kind=None, formula=None, debug=False, povo=True):
+        self.id = name
+        self.name = name
+        self.target = target
+        self.location = location
+        self.kind = kind
         self.formula = formula
         self.mon = Fotlmon(self.formula, Trace())
         self.debug = debug
         self.povo = povo
-        self.sig = None
+        self.enabled = True
 
 
 class mon_fx(Monitor):
     """
-    Decorator
+    Function/method decorator
     """
     def __init__(self, formula=None, debug=False, povo=True):
         """
@@ -22,6 +34,7 @@ class mon_fx(Monitor):
         to be decorated is not passed to the constructor!
         """
         super().__init__(formula, debug=debug, povo=povo)
+        self.sig = None
 
     def print(self, *args):
         if self.debug:
@@ -100,3 +113,55 @@ class mon_fx(Monitor):
             # self.print(self.mon.formula.toCODE())
             return fx_ret
         return wrapped
+
+
+########################################################
+# Sysmon
+########################################################
+class Sysmon:
+    """
+    The main system that contains all submonitors
+    """
+    fx_monitors = []
+    http_monitors = []
+
+    class MonType(Enum):
+        GENERIC = 0,
+        HTTP = 1,
+        FX = 2,
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def register_mon(name, formula, target, location, kind):
+        """
+        Register a monitor
+        :param name:
+        :param formula:
+        :param target:
+        :param location:
+        :param kind:
+        :return:
+        """
+        pass
+
+    @staticmethod
+    def add_http_rule(name, formula):
+        print("Adding http rule %s" % name)
+        mon = Monitor(name=name, target="HTTP", location="LOCAL", kind=Sysmon.MonType.HTTP, formula=formula, debug=False, povo=True)
+        Sysmon.http_monitors.append(mon)
+
+    @staticmethod
+    def monitor_http_rules():
+        for m in Sysmon.http_monitors:
+            if m.enabled:
+                m.mon.trace.push_event(Event("{};"))
+                res = m.mon.monitor(once=True)
+                print(res)
+
+"""
+Usage :
+ adding an http rule   : Sysmon.add_http_rule("rule1", "G(dzadzdz)")
+ monitoring a function : @mon_fx(formula)
+"""

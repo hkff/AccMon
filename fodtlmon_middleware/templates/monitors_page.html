@@ -1,0 +1,41 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+{% block title %} Monitors {% endblock %}
+
+{% block body %}
+
+<h2>Monitors list</h2>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>Name</th>
+            <th>target</th>
+            <th>location</th>
+            <th>kind</th>
+            <th>Formula</th>
+            <th>Status</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+         {% for m in monitors %}
+          <tr>
+            <td>{{ m.id}}</td>
+            <td>{{ m.name}}</td>
+            <td>{{ m.target }}</td>
+            <td>{{ m.location }}</td>
+            <td>{{ m.kind }}</td>
+            <td>{{ m.formula }}</td>
+            <td>{{ m.enabled }}</td>
+            <td>{{ m.mon.last }}</td>
+          </tr>
+         {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+{% endblock %}
+

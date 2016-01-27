@@ -19,7 +19,7 @@ from django.http import HttpResponse
 from django.contrib.auth import *
 from django.contrib.auth.models import User
 from django.shortcuts import render
-
+from fodtlmon_middleware.whitebox import *
 
 class FodtlmonMiddleware(object):
 
@@ -34,6 +34,7 @@ class FodtlmonMiddleware(object):
         """
         print("hahah evil %s user %s" % (request, request.user.id))
         print(User.objects.filter(id=request.user.id))
+        Sysmon.monitor_http_rules()
 
     def process_view(self, request, view, args, kwargs):
         """

@@ -17,9 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from django.shortcuts import render
 from django.http import HttpResponse
+from fodtlmon_middleware.middleware import *
 
 def index(request):
-    return render(request, 'index.html')
+    return render(request, 'stats.html', {"monitors": Sysmon.http_monitors + Sysmon.fx_monitors} )
 
 def index2(request):
     return HttpResponse("kkkkk")
