@@ -33,9 +33,6 @@ class FodtlmonMiddleware(object):
         :param request:
         :return:
         """
-        # print("hahah evil %s user %s" % (request, request.user.id))
-        # print(User.objects.filter(id=request.user.id))
-
         ####
         # Adding HTTP request events
         ####
@@ -43,7 +40,7 @@ class FodtlmonMiddleware(object):
         # TODO make it in a customizable list for the user
         predicates = list()
         # Request
-        predicates.append(P(request.method, args=[Constant(request.path)]))
+        predicates.append(P(request.method, args=[Constant('"%s"' % request.path)]))  # IMPORTANT Parse path as regexp
         predicates.append(P("SCHEME", args=[Constant(request.scheme)]))
         # Logged user
         predicates.append(P("USER", args=[Constant(str(request.user))]))

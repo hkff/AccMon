@@ -16,6 +16,7 @@
             <th>Formula</th>
             <th>Status</th>
             <th>Result</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -25,9 +26,42 @@
             <td>{{ m.name}}</td>
             <td>{{ m.target }}</td>
             <td>{{ m.location }}</td>
-            <td>{{ m.formula }}</td>
+            <td>
+                {% if m.formula|length > 15 %}
+                    {{ m.formula|slice:":15" }}...
+                {% else %}
+                    {{ m.formula }}
+                {% endif %}
+            </td>
             <td>{{ m.enabled }}</td>
-            <td>{{ m.mon.last }}</td>
+            <td>
+                {% if m.mon.last|stringformat:"s" == "?" %}
+                    <span class="label label-default b3res">
+                {% elif m.mon.last|stringformat:"s" == "⊥" %}
+                    <span class="label label-danger b3res">
+                {% else %}
+                    <span class="label label-success b3res">
+                {% endif %}
+                {{ m.mon.last }}</span>
+
+            </td>
+            <td>
+                <button type="button" class="btn btn-default btn-xs" title="{% if m.enabled %} Disable {% else %} Enable {% endif %}">
+                    <span class="glyphicon {% if m.enabled %} glyphicon-eye-open {% else %} glyphicon-eye-close {% endif %}"
+                          aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-xs" title="Restart">
+                    <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
+                </button>
+
+                <button type="button" class="btn btn-default btn-xs" title="Audit">
+                    <span class="glyphicon glyphicon-education" aria-hidden="true"></span>
+                </button>
+                <a href="{% url 'monitor_details' m.id %}" class="btn btn-default btn-xs" title="Details">
+                    <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>
+                </a>
+
+            </td>
           </tr>
          {% endfor %}
         </tbody>

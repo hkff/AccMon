@@ -1,6 +1,19 @@
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title"> {{ monitor.name }} </h3>
+        <h3 class="panel-title"> {{ monitor.name }}
+        <div style="float: right">
+            <button type="button" class="btn btn-default btn-xs" title="{% if monitor.enabled %} Disable {% else %} Enable {% endif %}">
+                <span class="glyphicon {% if monitor.enabled %} glyphicon-eye-open {% else %} glyphicon-eye-close {% endif %}"
+                      aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-default btn-xs" title="Restart">
+                <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-default btn-xs" title="Audit">
+                <span class="glyphicon glyphicon-education" aria-hidden="true"></span>
+            </button>
+        </div>
+        </h3>
     </div>
     <div class="panel-body">
         <table class="table">
@@ -54,8 +67,8 @@
                   <td>{{ monitor.mon.rewrite }}</td>
                 </tr>
                 <tr>
-                  <td class="mon_details_row_name"> Trace : </td>
-                  <td></td>
+                  <td class="mon_details_row_name"> Trace (only last 50) : </td>
+                  <td> <a href="#">See full trace</a> </td>
                 </tr>
             </tbody>
           </table>
@@ -68,7 +81,7 @@
 
   // Create a DataSet
   var items = new vis.DataSet([
-    {% for e in monitor.mon.trace.events %}
+    {% for e in monitor.mon.trace.events|slice:"-50:" %}
         {% with i=forloop.counter %}
             {% for p in e.predicates %}
                 {id: '{{ i }}_{{ forloop.counter }}', content: '{{ p }}', start: new Date("{{ e.step.isoformat }}")},
@@ -80,7 +93,8 @@
   // Configuration for the Timeline
   var options = {
       autoResize: true,
-      minHeight: '200px'
+      minHeight: '200px',
+      maxHeight: '800px'
   };
 
   // Create the Timeline

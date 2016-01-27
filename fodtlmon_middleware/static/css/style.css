@@ -26,3 +26,9 @@ body {
     padding-left: 10px;
     padding-right: 10px;
 }
+
+.b3res {
+    width: 25px;
+    align-content: center;
+    display:block;
+}

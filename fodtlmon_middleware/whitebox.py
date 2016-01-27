@@ -165,9 +165,6 @@ class Sysmon:
     def monitor_http_rules():
         for m in Sysmon.http_monitors:
             if m.enabled:
-                # e = Event.parse("{P(a)}")
-                # e.step = datetime.now()
-                # Sysmon.main_mon.trace.push_event(e)
                 res = m.mon.monitor(once=True)
                 print(res)
 
