@@ -12,19 +12,37 @@
           <tr>
             <th>id</th>
             <th>Step</th>
+            <th>Time</th>
             <th>Comment</th>
-            <th>Trace</th>
+            <th>Verdict</th>
           </tr>
         </thead>
         <tbody>
          {% for v in monitor.violations %}
           <tr>
-            <td>{{ v.monitor_id }}</td>
-            <td>{{ v.step }}</td>
-            <td>{{ v.comment }}</td>
-            <td>{{ v.trace }}</td>
             <td>
-                <button class="btn btn-warning" type="button">Audit</button>
+                {% if v.vid|length > 10 %}
+                    {{ v.vid|slice:":10" }}...
+                {% else %}
+                    {{ v.vid }}
+                {% endif %}
+            </td>
+            <td>{{ v.step }}</td>
+            <td>{{ v.timestamp }}</td>
+            <td>{{ v.comment }}</td>
+            <td>
+                {% if v.verdict|stringformat:"s" == "ViolationStatus.LEGITIMATE" %}
+                    <span class="label label-success">LEGITIMATE</span>
+                {% elif v.verdict|stringformat:"s" == "ViolationStatus.ILLEGITIMATE" %}
+                    <span class="label label-danger">ILLEGITIMATE</span>
+                {% elif v.verdict|stringformat:"s" == "ViolationStatus.UNREAD" %}
+                    <span class="label label-default">UNREAD</span>
+                {% else %}
+                    <span class="label label-success"> {{ v.verdict }}</span>
+                {% endif %}
+            </td>
+            <td>
+                <a class="btn btn-warning" type="button" href="{% url 'monitor_violation_audit' monitor.id v.vid %}">Audit</a>
             </td>
           </tr>
          {% endfor %}

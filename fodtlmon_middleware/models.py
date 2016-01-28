@@ -17,7 +17,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from django.db import models
-
+from datetime import datetime
+from hashlib import md5
+from enum import Enum
 
 # class Audit(models.Model):
 #     auditor = ""
@@ -36,8 +38,20 @@ from django.db import models
 
 
 class Violation:
-    def __init__(self, monitor_id, step="", trace="", comment=""):
+    class ViolationStatus(Enum):
+        LEGITIMATE = 0,
+        UNREAD = 1,
+        ILLEGITIMATE = 2,
+
+    def __init__(self, monitor_id, step="", trace="", comment="", timestamp=datetime.now()):
+        self.timestamp = timestamp
         self.monitor_id = monitor_id
         self.comment = comment
         self.trace = trace
         self.step = step
+        self.audit = ""
+        self.verdict = Violation.ViolationStatus.UNREAD
+        self.vid = self.compute_hash()
+
+    def compute_hash(self, sid=""):
+        return "%s@%s_%s" % (sid, self.monitor_id, md5((str(self.trace)+str(self.step)).encode()).hexdigest())

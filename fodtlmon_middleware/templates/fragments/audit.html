@@ -1,0 +1,135 @@
+<div class="panel panel-danger">
+    <div class="panel-heading">
+        <h3 class="panel-title"> {{ monitor.name }} </h3>
+    </div>
+    <div class="panel-body">
+        <table class="table">
+            <tbody>
+                <tr>
+                  <td class="mon_details_row_name"> Id </td>
+                  <td>{{ violation.vid }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Audit verdict </td>
+                  <td>
+                    {% if violation.verdict|stringformat:"s" == "ViolationStatus.LEGITIMATE" %}
+                        <span class="label label-success">LEGITIMATE</span>
+                    {% elif violation.verdict|stringformat:"s" == "ViolationStatus.ILLEGITIMATE" %}
+                        <span class="label label-danger">ILLEGITIMATE</span>
+                    {% elif violation.verdict|stringformat:"s" == "ViolationStatus.UNREAD" %}
+                        <span class="label label-default">UNREAD</span>
+                    {% else %}
+                        <span class="label label-success"> {{ violation.verdict }}</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> At step </td>
+                  <td>{{ violation.step }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> On </td>
+                  <td>{{ violation.timestamp }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Comment </td>
+                  <td> {{ violation.comment }} </td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> On monitor </td>
+                  <td>{{ monitor.name }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Target </td>
+                  <td>{{ monitor.target }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Location </td>
+                  <td>{{ monitor.location }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Formula </td>
+                  <td>{{ monitor.formula }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Current monitor step </td>
+                  <td>{{ monitor.mon.counter }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Result </td>
+                  <td>{{ monitor.mon.last }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Audit Comment </td>
+                  <td>
+                  <textarea class="form-control" rows="3" placeholder="Comment" id="auditComment">{{ violation.audit }}</textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Action </td>
+                  <td>
+                    <button type="button" class="btn btn-danger btn-xs" title="Trigger remediation" onclick="perform_audit(1)">
+                        <span class="glyphicon glyphicon-flash" aria-hidden="true"></span> Trigger remediation
+                    </button>
+                    <button type="button" class="btn btn-success btn-xs" title="Mark as legitimate" onclick="perform_audit(0)">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Mark as legitimate
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Trace : </td>
+                  <td> </td>
+                </tr>
+            </tbody>
+          </table>
+    </div>
+        <div id="trace_vis"></div>
+</div>
+
+
+<script type="application/javascript">
+  var container = document.getElementById('trace_vis');
+
+  // Create a DataSet
+  var items = new vis.DataSet([
+      {% for p in violation.trace.predicates %}
+        {% with i=forloop.counter %}
+            {id: '{{ i }}_{{ forloop.counter }}', content: '{{ p }}', start: new Date("{{ violation.trace.step.isoformat }}")},
+        {% endwith %}
+      {% endfor %}
+  ]);
+
+  // Configuration for the Timeline
+  var options = {
+      autoResize: true,
+      minHeight: '200px',
+      maxHeight: '800px'
+  };
+
+  // Create the Timeline
+  var timeline = new vis.Timeline(container, items, options);
+
+  function perform_audit(v) {
+      var verdict = "UNREAD";
+      if(v === 0)
+        verdict = "LEGITIMATE";
+      else if(v === 1)
+        verdict = "ILLEGITIMATE";
+
+    $.ajax({
+        dataType: 'text',
+        type:'POST',
+        url: '',
+        data: {
+            mon_id: "{{ monitor.id }}",
+            violation_id: "{{ violation.vid }}",
+            comment: $('#auditComment').val(),
+            verdict: verdict
+        },
+        success: function(response){
+            location.reload();
+        }
+    });
+  }
+
+</script>

@@ -22,6 +22,7 @@ from django.shortcuts import render
 from fodtlmon_middleware.whitebox import *
 import threading
 
+
 class FodtlmonMiddleware(object):
 
     def __init__(self):

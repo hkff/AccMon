@@ -51,3 +51,19 @@ def show_mon_details(request, mon_id):
 def show_mon_violations(request, mon_id):
     m = Sysmon.get_mon_by_id(mon_id)
     return render(request, 'pages/violations.html', {"monitor": m})
+
+
+def mon_violation_audit(request, mon_id, violation_id):
+    if request.method == "POST":
+        comment = request.POST.get('comment', '')
+        verdict = request.POST.get('verdict', '')
+        if verdict == "LEGITIMATE":
+            verdict = Violation.ViolationStatus.LEGITIMATE
+        else:
+            verdict = Violation.ViolationStatus.ILLEGITIMATE
+        Sysmon.audit(mon_id, violation_id, comment, verdict)
+        return HttpResponse("audited ! ")
+    else:
+        m = Sysmon.get_mon_by_id(mon_id)
+        v = next(filter(lambda x: x.vid == violation_id, m.violations))
+        return render(request, 'pages/audit.html', {"monitor": m, "violation": v})

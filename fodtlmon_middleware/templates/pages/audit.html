@@ -1,0 +1,12 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+{% block title %} Audit {% endblock %}
+
+{% block body %}
+
+<h2>Audit violation on monitor : {{ monitor.name }}</h2>
+
+{% include "fragments/audit.html" with monitor=monitor violation=violation %}
+
+{% endblock %}
+

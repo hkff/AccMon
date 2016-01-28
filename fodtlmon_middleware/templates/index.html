@@ -17,8 +17,11 @@
     <link href="{% static 'css/style.css' %}" rel="stylesheet" >
     <link href="{% static 'css/vis.min.css' %}" rel="stylesheet" >
 
-    <!-- Vis lib -->
+    <!-- JavaScript -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/vis.min.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
 </head>
 
 <body>
@@ -43,16 +46,12 @@
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container" style="">
         <div class="main_content">
         {% block body %}
         {% endblock %}
         </div>
     </div><!-- /.container -->
 
-
-    <!-- JavaScript -->
-    <script src="{% static 'js/jquery.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
 </body>
 </html>

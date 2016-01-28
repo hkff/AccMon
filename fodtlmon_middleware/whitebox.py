@@ -27,6 +27,7 @@ class Monitor:
         self.povo = povo
         self.enabled = True
         self.violations = []
+        self.audits = []
 
     def monitor(self):
         res = self.mon.monitor(once=True, struct_res=True)
@@ -196,3 +197,14 @@ class Sysmon:
     @staticmethod
     def get_mons():
         return Sysmon.fx_monitors + Sysmon.http_monitors
+
+    @staticmethod
+    def audit(mon_id, violation_id, comment, verdict):
+        m = Sysmon.get_mon_by_id(mon_id)
+        if m is not None:
+            v = next(filter(lambda x: x.vid == violation_id, m.violations))
+            if v is not None:
+                v.audit = comment
+                v.verdict = verdict
+                m.audits.append(violation_id)
+
