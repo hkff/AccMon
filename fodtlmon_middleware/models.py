@@ -19,17 +19,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from django.db import models
 
 
-class Audit(models.Model):
-    auditor = ""
-    monitor = ""
-    comment = ""
-    verdict = ""
-    trace = ""
-    step = ""
+# class Audit(models.Model):
+#     auditor = ""
+#     monitor_id = ""
+#     comment = ""
+#     verdict = ""
+#     trace = ""
+#     step = ""
+#
+#
+# class Violation2(models.Model):
+#     monitor_id = ""
+#     comment = ""
+#     trace = ""
+#     step = ""
 
 
-class Violation(models.Model):
-    monitor = ""
-    comment = ""
-    trace = ""
-    step = ""
+class Violation:
+    def __init__(self, monitor_id, step="", trace="", comment=""):
+        self.monitor_id = monitor_id
+        self.comment = comment
+        self.trace = trace
+        self.step = step

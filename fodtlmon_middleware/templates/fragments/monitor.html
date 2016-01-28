@@ -67,6 +67,10 @@
                   <td>{{ monitor.mon.rewrite }}</td>
                 </tr>
                 <tr>
+                  <td class="mon_details_row_name"> Violations </td>
+                  <td><a href="{% url 'monitor_violations' monitor.id %}">{{ monitor.violations|length }}</a></td>
+                </tr>
+                <tr>
                   <td class="mon_details_row_name"> Trace (only last 50) : </td>
                   <td> <a href="#">See full trace</a> </td>
                 </tr>

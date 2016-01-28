@@ -1,0 +1,36 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+{% block title %} Violations {% endblock %}
+
+{% block body %}
+
+<h2>Monitor violations : {{ monitor.name }}</h2>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>Step</th>
+            <th>Comment</th>
+            <th>Trace</th>
+          </tr>
+        </thead>
+        <tbody>
+         {% for v in monitor.violations %}
+          <tr>
+            <td>{{ v.monitor_id }}</td>
+            <td>{{ v.step }}</td>
+            <td>{{ v.comment }}</td>
+            <td>{{ v.trace }}</td>
+            <td>
+                <button class="btn btn-warning" type="button">Audit</button>
+            </td>
+          </tr>
+         {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+

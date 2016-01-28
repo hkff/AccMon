@@ -46,3 +46,8 @@ def show_stats(request):
 def show_mon_details(request, mon_id):
     m = Sysmon.get_mon_by_id(mon_id)
     return render(request, 'pages/monitor.html', {"monitor": m})
+
+
+def show_mon_violations(request, mon_id):
+    m = Sysmon.get_mon_by_id(mon_id)
+    return render(request, 'pages/violations.html', {"monitor": m})

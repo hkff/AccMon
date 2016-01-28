@@ -4,6 +4,7 @@ from fodtlmon.fodtl.fodtlmon import *
 from enum import Enum
 from datetime import datetime
 import time
+from fodtlmon_middleware.models import *
 
 
 ########################################################
@@ -28,7 +29,15 @@ class Monitor:
         self.violations = []
 
     def monitor(self):
-        return self.mon.monitor(once=True)
+        res = self.mon.monitor(once=True, struct_res=True)
+        if res.get("result") is Boolean3.Bottom:
+            self.mon.last = Boolean3.Unknown
+            self.mon.reset()
+            v = Violation(self.id, step=self.mon.counter, trace=self.mon.trace.events[self.mon.counter-1])
+            self.violations.append(v)
+        print(res)
+        print(self.violations)
+        return res
 
     def audit(self):
         pass

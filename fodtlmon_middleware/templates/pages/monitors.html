@@ -16,7 +16,9 @@
             <th>Formula</th>
             <th>Status</th>
             <th>Result</th>
-            <th>Action</th>
+{#            <th>Action</th>#}
+            <th>Violations</th>
+            <th>Audits</th>
           </tr>
         </thead>
         <tbody>
@@ -27,8 +29,8 @@
             <td>{{ m.target }}</td>
             <td>{{ m.location }}</td>
             <td>
-                {% if m.formula|length > 15 %}
-                    {{ m.formula|slice:":15" }}...
+                {% if m.formula|length > 10 %}
+                    {{ m.formula|slice:":10" }}...
                 {% else %}
                     {{ m.formula }}
                 {% endif %}
@@ -45,22 +47,30 @@
                 {{ m.mon.last }}</span>
 
             </td>
+{#            <td>#}
+{#                <button type="button" class="btn btn-default btn-xs" title="{% if m.enabled %} Disable {% else %} Enable {% endif %}">#}
+{#                    <span class="glyphicon {% if m.enabled %} glyphicon-eye-open {% else %} glyphicon-eye-close {% endif %}"#}
+{#                          aria-hidden="true"></span>#}
+{#                </button>#}
+{#                <button type="button" class="btn btn-default btn-xs" title="Restart">#}
+{#                    <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>#}
+{#                </button>#}
+{##}
+{#                <button type="button" class="btn btn-default btn-xs" title="Audit">#}
+{#                    <span class="glyphicon glyphicon-education" aria-hidden="true"></span>#}
+{#                </button>#}
+{#                <a href="{% url 'monitor_details' m.id %}" class="btn btn-default btn-xs" title="Details">#}
+{#                    <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>#}
+{#                </a>#}
+{#            </td>#}
             <td>
-                <button type="button" class="btn btn-default btn-xs" title="{% if m.enabled %} Disable {% else %} Enable {% endif %}">
-                    <span class="glyphicon {% if m.enabled %} glyphicon-eye-open {% else %} glyphicon-eye-close {% endif %}"
-                          aria-hidden="true"></span>
-                </button>
-                <button type="button" class="btn btn-default btn-xs" title="Restart">
-                    <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
-                </button>
-
-                <button type="button" class="btn btn-default btn-xs" title="Audit">
-                    <span class="glyphicon glyphicon-education" aria-hidden="true"></span>
-                </button>
-                <a href="{% url 'monitor_details' m.id %}" class="btn btn-default btn-xs" title="Details">
-                    <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>
-                </a>
-
+                <a class="label label-danger b3fres" href="{% url 'monitor_violations' m.id %}"> ⊥
+                    <span class="badge" style="background-color: #DE3C3C;">{{ m.violations|length }}</span></a>
+            </td>
+            <td>
+                <a class="label label-warning b3fres" href="{% url 'monitor_violations' m.id %}">
+                    <span class="glyphicon glyphicon-education"></span>
+                    <span class="badge" style="background-color: #D89822;">{{ m.violations|length }}</span></a>
             </td>
           </tr>
          {% endfor %}
