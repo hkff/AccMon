@@ -51,7 +51,6 @@ Usage
 5. Optional : 
     You can also define monitors on functions and class methods using the decorator @mon_fx
          
-         
 
 6. Now your are ready !
 

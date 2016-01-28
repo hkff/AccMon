@@ -21,6 +21,11 @@ setup(
     name='django-fodtlmon-middleware',
     version='1.0',
     packages=['fodtlmon_middleware'],
+    package_data={
+        'fodtlmon_middleware': [
+            'static/*', 'static/css/*', 'static/js/*', 'static/fonts/*',
+            'templates/*', 'templates/pages/*', 'templates/fragments/*'
+        ]},
     url='https://github.com/hkff/django-fodtlmon-middleware',
     license='GPL3',
     author='Walid Benghabrit',
