@@ -1,1 +1,89 @@
 # django-fodtlmon-middleware
+FODTLMON-middleware Version 1.0
+
+What is it?
+-----------
+
+FODTLMON-middleware is a monitoring middleware for django, using FODTLMON a monitor based on distributed first order 
+linear temporal logic. It allows to monitor formula defined on HTTP traffic and formula defined on python code 
+function / class methods.
+Note that this framework is a research prototype and should not be used in production !
+
+Installation
+------------
+
+You need PythonX.X.X >= Python3.4.0 installed on your system
+
+    You need to install the following dependencies :  
+            $ sudo pip3 install fodtlmon
+            $ sudo python3 setup.py install
+
+Usage
+-----
+
+1. In your django project settings.py :
+    add the following app 'fodtlmon_middleware' to INSTALLED_APPS 
+    add 'fodtlmon_middleware.middleware.FodtlmonMiddleware' in the MIDDLEWARE_CLASSES
+
+2. Create a python file (eg.: http_rules.py)
+    Note that the code above should be executed only once when the server starts
+        
+        from fodtlmon_middleware.whitebox import *
+        
+        # Define your Interpreted predicates here
+        
+        # Add your http rules here
+        Sysmon.add_http_rule(<monitor_name>, <formula_to_monitor>)
+
+        
+3. At the top of settings.py import the http_rules
+
+4. In urls.py :
+    Add the following import
+        
+        from fodtlmon_middleware import urls as fodtlurls
+
+    and the url pattern :
+        (eg.: here the system monitor app will be accessed via http../your_base_url/mon)
+        
+        url(r'^mon', include(fodtlurls.urlpatterns)),
+
+5. Optional : 
+    You can also define monitors on functions and class methods using the decorator @mon_fx
+         
+         
+
+6. Now your are ready !
+
+
+Licensing
+---------
+
+GPL V3 . Please see the file called LICENSE.
+
+Contacts
+--------
+
+###### Developer :
+>   Walid Benghabrit        <Walid.Benghabrit@mines-nantes.fr>
+
+###### Contributors :
+>   Pr.Jean-Claude Royer  <Jean-Claude.Royer@mines-nantes.fr>  (Theory)  
+>   Dr. Hervé Grall       <Herve.Grall@mines-nantes.fr>        (Theory)  
+
+-------------------------------------------------------------------------------
+Copyright (C) 2014-2016 Walid Benghabrit  
+Ecole des Mines de Nantes - ARMINES  
+ASCOLA Research Group  
+A4CLOUD Project http://www.a4cloud.eu/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
