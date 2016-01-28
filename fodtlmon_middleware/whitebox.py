@@ -14,7 +14,8 @@ class Monitor:
     """
     Generic monitor
     """
-    def __init__(self, name="", description="", target="", location="LOCAL", kind=None, formula=None, debug=False, povo=True):
+    def __init__(self, name="", description="", target="", location="LOCAL", kind=None, formula=None, debug=False,
+                 povo=True, violation_formula=None):
         self.id = name
         self.name = name
         self.target = target
@@ -28,6 +29,7 @@ class Monitor:
         self.enabled = True
         self.violations = []
         self.audits = []
+        self.violation_formula = violation_formula
 
     def monitor(self):
         res = self.mon.monitor(once=True, struct_res=True)
@@ -46,6 +48,24 @@ class Monitor:
 
     def audit(self):
         pass
+
+    def get_violation_by_id(self, vid) -> Violation:
+        return next(filter(lambda x: x.vid == vid, self.violations), None)
+
+    def trigger_remediation(self, violation_id):
+        v = self.get_violation_by_id(violation_id)
+        if v is not None:
+            mon = Monitor(name=v.monitor_id+"_violation",
+                          target="HTTP",
+                          location="LOCAL",
+                          kind=Sysmon.MonType.HTTP,
+                          formula=self.violation_formula,
+                          description="",
+                          debug=False,
+                          povo=True,
+                          violation_formula=None)
+            v.remediation_mon = mon
+            Sysmon.http_monitors.append(mon)
 
 
 class mon_fx(Monitor):
@@ -173,14 +193,14 @@ class Sysmon:
         pass
 
     @staticmethod
-    def get_mon_by_id(mon_id):
+    def get_mon_by_id(mon_id) -> Monitor:
         return next(filter(lambda x: x.id == mon_id, Sysmon.http_monitors + Sysmon.fx_monitors), None)
 
     @staticmethod
-    def add_http_rule(name, formula, description=""):
+    def add_http_rule(name, formula, description="", violation_formula=None):
         print("Adding http rule %s" % name)
         mon = Monitor(name=name, target="HTTP", location="LOCAL", kind=Sysmon.MonType.HTTP, formula=formula,
-                      description=description, debug=False, povo=True)
+                      description=description, debug=False, povo=True, violation_formula=violation_formula)
         Sysmon.http_monitors.append(mon)
 
     @staticmethod

@@ -77,6 +77,9 @@ def mon_violation_audit(request, mon_id, violation_id):
             verdict = Violation.ViolationStatus.LEGITIMATE
         else:
             verdict = Violation.ViolationStatus.ILLEGITIMATE
+            m = Sysmon.get_mon_by_id(mon_id)
+            m.trigger_remediation(violation_id)
+
         Sysmon.audit(mon_id, violation_id, comment, verdict)
         return HttpResponse("audited ! ")
     else:

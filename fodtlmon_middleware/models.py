@@ -20,6 +20,7 @@ from django.db import models
 from datetime import datetime
 from hashlib import md5
 from enum import Enum
+from fodtlmon_middleware.whitebox import *
 
 # class Audit(models.Model):
 #     auditor = ""
@@ -52,6 +53,7 @@ class Violation:
         self.audit = ""
         self.verdict = Violation.ViolationStatus.UNREAD
         self.vid = self.compute_hash()
+        self.remediation_mon = None
 
     def compute_hash(self, sid=""):
         return "%s@%s_%s" % (sid, self.monitor_id, md5((str(self.trace)+str(self.step)).encode()).hexdigest())
