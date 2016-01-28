@@ -16,6 +16,8 @@
             <th>Time</th>
             <th>Comment</th>
             <th>Verdict</th>
+            <th>Remediation Monitor</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -41,6 +43,18 @@
                 {% else %}
                     <span class="label label-success"> {{ v.verdict }}</span>
                 {% endif %}
+            </td>
+           <td>
+               {% if v.remediation_mon != None %}
+                    {% if v.remediation_mon.mon.last|stringformat:"s" == "?" %}
+                    <span class="label label-default b3res">
+                    {% elif v.remediation_mon.mon.last|stringformat:"s" == "⊥" %}
+                        <span class="label label-danger b3res">
+                    {% else %}
+                        <span class="label label-success b3res">
+                    {% endif %}
+                    {{ v.remediation_mon.mon.last }}</span>
+               {% endif %}
             </td>
             <td>
                 <a class="btn btn-warning" type="button" href="{% url 'monitor_violation_audit' monitor.id v.vid %}">Audit</a>

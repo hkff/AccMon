@@ -14,14 +14,14 @@ class Monitor:
     """
     Generic monitor
     """
-    def __init__(self, name="", description="", target="", location="LOCAL", kind=None, formula=None, debug=False,
-                 povo=True, violation_formula=None):
+    def __init__(self, name="", description="", target="", location="LOCAL", kind=None,
+                 formula=None, debug=False, povo=True, violation_formula=None):
         self.id = name
         self.name = name
         self.target = target
         self.location = location
         self.description = description
-        self.kind = kind
+        self.kind = Sysmon.MonType.GENERIC if kind is None else kind  # DO NOT use default value for karg
         self.formula = formula
         self.mon = Fodtlmon(self.formula, Sysmon.main_mon.trace)
         self.debug = debug
@@ -38,8 +38,12 @@ class Monitor:
             self.mon.reset()
             v = Violation(self.id, step=self.mon.counter, trace=self.mon.trace.events[self.mon.counter-1])
             self.violations.append(v)
+
+        if self.kind is Sysmon.MonType.REMEDIATION and res.get("result") is Boolean3.Top:
+            # Disable monitor
+            self.enabled = False
+
         print(res)
-        print(self.violations)
         return res
 
     def reset(self):
@@ -55,15 +59,18 @@ class Monitor:
     def trigger_remediation(self, violation_id):
         v = self.get_violation_by_id(violation_id)
         if v is not None:
-            mon = Monitor(name=v.monitor_id+"_violation",
-                          target="HTTP",
-                          location="LOCAL",
-                          kind=Sysmon.MonType.HTTP,
+            mon = Monitor(name="%s_violation@%s" % (v.monitor_id, v.step),
+                          target=self.target,
+                          location=self.location,
+                          kind=Sysmon.MonType.REMEDIATION,
                           formula=self.violation_formula,
-                          description="",
+                          description="Remediation monitor for monitor %s" % self.name,
                           debug=False,
                           povo=True,
                           violation_formula=None)
+            # IMPORTANT : stat remediation monitoring after the violation occurs
+            mon.mon.counter = int(v.step)
+            mon.mon.counter2 = int(v.step)
             v.remediation_mon = mon
             Sysmon.http_monitors.append(mon)
 
@@ -174,6 +181,7 @@ class Sysmon:
         GENERIC = 0,
         HTTP = 1,
         FX = 2,
+        REMEDIATION = 3
 
     def __init__(self):
         pass
