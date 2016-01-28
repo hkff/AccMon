@@ -6,6 +6,7 @@
 
 <h2>Audit violation on monitor : {{ monitor.name }}</h2>
 
+<a href="{% url 'monitor_violations' monitor.id %}">Back to violations list</a>
 {% include "fragments/audit.html" with monitor=monitor violation=violation %}
 
 {% endblock %}

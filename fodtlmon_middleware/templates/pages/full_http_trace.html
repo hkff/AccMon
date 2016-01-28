@@ -1,0 +1,24 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+{% block title %} Full HTTP trace {% endblock %}
+
+{% block body %}
+
+<h2> Full HTTP trace </h2>
+<a href="javascript: history.go(-1)">Back</a>
+</br>
+
+<table class="table">
+    <tbody>
+    {% for t in trace.events %}
+        <tr>
+          <td> {{ forloop.counter }}</td>
+          <td> {{ t }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+
+
+{% endblock %}
+

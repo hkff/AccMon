@@ -53,6 +53,11 @@ def show_mon_violations(request, mon_id):
     return render(request, 'pages/violations.html', {"monitor": m})
 
 
+def show_http_trace(request):
+    return render(request, 'pages/full_http_trace.html', {"trace": Sysmon.main_mon.trace})
+
+
+
 def mon_violation_audit(request, mon_id, violation_id):
     if request.method == "POST":
         comment = request.POST.get('comment', '')

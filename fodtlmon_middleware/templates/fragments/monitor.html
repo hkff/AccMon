@@ -9,9 +9,9 @@
             <button type="button" class="btn btn-default btn-xs" title="Restart">
                 <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
             </button>
-            <button type="button" class="btn btn-default btn-xs" title="Audit">
+            <a type="button" class="btn btn-default btn-xs" title="Audit" href="{% url 'monitor_violations' monitor.id %}">
                 <span class="glyphicon glyphicon-education" aria-hidden="true"></span>
-            </button>
+            </a>
         </div>
         </h3>
     </div>
@@ -72,7 +72,7 @@
                 </tr>
                 <tr>
                   <td class="mon_details_row_name"> Trace (only last 50) : </td>
-                  <td> <a href="#">See full trace</a> </td>
+                  <td> <a href="{% url 'http_trace' %}">See full trace</a> </td>
                 </tr>
             </tbody>
           </table>

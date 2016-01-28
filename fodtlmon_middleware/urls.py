@@ -26,4 +26,5 @@ urlpatterns = [
     url(r'^/monitors/mon_violations/(?P<mon_id>.*)/$', views.show_mon_violations, name="monitor_violations"),
     url(r'^/monitors/mon_audits/(?P<mon_id>.*)/violation_audit/(?P<violation_id>.*)/$', views.mon_violation_audit,
         name="monitor_violation_audit"),
+    url(r'^/http_trace/$', views.show_http_trace, name="http_trace"),
 ]

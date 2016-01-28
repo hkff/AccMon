@@ -5,7 +5,7 @@
 {% block body %}
 
 <h2>Monitor details : {{ monitor.name }}</h2>
-
+<a href="javascript: history.go(-1)">Back</a>
 {% include "fragments/monitor.html" with monitor=monitor %}
 
 {% endblock %}
