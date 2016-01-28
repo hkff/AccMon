@@ -10,20 +10,6 @@
                   <td>{{ violation.vid }}</td>
                 </tr>
                 <tr>
-                  <td class="mon_details_row_name"> Audit verdict </td>
-                  <td>
-                    {% if violation.verdict|stringformat:"s" == "ViolationStatus.LEGITIMATE" %}
-                        <span class="label label-success">LEGITIMATE</span>
-                    {% elif violation.verdict|stringformat:"s" == "ViolationStatus.ILLEGITIMATE" %}
-                        <span class="label label-danger">ILLEGITIMATE</span>
-                    {% elif violation.verdict|stringformat:"s" == "ViolationStatus.UNREAD" %}
-                        <span class="label label-default">UNREAD</span>
-                    {% else %}
-                        <span class="label label-success"> {{ violation.verdict }}</span>
-                    {% endif %}
-                  </td>
-                </tr>
-                <tr>
                   <td class="mon_details_row_name"> At step </td>
                   <td>{{ violation.step }}</td>
                 </tr>
@@ -56,8 +42,22 @@
                   <td>{{ monitor.mon.counter }}</td>
                 </tr>
                 <tr>
-                  <td class="mon_details_row_name"> Result </td>
+                  <td class="mon_details_row_name"> Current Result </td>
                   <td>{{ monitor.mon.last }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Audit verdict </td>
+                  <td>
+                    {% if violation.verdict|stringformat:"s" == "ViolationStatus.LEGITIMATE" %}
+                        <span class="label label-success">LEGITIMATE</span>
+                    {% elif violation.verdict|stringformat:"s" == "ViolationStatus.ILLEGITIMATE" %}
+                        <span class="label label-danger">ILLEGITIMATE</span>
+                    {% elif violation.verdict|stringformat:"s" == "ViolationStatus.UNREAD" %}
+                        <span class="label label-default">UNREAD</span>
+                    {% else %}
+                        <span class="label label-success"> {{ violation.verdict }}</span>
+                    {% endif %}
+                  </td>
                 </tr>
                 <tr>
                   <td class="mon_details_row_name"> Audit Comment </td>

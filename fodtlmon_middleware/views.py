@@ -57,6 +57,17 @@ def show_http_trace(request):
     return render(request, 'pages/full_http_trace.html', {"trace": Sysmon.main_mon.trace})
 
 
+def change_mon_status(request, mon_id):
+    if request.method == "POST":
+        m = Sysmon.get_mon_by_id(mon_id)
+        status = request.POST.get('status', '')
+        if status == "ENABLED":
+            m.enabled = True
+        elif status == "DISABLED":
+            m.enabled = False
+        return HttpResponse("Status changed !")
+    return HttpResponse("KO")
+
 
 def mon_violation_audit(request, mon_id, violation_id):
     if request.method == "POST":

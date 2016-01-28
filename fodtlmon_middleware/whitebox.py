@@ -40,6 +40,10 @@ class Monitor:
         print(self.violations)
         return res
 
+    def reset(self):
+        self.mon.last = Boolean3.Unknown
+        self.mon.reset()
+
     def audit(self):
         pass
 

@@ -2,7 +2,15 @@
     <div class="panel-heading">
         <h3 class="panel-title"> {{ monitor.name }}
         <div style="float: right">
-            <button type="button" class="btn btn-default btn-xs" title="{% if monitor.enabled %} Disable {% else %} Enable {% endif %}">
+            <button type="button" class="btn btn-default btn-xs"
+                    {% if monitor.enabled %}
+                    title="Disable"
+                    onclick="change_mon_status(1)"
+                     {% else %}
+                    title="Enable"
+                    onclick="change_mon_status(0)"
+                    {% endif %}
+            >
                 <span class="glyphicon {% if monitor.enabled %} glyphicon-eye-open {% else %} glyphicon-eye-close {% endif %}"
                       aria-hidden="true"></span>
             </button>
@@ -103,4 +111,25 @@
 
   // Create the Timeline
   var timeline = new vis.Timeline(container, items, options);
+
+  function change_mon_status(v) {
+      var status = 0;
+      if(v === 0)
+        status = "ENABLED";
+      else if(v === 1)
+        status = "DISABLED";
+
+    $.ajax({
+        dataType: 'text',
+        type:'POST',
+        url: '{% url 'mon_change_status' monitor.id %}',
+        data: {
+            mon_id: "{{ monitor.id }}",
+            status: status
+        },
+        success: function(response){
+            location.reload();
+        }
+    });
+  }
 </script>

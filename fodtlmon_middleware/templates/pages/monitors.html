@@ -35,7 +35,13 @@
                     {{ m.formula }}
                 {% endif %}
             </td>
-            <td>{{ m.enabled }}</td>
+            <td>
+                {% if m.enabled|stringformat:"s" == "True" %}
+                    <span class="label label-info">Running...</span>
+                {% else %}
+                    <span class="label label-default ">Stopped</span>
+                {% endif %}
+            </td>
             <td>
                 {% if m.mon.last|stringformat:"s" == "?" %}
                     <span class="label label-default b3res">
