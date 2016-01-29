@@ -69,8 +69,15 @@
 {#                </a>#}
 {#            </td>#}
             <td>
-                <a class="label label-danger b3fres" href="{% url 'monitor_violations' m.id %}"> ⊥
-                    <span class="badge" style="background-color: #DE3C3C;">{{ m.violations|length }}</span></a>
+                <div class="btn-toolbar">
+                    <a class="label label-danger b3fres btn-group" href="{% url 'monitor_violations' m.id %}"> ⊥
+                        <span class="badge" style="background-color: #DE3C3C;">{{ m.violations|length }}</span></a>
+                    {% if m.liveness != None and m.is_liveness_expired != False %}
+                        <span class="glyphicon glyphicon-warning-sign btn-group" style="color: orange;"
+                        data-toggle="tooltip" title="Liveness formula potentially violated ahead of
+                        {{ m.is_liveness_expired }} steps!"></span>
+                    {% endif %}
+                </div>
             </td>
             <td>
                 <a class="label label-warning b3fres" href="{% url 'monitor_violations' m.id %}">

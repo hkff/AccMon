@@ -15,7 +15,21 @@ class Monitor:
     Generic monitor
     """
     def __init__(self, name="", description="", target="", location="LOCAL", kind=None,
-                 formula=None, debug=False, povo=True, violation_formula=None):
+                 formula=None, debug=False, povo=True, violation_formula=None, liveness=None):
+        """
+        Init method
+        :param name: The name of the monitor (for now the name is also the id)
+        :param description:
+        :param target:
+        :param location: Monitor location (LOCAL / REMOTE_addr)
+        :param kind: see Sysmon.MonType
+        :param formula: The FODTL formula to be monitored
+        :param debug:
+        :param povo: Print the result to sys out
+        :param violation_formula: The formula to monitor when a remediation is triggered
+        :param livness: Livness delay :
+        :return:
+        """
         self.id = name
         self.name = name
         self.target = target
@@ -30,14 +44,27 @@ class Monitor:
         self.violations = []
         self.audits = []
         self.violation_formula = violation_formula
+        self.liveness = liveness
+        self.liveness_counter = liveness
 
     def monitor(self):
         res = self.mon.monitor(once=True, struct_res=True)
+
         if res.get("result") is Boolean3.Bottom:
             self.mon.last = Boolean3.Unknown
             self.mon.reset()
             v = Violation(self.id, step=self.mon.counter, trace=self.mon.trace.events[self.mon.counter-1])
             self.violations.append(v)
+
+        elif res.get("result") is Boolean3.Unknown:
+            # test liveness
+            if self.liveness is not None:
+                if isinstance(self.mon.formula, Always):  # Test if it's a liveness formula
+                    # Check the rewrite formula
+                    if isinstance(self.mon.rewrite, And):  # Bad prefix
+                        self.liveness_counter -= 1
+                    elif isinstance(self.mon.rewrite, Always):  # Good prefix
+                        self.liveness_counter = self.liveness
 
         if self.kind is Sysmon.MonType.REMEDIATION and res.get("result") is Boolean3.Top:
             # Disable monitor
@@ -73,6 +100,12 @@ class Monitor:
             mon.mon.counter2 = int(v.step)
             v.remediation_mon = mon
             Sysmon.http_monitors.append(mon)
+
+    def is_liveness_expired(self):
+        if self.liveness is not None:
+            res = self.liveness_counter <= 0
+            return abs(self.liveness_counter) if res else False
+        return False
 
 
 class mon_fx(Monitor):
@@ -205,10 +238,10 @@ class Sysmon:
         return next(filter(lambda x: x.id == mon_id, Sysmon.http_monitors + Sysmon.fx_monitors), None)
 
     @staticmethod
-    def add_http_rule(name, formula, description="", violation_formula=None):
+    def add_http_rule(name, formula, description="", violation_formula=None, liveness=None):
         print("Adding http rule %s" % name)
         mon = Monitor(name=name, target="HTTP", location="LOCAL", kind=Sysmon.MonType.HTTP, formula=formula,
-                      description=description, debug=False, povo=True, violation_formula=violation_formula)
+                      description=description, debug=False, povo=True, violation_formula=violation_formula, liveness=liveness)
         Sysmon.http_monitors.append(mon)
 
     @staticmethod

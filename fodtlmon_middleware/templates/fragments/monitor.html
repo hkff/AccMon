@@ -78,6 +78,14 @@
                   <td class="mon_details_row_name"> Violations </td>
                   <td><a href="{% url 'monitor_violations' monitor.id %}">{{ monitor.violations|length }}</a></td>
                 </tr>
+                {% if monitor.liveness != None and monitor.is_liveness_expired != False %}
+                   <tr>
+                      <td class="mon_details_row_name"> Liveness </td>
+                      <td> Potentially violated ahead of {{ monitor.is_liveness_expired }} steps !
+                        <span class="glyphicon glyphicon-warning-sign btn-group" style="color: orange;"></span>
+                      </td>
+                    </tr>
+                {% endif %}
                 <tr>
                   <td class="mon_details_row_name"> Trace (only last 50) : </td>
                   <td> <a href="{% url 'http_trace' %}">See full trace</a> </td>
