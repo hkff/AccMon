@@ -20,12 +20,12 @@ from fodtlmon_middleware import views
 
 urlpatterns = [
     url(r'^$', views.index, name='sysmon'),
-    url(r'^/monitors/$', views.show_monitors, name="monitors"),
-    url(r'^/stats/$', views.show_stats, name="stats"),
-    url(r'^/monitors/mon_details/(?P<mon_id>.*)/$', views.show_mon_details, name="monitor_details"),
-    url(r'^/monitors/mon_violations/(?P<mon_id>.*)/$', views.show_mon_violations, name="monitor_violations"),
-    url(r'^/monitors/mon_audits/(?P<mon_id>.*)/violation_audit/(?P<violation_id>.*)/$', views.mon_violation_audit,
+    url(r'^monitors/$', views.show_monitors, name="monitors"),
+    url(r'^stats/$', views.show_stats, name="stats"),
+    url(r'^monitors/mon_details/(?P<mon_id>.*)/$', views.show_mon_details, name="monitor_details"),
+    url(r'^monitors/mon_violations/(?P<mon_id>.*)/$', views.show_mon_violations, name="monitor_violations"),
+    url(r'^monitors/mon_audits/(?P<mon_id>.*)/violation_audit/(?P<violation_id>.*)/$', views.mon_violation_audit,
         name="monitor_violation_audit"),
-    url(r'^/http_trace/$', views.show_http_trace, name="http_trace"),
-    url(r'^/monitors/(?P<mon_id>.*)/$', views.change_mon_status, name="mon_change_status"),
+    url(r'^http_trace/$', views.show_http_trace, name="http_trace"),
+    url(r'^monitors/(?P<mon_id>.*)/$', views.change_mon_status, name="mon_change_status"),
 ]
