@@ -1,0 +1,73 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title"> {{ actor.name }}
+        <div style="float: right">
+            <button type="button" class="btn btn-default btn-xs"
+                    {% if monitor.enabled %}
+                    title="Disable"
+                    onclick="change_mon_status(1)"
+                     {% else %}
+                    title="Enable"
+                    onclick="change_mon_status(0)"
+                    {% endif %}
+            >
+                <span class="glyphicon {% if monitor.enabled %} glyphicon-eye-open {% else %} glyphicon-eye-close {% endif %}"
+                      aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-default btn-xs" title="Restart">
+                <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
+            </button>
+            <a type="button" class="btn btn-default btn-xs" title="Audit" href="{% url 'monitor_violations' monitor.id %}">
+                <span class="glyphicon glyphicon-education" aria-hidden="true"></span>
+            </a>
+        </div>
+        </h3>
+    </div>
+    <div class="panel-body">
+        <table class="table">
+            <tbody>
+                <tr>
+                  <td class="mon_details_row_name"> Name </td>
+                  <td>{{ actor.name }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> IP address </td>
+                  <td>{{ actor.ip_addr }}:{{ actor.port }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Target </td>
+                  <td>{{ actor.formulas }}</td>
+                </tr>
+                <tr>
+                  <td class="mon_details_row_name"> Trace (only last 50) : </td>
+                  <td> <a href="{% url 'http_trace' %}">See full trace</a> </td>
+                </tr>
+            </tbody>
+          </table>
+    </div>
+</div>
+
+
+<script type="application/javascript">
+
+function change_mon_status(v) {
+    var status = 0;
+    if(v === 0)
+        status = "ENABLED";
+    else if(v === 1)
+        status = "DISABLED";
+
+    $.ajax({
+        dataType: 'text',
+        type:'POST',
+        url: '{% url 'mon_change_status' monitor.id %}',
+        data: {
+            mon_id: "{{ monitor.id }}",
+            status: status
+        },
+        success: function(response){
+            location.reload();
+        }
+    });
+}
+</script>

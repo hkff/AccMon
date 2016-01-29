@@ -31,7 +31,7 @@ def show_monitors(request):
 
 
 def show_actors(request):
-    return render(request, 'pages/actors.html', {"actors": Sysmon.actors})
+    return render(request, 'pages/actors.html', {"actors": Sysmon.actors, "KV": Sysmon.main_mon.KV})
 
 
 def show_stats(request):
@@ -46,6 +46,11 @@ def show_stats(request):
 def show_mon_details(request, mon_id):
     m = Sysmon.get_mon_by_id(mon_id)
     return render(request, 'pages/monitor.html', {"monitor": m})
+
+
+def show_actor_details(request, actor_name):
+    a = Sysmon.get_actor_by_name(actor_name)
+    return render(request, 'pages/actor.html', {"actor": a})
 
 
 def show_mon_violations(request, mon_id):

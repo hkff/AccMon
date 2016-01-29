@@ -81,7 +81,7 @@ class FodtlmonMiddleware(object):
         :param response:
         :return:
         """
-        response["VCLOCK"] = "{true}"
+        response["KV"] = Sysmon.main_mon.KV
         print(response)
         return response
 

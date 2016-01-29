@@ -5,11 +5,10 @@
 {% block body %}
 
 <h2>Actors list</h2>
-<div class="table-responsive">
+    <div class="table-responsive">
     <table class="table table-striped">
         <thead>
           <tr>
-            <th>id</th>
             <th>Name</th>
             <th>Status</th>
             <th>IP address</th>
@@ -18,16 +17,39 @@
         <tbody>
          {% for a in actors %}
           <tr>
-            <td><a href="{% url 'monitor_details' m.id %}"> {{ m.id }} </a></td>
-            <td>{{ a.name}}</td>
-            <td> {{ a.formulas }} </td>
+            <td><a href="{% url 'actor_details' a.name %}"> {{ a.name }} </a></td>
+            <td>  </td>
             <td>{{ a.ip_addr }} : {{ a.port }}</td>
           </tr>
          {% endfor %}
         </tbody>
     </table>
-</div>
+    </div>
 
+
+<h2>Global KV</h2>
+    <div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Formula ID</th>
+            <th>Monitor</th>
+            <th>Value</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+         {% for e in KV.entries %}
+          <tr>
+            <td> {{ e.fid }} </td>
+            <td> {{ e.agent }} </td>
+            <td> {{ e.value }} </td>
+            <td> {{ e.timestamp }} </td>
+          </tr>
+         {% endfor %}
+        </tbody>
+    </table>
+    </div>
 
 {% endblock %}
 
