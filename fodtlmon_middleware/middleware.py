@@ -38,6 +38,8 @@ class FodtlmonMiddleware(object):
         # Adding HTTP request events
         ####
         now = datetime.now()
+        if "sysmon/" in request.path:  # Do not log and monitor the middleware
+            return
         # TODO make it in a customizable list for the user
         predicates = list()
         # Request

@@ -27,7 +27,7 @@ class Monitor:
         :param debug:
         :param povo: Print the result to sys out
         :param violation_formula: The formula to monitor when a remediation is triggered
-        :param livness: Livness delay :
+        :param liveness: Livness delay :
         :return:
         """
         self.id = name
@@ -109,7 +109,11 @@ class Monitor:
         return False
 
 
-class mon_fx(Monitor):
+class Mon_http(Monitor):
+    pass
+
+
+class Mon_fx(Monitor):
     """
     Function/method decorator
     """
@@ -118,8 +122,11 @@ class mon_fx(Monitor):
         If there are decorator arguments, the function
         to be decorated is not passed to the constructor!
         """
-        super().__init__(formula, debug=debug, povo=povo)
+        super().__init__(name="name", target="HTTP", location="LOCAL", kind=Sysmon.MonType.FX, formula=formula,
+                      description="", debug=False, povo=True, violation_formula=None, liveness=None)
         self.sig = None
+        Sysmon.add_fx_mon(self)
+
 
     def print(self, *args):
         if self.debug:
@@ -131,6 +138,7 @@ class mon_fx(Monitor):
         once, as part of the decoration process! You can only give
         it a single argument, which is the function object.
         """
+        print("calling ........")
         if inspect.isfunction(f):
             self.sig = inspect.signature(f)
         else:
@@ -190,10 +198,10 @@ class mon_fx(Monitor):
 
             # Run monitor
             # self.print(self.mon.trace)
-            res = self.mon.monitor(once=False)
-
-            if self.povo:
-                print(res)
+            # res = self.mon.monitor(once=False)
+            self.monitor()
+            # if self.povo:
+            #     print(res)
 
             # self.print(self.mon.formula.toCODE())
             return fx_ret
@@ -239,10 +247,14 @@ class Sysmon:
         return next(filter(lambda x: x.id == mon_id, Sysmon.http_monitors + Sysmon.fx_monitors), None)
 
     @staticmethod
-    def add_http_rule(name, formula, description="", violation_formula=None, liveness=None):
+    def add_fx_mon(mon):
+        Sysmon.fx_monitors.append(mon)
+
+    @staticmethod
+    def add_http_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None):
         print("Adding http rule %s" % name)
-        mon = Monitor(name=name, target="HTTP", location="LOCAL", kind=Sysmon.MonType.HTTP, formula=formula,
-                      description=description, debug=False, povo=True, violation_formula=violation_formula, liveness=liveness)
+        mon = Mon_http(name=name, target="HTTP", location="LOCAL", kind=Sysmon.MonType.HTTP, formula=formula,
+                    description=description, debug=False, povo=True, violation_formula=violation_formula, liveness=liveness)
         Sysmon.http_monitors.append(mon)
 
     @staticmethod
@@ -254,7 +266,7 @@ class Sysmon:
                 print(res)
 
     @staticmethod
-    def push_event(e):
+    def push_event(e: Event):
         # Push the event to the main mon
         Sysmon.main_mon.trace.push_event(e)
         # Store the event into the db

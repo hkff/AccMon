@@ -39,7 +39,7 @@ def show_stats(request):
     t = len(list(filter(lambda m: m.mon.last is Boolean3.Top, mons)))
     f = len(list(filter(lambda m: m.mon.last is Boolean3.Bottom, mons)))
     u = len(list(filter(lambda m: m.mon.last is Boolean3.Unknown, mons)))
-    args = {'mons_true_nbr': t, 'mons_false_nbr': f, 'mons_unknow_nbr': u}
+    args = {'mons_true_nbr': t, 'mons_false_nbr': f, 'mons_unknow_nbr': u, 'mons': mons}
     return render(request, 'pages/stats.html', args)
 
 
