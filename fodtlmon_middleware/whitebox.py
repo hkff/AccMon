@@ -95,6 +95,7 @@ class Monitor:
                           debug=False,
                           povo=True,
                           violation_formula=None)
+
             # IMPORTANT : stat remediation monitoring after the violation occurs
             mon.mon.counter = int(v.step)
             mon.mon.counter2 = int(v.step)

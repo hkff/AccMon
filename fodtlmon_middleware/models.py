@@ -44,8 +44,8 @@ class Violation:
         UNREAD = 1,
         ILLEGITIMATE = 2,
 
-    def __init__(self, monitor_id, step="", trace="", comment="", timestamp=datetime.now()):
-        self.timestamp = timestamp
+    def __init__(self, monitor_id, step="", trace="", comment="", timestamp=None):
+        self.timestamp = datetime.now() if timestamp is None else timestamp
         self.monitor_id = monitor_id
         self.comment = comment
         self.trace = trace
