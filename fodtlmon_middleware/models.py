@@ -57,3 +57,17 @@ class Violation:
 
     def compute_hash(self, sid=""):
         return "%s@%s_%s" % (sid, self.monitor_id, md5((str(self.trace)+str(self.step)).encode()).hexdigest())
+
+
+class Actor:
+    class ActorStatus(Enum):
+        OFFLINE = 0,
+        ONLINE = 1,
+        CONNECTED = 2,
+
+    def __init__(self, name, ip_addr, port):
+        self.name = name
+        self.ip_addr = ip_addr
+        self.port = port
+        self.formulas = []
+        self.status = Actor.ActorStatus.OFFLINE

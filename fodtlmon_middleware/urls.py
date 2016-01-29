@@ -21,6 +21,7 @@ from fodtlmon_middleware import views
 urlpatterns = [
     url(r'^$', views.index, name='sysmon'),
     url(r'^sysmon/monitors/$', views.show_monitors, name="monitors"),
+    url(r'^sysmon/actors/$', views.show_actors, name="actors"),
     url(r'^sysmon/stats/$', views.show_stats, name="stats"),
     url(r'^sysmon/monitors/mon_details/(?P<mon_id>.*)/$', views.show_mon_details, name="monitor_details"),
     url(r'^sysmon/monitors/mon_violations/(?P<mon_id>.*)/$', views.show_mon_violations, name="monitor_violations"),

@@ -5,6 +5,12 @@ from enum import Enum
 from datetime import datetime
 import time
 from fodtlmon_middleware.models import *
+import socket
+
+try:
+    HOSTNAME = socket.gethostname()
+except:
+    HOSTNAME = 'localhost'
 
 
 ########################################################
@@ -46,10 +52,39 @@ class Monitor:
         self.violation_formula = violation_formula
         self.liveness = liveness
         self.liveness_counter = liveness
+        self.kv_implementation = KVector
+        self.handle_remote_formulas()
+
+    def handle_remote_formulas(self):
+        """
+        Handling remote formulas
+        :return:
+        """
+        # 1. Create the Knowledge vector
+        # kv = self.kv_implementation()
+
+        # 2. Get all remote formulas
+        remotes = self.mon.formula.walk(filter_type=At)
+
+        # 3. Compute formulas hash
+        for f in remotes:
+            f.compute_hash(sid=self.id)
+            Sysmon.main_mon.KV.add_entry(self.kv_implementation.Entry(f.fid, agent=self.name, value=Boolean3.Unknown, timestamp=0))
+            sysactor = Sysmon.get_actor_by_name(f.agent)
+            sysactor.formulas.append(f.inner)
+
+        # IMPORTANT
+        self.mon.reset()
+
+        # 4. Add the knowledge vector
+        self.mon.KV = Sysmon.main_mon.KV
 
     def monitor(self):
+        """
+        Monitoring method
+        :return:
+        """
         res = self.mon.monitor(once=True, struct_res=True)
-
         if res.get("result") is Boolean3.Bottom:
             self.mon.last = Boolean3.Unknown
             self.mon.reset()
@@ -218,6 +253,9 @@ class Sysmon:
     fx_monitors = []
     http_monitors = []
     main_mon = Fodtlmon("true", Trace())
+    kv_implementation = KVector
+    main_mon.KV = kv_implementation()
+    actors = []
 
     class MonType(Enum):
         GENERIC = 0,
@@ -286,3 +324,12 @@ class Sysmon:
                 v.verdict = verdict
                 m.audits.append(violation_id)
 
+    @staticmethod
+    def register_actor(name, addr):
+        addr = addr.split(":")  # TODO check and secure
+        a = Actor(name, addr[0], addr[1])
+        Sysmon.actors.append(a)
+
+    @staticmethod
+    def get_actor_by_name(name):
+        return next(filter(lambda x: x.name == name, Sysmon.actors), None)

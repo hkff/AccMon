@@ -1,0 +1,33 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+{% block title %} Actors {% endblock %}
+
+{% block body %}
+
+<h2>Actors list</h2>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>IP address</th>
+          </tr>
+        </thead>
+        <tbody>
+         {% for a in actors %}
+          <tr>
+            <td><a href="{% url 'monitor_details' m.id %}"> {{ m.id }} </a></td>
+            <td>{{ a.name}}</td>
+            <td> {{ a.formulas }} </td>
+            <td>{{ a.ip_addr }} : {{ a.port }}</td>
+          </tr>
+         {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+{% endblock %}
+
