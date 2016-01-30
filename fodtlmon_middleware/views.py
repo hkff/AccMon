@@ -96,7 +96,10 @@ def mon_violation_audit(request, mon_id, violation_id):
         return render(request, 'pages/audit.html', {"monitor": m, "violation": v})
 
 
-def get_monitors_updates(request):
+##########################
+# Sysmon API
+##########################
+def api_get_monitors_updates(request):
     res = {}
     mons = Sysmon.get_mons()
     for m in mons:
@@ -119,7 +122,4 @@ def get_monitors_updates(request):
         res["%s_audits" % m.id] = len(m.audits)
     return JsonResponse(res)
 
-##########################
-# Sysmon API
-##########################
 

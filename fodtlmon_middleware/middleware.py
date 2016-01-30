@@ -39,8 +39,8 @@ class FodtlmonMiddleware(object):
         ####
         now = datetime.now()
 
-        # if "sysmon/" in request.path:  # Do not log and monitor the middleware
-        #     return  # Log it may be usefull for audits
+        if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
+            return  # Log it may be usefull for audits
 
         # TODO make it in a customizable list for the user
         predicates = list()
