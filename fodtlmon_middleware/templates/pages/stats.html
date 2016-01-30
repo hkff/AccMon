@@ -6,6 +6,8 @@
 
 <h2>Monitors statistics</h2>
 
+<ul class="media-list">
+    <li class="media">
 <div>
     <div class="col-lg-3 col-md-6">
         <div class="panel panel-grey">
@@ -72,11 +74,61 @@
         </div>
     </div>
 </div>
+    </li>
+    <li class="media">
+        <canvas id="myChart" width="400" height="400"></canvas>
+    </li>
+</ul>
+<script type="application/javascript">
 
-    <script type="javascript">
+    function generate_audits_violations_per_mon() {
+        var ctx = document.getElementById("myChart").getContext("2d");
+        var data = {
+            labels: [
+                {% for m in mons %} "{{ m.name }}", {% endfor %}
+            ],
+            datasets: [
+                {
+                    label: "Violations",
+                    fillColor: "#d9534f",
+                    strokeColor: "rgba(151,187,205,1)",
+                    highlightFill: "#d9534f",
+                    highlightStroke: "rgba(151,187,205,1)",
+                    data: [ {% for m in mons %} {{ m.violations|length }}, {% endfor %} ]
+                },
+                {
+                    label: "Audits",
+                    fillColor: "#ec971f",
+                    strokeColor: "rgba(151,187,205,1)",
+                    highlightFill: "#ec971f",
+                    highlightStroke: "rgba(151,187,205,1)",
+                    data: [ {% for m in mons %} {{ m.audits|length }}, {% endfor %} ]
+                }
+            ]
+        };
 
+        var options = {
+            scaleShowGridLines : true,                // Whether grid lines are shown across the chart
+            scaleGridLineColor : "rgba(0,0,0,.05)",   // Colour of the grid lines
+            scaleGridLineWidth : 1,                   // Width of the grid lines
+            scaleShowHorizontalLines: true,           // Whether to show horizontal lines (except X axis)
+            scaleShowVerticalLines: true,             // Whether to show vertical lines (except Y axis)
+            barShowStroke : false,                    // If there is a stroke on each bar
+            barStrokeWidth : 2,                       // Pixel width of the bar stroke
+            barValueSpacing : 5,                      // Spacing between each of the X value sets
+            barDatasetSpacing : 1,                    // Spacing between data sets within X values
+            multiTooltipTemplate: "<%= datasetLabel %> : <%= value %>",
+            responsive : true,
+            animation: true,
+            maintainAspectRatio: false,
+            showTooltips: true
+        };
 
-    </script>
+        var chart = new Chart(ctx).Bar(data, options);
+    }
+
+    // Generate graphs
+    generate_audits_violations_per_mon()
+</script>
 
 {% endblock %}
-

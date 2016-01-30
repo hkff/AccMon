@@ -91,6 +91,7 @@ setInterval(function get_mons_updates(){
                 $.each(response, function(i, val) {
                     $("#" + i).empty().append(val);
                 });
+                $('[data-toggle="tooltip"]').tooltip();
             }
         });
     }, 4000);
