@@ -19,7 +19,8 @@ from django.conf.urls import include, url
 from fodtlmon_middleware import views
 
 urlpatterns = [
-    url(r'^$', views.index, name='sysmon'),
+    # Sysmon app #
+    url(r'^sysmon/$', views.index, name='sysmon'),
     url(r'^sysmon/monitors/$', views.show_monitors, name="monitors"),
     url(r'^sysmon/stats/$', views.show_stats, name="stats"),
     url(r'^sysmon/monitors/mon_details/(?P<mon_id>.*)/$', views.show_mon_details, name="monitor_details"),
@@ -30,4 +31,8 @@ urlpatterns = [
     url(r'^sysmon/monitors/(?P<mon_id>.*)/$', views.change_mon_status, name="mon_change_status"),
     url(r'^sysmon/actors/$', views.show_actors, name="actors"),
     url(r'^sysmon/actors/actor_details/(?P<actor_name>.*)/$', views.show_actor_details, name="actor_details"),
+    url(r'^sysmon/monitors/get_updates$', views.get_monitors_updates, name='get_mons_updates'),
+
+    # Sysmon API #
+
 ]

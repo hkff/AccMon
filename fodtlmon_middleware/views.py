@@ -16,11 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from fodtlmon_middleware.middleware import *
 from django.contrib.auth.decorators import login_required
 
 
+##########################
+# Sysmon APP
+##########################
 # @login_required
 def index(request):
     return render(request, 'index.html')
@@ -91,3 +94,32 @@ def mon_violation_audit(request, mon_id, violation_id):
         m = Sysmon.get_mon_by_id(mon_id)
         v = next(filter(lambda x: x.vid == violation_id, m.violations))
         return render(request, 'pages/audit.html', {"monitor": m, "violation": v})
+
+
+def get_monitors_updates(request):
+    res = {}
+    mons = Sysmon.get_mons()
+    for m in mons:
+        res["%s_status" % m.id] = '<span class="label label-info">Running...</span>'  if m.enabled \
+            else '<span class="label label-default ">Stopped</span>'
+
+        if m.mon.last == Boolean3.Unknown:
+            res["%s_result" % m.id] = '<span class="label label-default b3res">' + str(m.mon.last) + '</span>'
+        elif m.mon.last == Boolean3.Bottom:
+            res["%s_result" % m.id] = '<span class="label label-danger b3res">'  + str(m.mon.last) + '</span>'
+        else:
+            res["%s_result" % m.id] = '<span class="label label-success b3res">'  + str(m.mon.last) + '</span>'
+
+        if m.liveness is not None and m.is_liveness_expired() is not False:
+            res["%s_liveness" % m.id] = ('<span class="glyphicon glyphicon-warning-sign btn-group" style="color: '
+                                         'orange;" data-toggle="tooltip" title="Liveness formula potentially violated'
+                                         ' ahead of ' + str(m.is_liveness_expired()) + ' steps !"></span>')
+
+        res["%s_violations" % m.id] = len(m.violations)
+        res["%s_audits" % m.id] = len(m.audits)
+    return JsonResponse(res)
+
+##########################
+# Sysmon API
+##########################
+

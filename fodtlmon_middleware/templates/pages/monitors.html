@@ -35,14 +35,14 @@
                     {{ m.formula }}
                 {% endif %}
             </td>
-            <td>
+            <td id="{{ m.id }}_status">
                 {% if m.enabled|stringformat:"s" == "True" %}
                     <span class="label label-info">Running...</span>
                 {% else %}
                     <span class="label label-default ">Stopped</span>
                 {% endif %}
             </td>
-            <td>
+            <td id="{{ m.id }}_result">
                 {% if m.mon.last|stringformat:"s" == "?" %}
                     <span class="label label-default b3res">
                 {% elif m.mon.last|stringformat:"s" == "⊥" %}
@@ -52,37 +52,26 @@
                 {% endif %}
                 {{ m.mon.last }}</span>
             </td>
-{#            <td>#}
-{#                <button type="button" class="btn btn-default btn-xs" title="{% if m.enabled %} Disable {% else %} Enable {% endif %}">#}
-{#                    <span class="glyphicon {% if m.enabled %} glyphicon-eye-open {% else %} glyphicon-eye-close {% endif %}"#}
-{#                          aria-hidden="true"></span>#}
-{#                </button>#}
-{#                <button type="button" class="btn btn-default btn-xs" title="Restart">#}
-{#                    <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>#}
-{#                </button>#}
-{##}
-{#                <button type="button" class="btn btn-default btn-xs" title="Audit">#}
-{#                    <span class="glyphicon glyphicon-education" aria-hidden="true"></span>#}
-{#                </button>#}
-{#                <a href="{% url 'monitor_details' m.id %}" class="btn btn-default btn-xs" title="Details">#}
-{#                    <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>#}
-{#                </a>#}
-{#            </td>#}
             <td>
                 <div class="btn-toolbar">
                     <a class="label label-danger b3fres btn-group" href="{% url 'monitor_violations' m.id %}"> ⊥
-                        <span class="badge" style="background-color: #DE3C3C;">{{ m.violations|length }}</span></a>
-                    {% if m.liveness != None and m.is_liveness_expired != False %}
-                        <span class="glyphicon glyphicon-warning-sign btn-group" style="color: orange;"
-                        data-toggle="tooltip" title="Liveness formula potentially violated ahead of
-                        {{ m.is_liveness_expired }} steps!"></span>
-                    {% endif %}
+                        <span class="badge" style="background-color: #DE3C3C;" id="{{ m.id }}_violations">{{ m.violations|length }}</span></a>
+
+                    <div class="btn-group" id="{{ m.id }}_liveness">
+                        {% if m.liveness != None and m.is_liveness_expired != False %}
+                            <span class="glyphicon glyphicon-warning-sign btn-group" style="color: orange;"
+                            data-toggle="tooltip" title="Liveness formula potentially violated ahead of
+                            {{ m.is_liveness_expired }} steps !"></span>
+                        {% endif %}
+                    </div>
                 </div>
             </td>
             <td>
                 <a class="label label-warning b3fres" href="{% url 'monitor_violations' m.id %}">
                     <span class="glyphicon glyphicon-education"></span>
-                    <span class="badge" style="background-color: #D89822;">{{ m.audits|length }}</span></a>
+                    <span class="badge" style="background-color: #D89822;" id="{{ m.id }}_audits">
+                        {{ m.audits|length }}
+                    </span></a>
             </td>
           </tr>
          {% endfor %}
@@ -90,6 +79,23 @@
     </table>
 </div>
 
+
+<script type="application/javascript">
+setInterval(function get_mons_updates(){
+        $.ajax({
+            dataType: 'json',
+            type:'GET',
+            url: "{% url 'get_mons_updates' %}",
+            data: {},
+            success: function(response){
+                $.each(response, function(i, val) {
+                    $("#" + i).empty().append(val);
+                });
+            }
+        });
+    }, 4000);
+
+</script>
 
 {% endblock %}
 
