@@ -30,7 +30,13 @@ def login(request):
 
 #@login_required(login_url='sysmon_login')
 def index(request):
-    return render(request, 'pages/home.html')
+    args = {}
+    mons = Sysmon.get_mons()
+    args["violations_nbr"] = sum(map(lambda x: len(x.violations), mons))
+    args["audits_nbr"] = sum(map(lambda x: len(x.audits), mons))
+    args["running_mons"] = len(list(filter(lambda x: x.enabled, mons)))
+    args["offline_mons"] = len(mons) - args["running_mons"]
+    return render(request, 'pages/home.html', args)
 
 
 def show_monitors(request):

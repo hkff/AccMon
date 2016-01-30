@@ -28,6 +28,31 @@ class FodtlmonMiddleware(object):
     def __init__(self):
         self.monitors = []
 
+    def Log(self, request, attribute: Sysmon.LogAttributes):
+        args = []
+
+        if attribute is Sysmon.LogAttributes.PATH:
+            args.append(Constant('"%s"' % request.path))  # IMPORTANT Parse path as regexp
+            return P(request.method, args=args)
+
+        elif attribute is Sysmon.LogAttributes.SCHEME:
+            args.append(Constant(request.scheme))
+
+        elif attribute is Sysmon.LogAttributes.USER:
+            args.append(Constant(request.user))
+
+        elif attribute is Sysmon.LogAttributes.REMOTE_ADDR:
+            args.append(str(request.META.get("REMOTE_ADDR")))
+
+        elif attribute is Sysmon.LogAttributes.CONTENT_TYPE:
+            args.append(str(request.META.get("CONTENT_TYPE")))
+
+        elif attribute is Sysmon.LogAttributes.QUERY_STRING:
+            arg = str(request.META.get("QUERY_STRING"))
+            if arg != '': args.append(Constant(arg))
+
+        return P(attribute.name, args=args)
+
     def process_request(self, request):
         """
         Request intercepting
@@ -42,20 +67,10 @@ class FodtlmonMiddleware(object):
         if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
             return  # Log it may be usefull for audits
 
-        # TODO make it in a customizable list for the user
         predicates = list()
-        # Request
-        predicates.append(P(request.method, args=[Constant('"%s"' % request.path)]))  # IMPORTANT Parse path as regexp
-        predicates.append(P("SCHEME", args=[Constant(request.scheme)]))
-        # Logged user
-        predicates.append(P("USER", args=[Constant(str(request.user))]))
-        # Meta
-        predicates.append(P("REMOTE_ADDR", args=[Constant(str(request.META.get("REMOTE_ADDR")))]))
-        predicates.append(P("CONTENT_TYPE", args=[Constant(str(request.META.get("CONTENT_TYPE")))]))
-
-        arg = str(request.META.get("QUERY_STRING"))
-        args = [] if arg == '' else [Constant(arg)]
-        predicates.append(P("QUERY_STRING", args=args))
+        # Log the events
+        for l in Sysmon.log_attributes:
+            predicates.append(self.Log(request, l))
 
         # pushing the event
         Sysmon.push_event(Event(predicates, step=now))
@@ -72,6 +87,7 @@ class FodtlmonMiddleware(object):
         :param kwargs:
         :return:
         """
+        now = datetime.now()
         print("%s %s %s %s" % (request, view.__name__, args, kwargs))
         # return HttpResponse("Your are trying to cheat !")
         # return render(request, "index.html")
@@ -83,6 +99,7 @@ class FodtlmonMiddleware(object):
         :param response:
         :return:
         """
+        now = datetime.now()
         response["KV"] = Sysmon.main_mon.KV
         print(response)
         return response

@@ -263,6 +263,18 @@ class Sysmon:
         FX = 2,
         REMEDIATION = 3
 
+    class LogAttributes(Enum):
+        SCHEME = 0
+        PATH = 1
+        USER = 2
+        REMOTE_ADDR = 3
+        CONTENT_TYPE = 4
+        QUERY_STRING = 5
+
+    LGA = LogAttributes
+
+    log_attributes = [x for x in LGA]
+
     def __init__(self):
         pass
 
