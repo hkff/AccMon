@@ -24,9 +24,13 @@ from django.contrib.auth.decorators import login_required
 ##########################
 # Sysmon APP
 ##########################
-# @login_required
+def login(request):
+    return render(request, 'pages/login.html')
+
+
+#@login_required(login_url='sysmon_login')
 def index(request):
-    return render(request, 'index.html')
+    return render(request, 'pages/home.html')
 
 
 def show_monitors(request):

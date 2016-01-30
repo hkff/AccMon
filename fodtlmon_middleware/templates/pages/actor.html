@@ -1,8 +1,8 @@
-{% extends "index.html" %}
+{% extends "pages/main.html" %}
 {% load staticfiles %}
 {% block title %} Actor {% endblock %}
 
-{% block body %}
+{% block container %}
 
 <h2>Actor details : {{ Actor.name }}</h2>
 <a href="javascript: history.go(-1)">Back</a>

@@ -1,0 +1,30 @@
+{% extends "pages/base_template.html" %}
+{% load staticfiles %}
+
+
+{% block body %}
+
+<style>
+    body {
+        font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #333;
+        background-color: #EEE;
+    }
+</style>
+
+<div class="container" style="">
+    <div class="main_content">
+        <form class="form-signin">
+            <h2 class="form-signin-heading">Please sign in</h2>
+            <label for="inputUsername" class="sr-only">User name</label>
+            <input type="input" id="inputUsername" class="form-control" placeholder="User name" required="" autofocus="">
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="">
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+          </form>
+    </div>
+</div>
+
+{% endblock %}

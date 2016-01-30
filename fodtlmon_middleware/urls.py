@@ -21,6 +21,7 @@ from fodtlmon_middleware import views
 urlpatterns = [
     # Sysmon app #
     url(r'^sysmon/$', views.index, name='sysmon'),
+    url(r'^sysmon/login$', views.login, name='sysmon_login'),
     url(r'^sysmon/monitors/$', views.show_monitors, name="monitors"),
     url(r'^sysmon/stats/$', views.show_stats, name="stats"),
     url(r'^sysmon/monitors/mon_details/(?P<mon_id>.*)/$', views.show_mon_details, name="monitor_details"),
