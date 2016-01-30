@@ -12,8 +12,9 @@
     <tbody>
     {% for t in trace.events %}
         <tr>
-          <td> {{ forloop.counter }}</td>
-          <td> {{ t }}</td>
+            <td> {{ forloop.counter }}</td>
+            <td class="col-md-2"> {{ t.step }}</td>
+            <td> {{ t }}</td>
         </tr>
         {% endfor %}
     </tbody>
