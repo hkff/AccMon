@@ -97,47 +97,47 @@
 </div>
 
 <script type="application/javascript">
-  var container = document.getElementById('trace_vis');
+    var container = document.getElementById('trace_vis');
 
-  // Create a DataSet
-  var items = new vis.DataSet([
-    {% for e in monitor.mon.trace.events|slice:"-50:" %}
-        {% with i=forloop.counter %}
-            {% for p in e.predicates %}
-                {id: '{{ i }}_{{ forloop.counter }}', content: '{{ p }}', start: new Date("{{ e.step.isoformat }}")},
-            {% endfor %}
-        {% endwith %}
-    {% endfor %}
-  ]);
+    // Create a DataSet
+    var items = new vis.DataSet([
+        {% for e in monitor.mon.trace.events|slice:"-50:" %}
+            {% with i=forloop.counter %}
+                {% for p in e.predicates %}
+                    {id: '{{ i }}_{{ forloop.counter }}', content: '{{ p }}', start: new Date("{{ e.step.isoformat }}")},
+                {% endfor %}
+            {% endwith %}
+        {% endfor %}
+    ]);
 
-  // Configuration for the Timeline
-  var options = {
-      autoResize: true,
-      minHeight: '200px',
-      maxHeight: '800px'
-  };
+    // Configuration for the Timeline
+    var options = {
+        autoResize: true,
+        minHeight: '200px',
+        maxHeight: '800px'
+    };
 
-  // Create the Timeline
-  var timeline = new vis.Timeline(container, items, options);
+    // Create the Timeline
+    var timeline = new vis.Timeline(container, items, options);
 
-  function change_mon_status(v) {
-      var status = 0;
-      if(v === 0)
-        status = "ENABLED";
-      else if(v === 1)
-        status = "DISABLED";
+    function change_mon_status(v) {
+        var status = 0;
+        if(v === 0)
+            status = "ENABLED";
+        else if(v === 1)
+            status = "DISABLED";
 
-    $.ajax({
-        dataType: 'text',
-        type:'POST',
-        url: '{% url 'mon_change_status' monitor.id %}',
-        data: {
-            mon_id: "{{ monitor.id }}",
-            status: status
-        },
-        success: function(response){
-            location.reload();
-        }
-    });
-  }
+        $.ajax({
+            dataType: 'text',
+            type:'POST',
+            url: '{% url 'mon_change_status' monitor.id %}',
+            data: {
+                mon_id: "{{ monitor.id }}",
+                status: status
+            },
+            success: function(response){
+                location.reload();
+            }
+        });
+    }
 </script>

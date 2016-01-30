@@ -33,6 +33,7 @@ urlpatterns = [
     url(r'^sysmon/actors/actor_details/(?P<actor_name>.*)/$', views.show_actor_details, name="actor_details"),
 
     # Sysmon API #
-    url(r'^sysmon/api/get_updates$', views.api_get_monitors_updates, name='get_mons_updates'),
+    url(r'^sysmon/api/get_mons_updates/$', views.api_get_monitors_updates, name='get_mons_updates'),
+    url(r'^sysmon/api/get_mon_details/(?P<mon_id>.*)/$', views.api_get_mon_details, name="get_mon_details"),
 
 ]

@@ -123,3 +123,6 @@ def api_get_monitors_updates(request):
     return JsonResponse(res)
 
 
+def api_get_mon_details(request, mon_id):
+    m = Sysmon.get_mon_by_id(mon_id)
+    return render(request, 'fragments/monitor.html', {"monitor": m})

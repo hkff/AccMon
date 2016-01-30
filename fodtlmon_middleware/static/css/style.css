@@ -59,3 +59,7 @@ body {
     align-content: center;
     display:block;
 }
+
+.tooltipclass {
+    background-color: #2b2b2b;
+}

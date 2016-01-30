@@ -121,7 +121,7 @@ class Monitor:
     def trigger_remediation(self, violation_id):
         v = self.get_violation_by_id(violation_id)
         if v is not None:
-            mon = Monitor(name="%s_violation@%s" % (v.monitor_id, v.step),
+            mon = Monitor(name="%s_violation_%s" % (v.monitor_id, v.step),
                           target=self.target,
                           location=self.location,
                           kind=Sysmon.MonType.REMEDIATION,

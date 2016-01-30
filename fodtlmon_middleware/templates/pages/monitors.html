@@ -29,11 +29,13 @@
             <td>{{ m.target }}</td>
             <td>{{ m.location }}</td>
             <td>
+                <div data-toggle="tooltip" title="{{ m.formula }}">
                 {% if m.formula|length > 10 %}
                     {{ m.formula|slice:":10" }}...
                 {% else %}
                     {{ m.formula }}
                 {% endif %}
+                </div>
             </td>
             <td id="{{ m.id }}_status">
                 {% if m.enabled|stringformat:"s" == "True" %}
