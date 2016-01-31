@@ -427,4 +427,5 @@ class Sysmon:
 
     # TODO add initsysmon to perform some checks
     # example : check if all predicates in formula can be logged
-    # safe /unsafe agents
+    # safe /unsafe agents : call another view inside a view
+    # view and response needs to have separate traces
