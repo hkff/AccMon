@@ -24,11 +24,11 @@
                     <td>
                         {% if rule.enabled %}
                         <span class="label label-success" style="font-size: 100%;">
-                            <input type="checkbox" checked> ON
+                            <input type="checkbox" checked onchange="update_rule('{{ rule.name }}', 'HTTP', 'OFF')"> ON
                         </span>
                         {% else %}
                         <span class="label label-danger" style="font-size: 100%;">
-                            <input type="checkbox"> OFF
+                            <input type="checkbox" onchange="update_rule('{{ rule.name }}', 'HTTP', 'ON')"> OFF
                         </span>
                         {% endif %}
                     </td>
@@ -112,5 +112,24 @@
             </div>
         </div>
     </div>
+
+
+<script type="application/javascript">
+    function update_rule(name, kind, status) {
+        $.ajax({
+            dataType: 'text',
+            type:'POST',
+            url: '{% url 'update_log_rule' %}',
+            data: {
+                rule_name: name,
+                kind: kind,
+                status: status
+            },
+            success: function(response){
+                location.reload();
+            }
+        });
+    }
+</script>
 {% endblock %}
 

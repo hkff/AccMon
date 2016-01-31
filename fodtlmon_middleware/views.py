@@ -123,6 +123,22 @@ def mon_violation_audit(request, mon_id, violation_id):
         return render(request, 'pages/audit.html', {"monitor": m, "violation": v})
 
 
+def update_log_rule(request):
+    if request.method == "POST":
+        kind = request.POST.get('kind', None)
+        status = request.POST.get('status', None)
+        rule_name = request.POST.get('rule_name', None)
+        if (kind and status and rule_name) is not None:
+            rule = Sysmon.get_rule_by_name(rule_name, Monitor.MonType[kind])
+            if rule is not None:
+                if status == "ON":
+                    rule.enabled = True
+                elif status == "OFF":
+                    rule.enabled = False
+                return HttpResponse("Rule updated !")
+    return HttpResponse("KO")
+
+
 ##########################
 # Sysmon API
 ##########################

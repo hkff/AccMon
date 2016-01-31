@@ -335,6 +335,17 @@ class Sysmon:
         return next(filter(lambda x: x.id == mon_id, Sysmon.http_monitors + Sysmon.fx_monitors), None)
 
     @staticmethod
+    def get_rule_by_name(rule_name, kind: Monitor.MonType) -> LogAttribute:
+        rules = []
+        if kind is Monitor.MonType.HTTP:
+            rules = Sysmon.log_http_attributes
+        elif kind is Monitor.MonType.VIEW:
+            rules = Sysmon.log_view_attributes
+        elif kind is Monitor.MonType.RESPONSE:
+            rules = Sysmon.log_response_attributes
+        return next(filter(lambda x: x.name == rule_name, rules), None)
+
+    @staticmethod
     def add_fx_mon(mon):
         Sysmon.fx_monitors.append(mon)
 
