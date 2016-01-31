@@ -28,31 +28,6 @@ class FodtlmonMiddleware(object):
     def __init__(self):
         self.monitors = []
 
-    def Log(self, request, attribute: Sysmon.LogAttributes):
-        args = []
-
-        if attribute is Sysmon.LogAttributes.PATH:
-            args.append(Constant('"%s"' % request.path))  # IMPORTANT Parse path as regexp TODO for META also
-            return P(request.method, args=args)
-
-        elif attribute is Sysmon.LogAttributes.SCHEME:
-            args.append(Constant(request.scheme))
-
-        elif attribute is Sysmon.LogAttributes.USER:
-            args.append(Constant(request.user))
-
-        elif attribute is Sysmon.LogAttributes.REMOTE_ADDR:
-            args.append(str(request.META.get("REMOTE_ADDR")))
-
-        elif attribute is Sysmon.LogAttributes.CONTENT_TYPE:
-            args.append(str(request.META.get("CONTENT_TYPE")))
-
-        elif attribute is Sysmon.LogAttributes.QUERY_STRING:
-            arg = str(request.META.get("QUERY_STRING"))
-            if arg != '': args.append(Constant(arg))
-
-        return P(attribute.name, args=args)
-
     ############################################
     # 1. Processing an incoming HTTP request
     ############################################
@@ -73,8 +48,11 @@ class FodtlmonMiddleware(object):
         predicates = list()
         # Log the events
         for l in Sysmon.log_http_attributes:
-            predicates.append(self.Log(request, l))
-
+            #predicates.append(self.Log(request, l))
+            if isinstance(l.value , LogAttribute):
+                if l.value.enabled and l.value.eval_fx is not None:
+                    predicates.append(l.value.eval_fx(request))
+            pass
         # pushing the event
         Sysmon.push_event(Event(predicates, step=now))
 

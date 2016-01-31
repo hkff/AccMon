@@ -5,7 +5,7 @@
 {% block container %}
 
 <h2>Configuration</h2>
-    <div class="panel panel-default">
+    <div class="panel panel-primary">
         <div class="panel-heading"><b>Incoming HTTP Requests</b></div>
         <div class="panel-body">
             <div class="table-responsive">
@@ -18,11 +18,11 @@
                   </tr>
                 </thead>
                 <tbody>
-                 {% for rule in LogAttributes %}
+                 {% for rule in log_http_attributes %}
                   <tr>
                     <td> {{ rule.name }} </td>
                     <td>
-                        {% if rule in log_http_attributes %}
+                        {% if rule.value.enabled %}
                         <span class="label label-success">
                             <input type="checkbox" checked> ON
                         </span>
@@ -33,7 +33,7 @@
                         {% endif %}
                     </td>
 
-                      <td>  </td>
+                      <td> {{ rule.value.description }} </td>
                   </tr>
                  {% endfor %}
                 </tbody>

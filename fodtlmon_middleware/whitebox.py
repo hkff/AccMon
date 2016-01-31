@@ -259,6 +259,17 @@ class Mon_fx(Monitor):
 ########################################################
 # Sysmon
 ########################################################
+class LogAttribute:
+    """
+
+    """
+    def __init__(self, name, eval_fx=None, description="", enabled=True):
+        self.name = name
+        self.description = description
+        self.eval_fx = eval_fx
+        self.enabled = enabled
+
+
 class Sysmon:
     """
     The main system that contains all submonitors
@@ -273,16 +284,31 @@ class Sysmon:
     actors = []
 
     class LogAttributes(Enum):
-        SCHEME = 0
-        PATH = 1
-        USER = 2
-        REMOTE_ADDR = 3
-        CONTENT_TYPE = 4
-        QUERY_STRING = 5
+        """
+        Log attributes list
+        """
+        SCHEME = LogAttribute("SCHEME", description="HTTP request schema.", enabled=True,
+                              eval_fx=lambda request, view=None: P("SCHEME", args=[Constant(request.scheme)]))
+
+        PATH = LogAttribute("PATH", description="", enabled=True, # IMPORTANT Parse path as regexp TODO for META also
+                            eval_fx=lambda request, view=None: P(request.method, args=[Constant('"%s"' % request.path)]))
+
+        USER = LogAttribute("USER", description="HTTP logged user id.", enabled=True,
+                              eval_fx=lambda request, view=None: P("USER", args=[Constant(request.user)]))
+
+        REMOTE_ADDR = LogAttribute("REMOTE_ADDR", description="Client ip adresse.", enabled=True,
+                              eval_fx=lambda request, view=None: P("REMOTE_ADDR", args=[Constant(str(request.META.get("REMOTE_ADDR")))]))
+
+        CONTENT_TYPE = LogAttribute("CONTENT_TYPE", description="Client ip adresse.", enabled=True,
+                              eval_fx=lambda request, view=None: P("CONTENT_TYPE", args=[Constant(str(request.META.get("CONTENT_TYPE")))]))
+
+        QUERY_STRING = LogAttribute("QUERY_STRING", description="Client ip adresse.", enabled=True,
+                              eval_fx=lambda request, view=None: P("QUERY_STRING", args=[Constant(str(request.META.get("QUERY_STRING")))]))
 
     LGA = LogAttributes
 
-    log_http_attributes = [LGA.SCHEME, LGA.USER]
+    # Log attributes lists
+    log_http_attributes = [LGA.SCHEME, LGA.PATH, LGA.USER, LGA.REMOTE_ADDR, LGA.CONTENT_TYPE, LGA.QUERY_STRING]
     log_view_attributes = []
     log_response_attributes = []
 
