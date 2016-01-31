@@ -32,7 +32,7 @@ class Monitor:
         POSTERIORI = 0,
         REAL_TIME = 1
 
-    def __init__(self, name="", description="", target="", location="LOCAL", kind=None,
+    def __init__(self, name="", description="", target=None, location="LOCAL", kind=None,
                  control_type=MonControlType.POSTERIORI,
                  formula=None, debug=False, povo=True, violation_formula=None, liveness=None):
         """
@@ -338,7 +338,7 @@ class Sysmon:
 
     @staticmethod
     def get_mon_by_id(mon_id) -> Monitor:
-        return next(filter(lambda x: x.id == mon_id, Sysmon.http_monitors + Sysmon.fx_monitors), None)
+        return next(filter(lambda x: x.id == mon_id, Sysmon.get_mons()), None)
 
     @staticmethod
     def get_rule_by_name(rule_name, kind: Monitor.MonType) -> LogAttribute:
@@ -359,18 +359,28 @@ class Sysmon:
     def add_http_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
                       control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding http rule %s" % name)
-        mon = Mon_http(name=name, target="HTTP", location="LOCAL", kind=Monitor.MonType.HTTP, formula=formula,
-                     description=description, debug=False, povo=True, violation_formula=violation_formula,
-                     liveness=liveness, control_type=control_type)
+        mon = Mon_http(name=name, target=Monitor.MonType.HTTP, location="LOCAL", kind=Monitor.MonType.HTTP,
+                       formula=formula, description=description, debug=False, povo=True,
+                       violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.http_monitors.append(mon)
 
     @staticmethod
-    def monitor_http_rules():
-        for m in Sysmon.http_monitors:
-            if m.enabled:
-                res = m.monitor()
-                # TODO : automatic audit after x mn ??
-                print(res)
+    def add_view_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
+                      control_type=Monitor.MonControlType.POSTERIORI):
+        print("Adding view rule %s" % name)
+        mon = Mon_http(name=name, target=Monitor.MonType.VIEW, location="LOCAL", kind=Monitor.MonType.HTTP,
+                       formula=formula, description=description, debug=False, povo=True,
+                       violation_formula=violation_formula, liveness=liveness, control_type=control_type)
+        Sysmon.views_monitors.append(mon)
+
+    @staticmethod
+    def add_response_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
+                      control_type=Monitor.MonControlType.POSTERIORI):
+        print("Adding response rule %s" % name)
+        mon = Mon_http(name=name, target=Monitor.MonType.RESPONSE, location="LOCAL", kind=Monitor.MonType.HTTP,
+                       formula=formula, description=description, debug=False, povo=True,
+                       violation_formula=violation_formula, liveness=liveness, control_type=control_type)
+        Sysmon.response_monitors.append(mon)
 
     @staticmethod
     def push_event(e: Event):
@@ -381,7 +391,7 @@ class Sysmon:
 
     @staticmethod
     def get_mons():
-        return Sysmon.fx_monitors + Sysmon.http_monitors
+        return Sysmon.fx_monitors + Sysmon.http_monitors + Sysmon.views_monitors + Sysmon.response_monitors
 
     @staticmethod
     def audit(mon_id, violation_id, comment, verdict):

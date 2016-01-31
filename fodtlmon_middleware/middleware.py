@@ -67,10 +67,9 @@ class FodtlmonMiddleware(object):
         Sysmon.push_event(Event(self.log_events(request, Sysmon.log_http_attributes), step=now))
 
         # Trigger monitors
-        violations = self.monitor(Sysmon.http_monitors)
-
-        if violations > 0:
+        if self.monitor(Sysmon.http_monitors) > 0:
             return render(request, "pages/access_denied.html")
+
 
     ############################################
     # 2. Processing a view after a request
@@ -84,10 +83,18 @@ class FodtlmonMiddleware(object):
         :param kwargs:
         :return:
         """
-        now = datetime.now()
         print("%s %s %s %s" % (request, view.__name__, args, kwargs))
-        # return HttpResponse("Your are trying to cheat !")
-        # return render(request, "index.html")
+        now = datetime.now()
+
+        if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
+            return  # Log it may be usefull for audits
+
+        # pushing the event
+        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_view_attributes), step=now))
+
+        # Trigger monitors
+        if self.monitor(Sysmon.views_monitors) > 0:
+            return render(request, "pages/access_denied.html")
 
     ############################################
     # 3. Processing an HTTP response
@@ -100,6 +107,18 @@ class FodtlmonMiddleware(object):
         :return:
         """
         now = datetime.now()
+
+        if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
+            return  # Log it may be usefull for audits
+
+        # pushing the event
+        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes), step=now))
+
+        # Trigger monitors
+        if self.monitor(Sysmon.response_monitors) > 0:
+            return render(request, "pages/access_denied.html")
+
+        # Update KV TODO filter
         response["KV"] = Sysmon.main_mon.KV
-        print(response)
+
         return response

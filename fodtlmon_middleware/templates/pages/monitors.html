@@ -27,7 +27,7 @@
           <tr>
             <td><a href="{% url 'monitor_details' m.id %}"> {{ m.id }} </a></td>
             <td>{{ m.name}}</td>
-            <td>{{ m.target }}</td>
+            <td>{{ m.target.name }}</td>
             <td>{{ m.location }}</td>
             <td>{{ m.control_type.name }}</td>
             <td>
