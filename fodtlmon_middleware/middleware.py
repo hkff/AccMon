@@ -49,9 +49,9 @@ class FodtlmonMiddleware(object):
         # Log the events
         for l in Sysmon.log_http_attributes:
             #predicates.append(self.Log(request, l))
-            if isinstance(l.value , LogAttribute):
-                if l.value.enabled and l.value.eval_fx is not None:
-                    predicates.append(l.value.eval_fx(request))
+            if isinstance(l, LogAttribute):
+                if l.enabled and l.eval_fx is not None:
+                    predicates.append(l.eval_fx(request))
             pass
         # pushing the event
         Sysmon.push_event(Event(predicates, step=now))

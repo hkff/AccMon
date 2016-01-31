@@ -283,7 +283,7 @@ class Sysmon:
     main_mon.KV = kv_implementation()
     actors = []
 
-    class LogAttributes(Enum):
+    class LogAttributes:
         """
         Log attributes list
         """
@@ -382,3 +382,15 @@ class Sysmon:
     @staticmethod
     def get_actor_by_name(name):
         return next(filter(lambda x: x.name == name, Sysmon.actors), None)
+
+    @staticmethod
+    def add_log_attribute(attr: LogAttribute, target=Monitor.MonType.HTTP):
+        setattr(Sysmon.LogAttributes, attr.name, attr)
+        if target is Monitor.MonType.HTTP:
+            Sysmon.log_http_attributes.append(attr)
+        elif target is Monitor.MonType.VIEW:
+            Sysmon.log_view_attributes.append(attr)
+        elif target is Monitor.MonType.RESPONSE:
+            Sysmon.log_response_attributes.append(attr)
+        else:
+            raise Exception("Please specify a target for your rule Monitor.MonType.(HTTP/VIEW/RESPONSE/)")
