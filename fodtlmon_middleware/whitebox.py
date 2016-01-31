@@ -289,27 +289,27 @@ class Sysmon:
         Log attributes list
         """
         SCHEME = LogAttribute("SCHEME", description="HTTP request schema.", enabled=True,
-                              eval_fx=lambda request, view=None, response=None:
+                              eval_fx=lambda request, view, args, kwargs, response:
                               P("SCHEME", args=[Constant(request.scheme)]))
 
         PATH = LogAttribute("PATH", description="", enabled=True, # IMPORTANT Parse path as regexp TODO for META also
-                            eval_fx=lambda request, view=None, response=None:
+                            eval_fx=lambda request, view, args, kwargs, response:
                             P(request.method, args=[Constant('"%s"' % request.path)]))
 
         USER = LogAttribute("USER", description="HTTP logged user id.", enabled=True,
-                              eval_fx=lambda request, view=None, response=None:
+                              eval_fx=lambda request, view, args, kwargs, response:
                               P("USER", args=[Constant(request.user)]))
 
         REMOTE_ADDR = LogAttribute("REMOTE_ADDR", description="Client ip adresse.", enabled=True,
-                              eval_fx=lambda request, view=None, response=None:
+                              eval_fx=lambda request, view, args, kwargs, response:
                               P("REMOTE_ADDR", args=[Constant(str(request.META.get("REMOTE_ADDR")))]))
 
         CONTENT_TYPE = LogAttribute("CONTENT_TYPE", description="Client ip adresse.", enabled=True,
-                              eval_fx=lambda request, view=None, response=None:
+                              eval_fx=lambda request, view, args, kwargs, response:
                               P("CONTENT_TYPE", args=[Constant(str(request.META.get("CONTENT_TYPE")))]))
 
         QUERY_STRING = LogAttribute("QUERY_STRING", description="Client ip adresse.", enabled=True,
-                              eval_fx=lambda request, view=None, response=None:
+                              eval_fx=lambda request, view, args, kwargs, response:
                               P("QUERY_STRING", args=[Constant(str(request.META.get("QUERY_STRING")))]))
 
     LGA = LogAttributes

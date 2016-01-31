@@ -28,12 +28,13 @@ class FodtlmonMiddleware(object):
     def __init__(self):
         self.monitors = []
 
-    def log_events(self, request, attributes, view=None, response=None):
+    def log_events(self, request, attributes, view=None, response=None, args=None, kwargs=None):
         predicates = list()
         for l in attributes:
             if isinstance(l, LogAttribute):
                 if l.enabled and l.eval_fx is not None:
-                    predicates.append(l.eval_fx(request, view=view, response=response))
+                    p = l.eval_fx(request=request, view=view, response=response, args=args, kwargs=kwargs)
+                    if isinstance(p, Predicate): predicates.append(p)
         return predicates
 
     def monitor(self, monitors):
@@ -90,7 +91,8 @@ class FodtlmonMiddleware(object):
             return  # Log it may be usefull for audits
 
         # pushing the event
-        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_view_attributes), step=now))
+        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_view_attributes, view=view,
+                                                args=args, kwargs=kwargs), step=now))
 
         # Trigger monitors
         if self.monitor(Sysmon.views_monitors) > 0:
@@ -112,7 +114,7 @@ class FodtlmonMiddleware(object):
             return  # Log it may be usefull for audits
 
         # pushing the event
-        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes), step=now))
+        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes, response=response), step=now))
 
         # Trigger monitors
         if self.monitor(Sysmon.response_monitors) > 0:
