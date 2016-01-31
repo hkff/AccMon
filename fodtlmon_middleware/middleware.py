@@ -28,6 +28,27 @@ class FodtlmonMiddleware(object):
     def __init__(self):
         self.monitors = []
 
+    def log_events(self, request, attributes, view=None, response=None):
+        predicates = list()
+        for l in attributes:
+            if isinstance(l, LogAttribute):
+                if l.enabled and l.eval_fx is not None:
+                    predicates.append(l.eval_fx(request, view=view, response=response))
+        return predicates
+
+    def monitor(self, monitors):
+        violations = 0
+        for m in monitors:
+            if m.enabled:
+                if m.control_type is Monitor.MonControlType.REAL_TIME:
+                    res = m.monitor()
+                    if res.get("result") is Boolean3.Bottom:
+                        violations += 1
+                else:
+                    # TODO make it thread safe
+                    threading.Thread(target=m.monitor).start()
+        return violations
+
     ############################################
     # 1. Processing an incoming HTTP request
     ############################################
@@ -37,28 +58,19 @@ class FodtlmonMiddleware(object):
         :param request:
         :return:
         """
-        ####
-        # Adding HTTP request events
-        ####
         now = datetime.now()
 
         if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
             return  # Log it may be usefull for audits
 
-        predicates = list()
-        # Log the events
-        for l in Sysmon.log_http_attributes:
-            #predicates.append(self.Log(request, l))
-            if isinstance(l, LogAttribute):
-                if l.enabled and l.eval_fx is not None:
-                    predicates.append(l.eval_fx(request))
-            pass
         # pushing the event
-        Sysmon.push_event(Event(predicates, step=now))
+        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_http_attributes), step=now))
 
         # Trigger monitors
-        # TODO make it thread safe
-        threading.Thread(target=Sysmon.monitor_http_rules).start()
+        violations = self.monitor(Sysmon.http_monitors)
+
+        if violations > 0:
+            return render(request, "pages/access_denied.html")
 
     ############################################
     # 2. Processing a view after a request
