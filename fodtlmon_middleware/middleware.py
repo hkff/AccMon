@@ -32,7 +32,7 @@ class FodtlmonMiddleware(object):
         args = []
 
         if attribute is Sysmon.LogAttributes.PATH:
-            args.append(Constant('"%s"' % request.path))  # IMPORTANT Parse path as regexp
+            args.append(Constant('"%s"' % request.path))  # IMPORTANT Parse path as regexp TODO for META also
             return P(request.method, args=args)
 
         elif attribute is Sysmon.LogAttributes.SCHEME:
@@ -53,6 +53,9 @@ class FodtlmonMiddleware(object):
 
         return P(attribute.name, args=args)
 
+    ############################################
+    # 1. Processing an incoming HTTP request
+    ############################################
     def process_request(self, request):
         """
         Request intercepting
@@ -69,15 +72,19 @@ class FodtlmonMiddleware(object):
 
         predicates = list()
         # Log the events
-        for l in Sysmon.log_attributes:
+        for l in Sysmon.log_http_attributes:
             predicates.append(self.Log(request, l))
 
         # pushing the event
         Sysmon.push_event(Event(predicates, step=now))
 
         # Trigger monitors
+        # TODO make it thread safe
         threading.Thread(target=Sysmon.monitor_http_rules).start()
 
+    ############################################
+    # 2. Processing a view after a request
+    ############################################
     def process_view(self, request, view, args, kwargs):
         """
         View intercepting
@@ -92,6 +99,9 @@ class FodtlmonMiddleware(object):
         # return HttpResponse("Your are trying to cheat !")
         # return render(request, "index.html")
 
+    ############################################
+    # 3. Processing an HTTP response
+    ############################################
     def process_response(self, request, response):
         """
         Response intercepting
@@ -103,5 +113,3 @@ class FodtlmonMiddleware(object):
         response["KV"] = Sysmon.main_mon.KV
         print(response)
         return response
-
-

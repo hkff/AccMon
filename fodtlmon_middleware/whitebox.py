@@ -20,7 +20,20 @@ class Monitor:
     """
     Generic monitor
     """
+    class MonType(Enum):
+        GENERIC = 0,
+        HTTP = 1,
+        FX = 2,
+        REMEDIATION = 3,
+        VIEW = 4,
+        RESPONSE = 5
+    
+    class MonControlType(Enum):
+        POSTERIORI = 0,
+        REAL_TIME = 1
+
     def __init__(self, name="", description="", target="", location="LOCAL", kind=None,
+                 control_type=MonControlType.POSTERIORI,
                  formula=None, debug=False, povo=True, violation_formula=None, liveness=None):
         """
         Init method
@@ -28,7 +41,7 @@ class Monitor:
         :param description:
         :param target:
         :param location: Monitor location (LOCAL / REMOTE_addr)
-        :param kind: see Sysmon.MonType
+        :param kind: see Monitor.MonType
         :param formula: The FODTL formula to be monitored
         :param debug:
         :param povo: Print the result to sys out
@@ -41,7 +54,7 @@ class Monitor:
         self.target = target
         self.location = location
         self.description = description
-        self.kind = Sysmon.MonType.GENERIC if kind is None else kind  # DO NOT use default value for karg
+        self.kind = Monitor.MonType.GENERIC if kind is None else kind  # DO NOT use default value for karg
         self.formula = formula
         self.mon = Fodtlmon(self.formula, Sysmon.main_mon.trace)
         self.debug = debug
@@ -101,7 +114,7 @@ class Monitor:
                     elif isinstance(self.mon.rewrite, Always):  # Good prefix
                         self.liveness_counter = self.liveness
 
-        if self.kind is Sysmon.MonType.REMEDIATION and res.get("result") is Boolean3.Top:
+        if self.kind is Monitor.MonType.REMEDIATION and res.get("result") is Boolean3.Top:
             # Disable monitor
             self.enabled = False
 
@@ -124,7 +137,7 @@ class Monitor:
             mon = Monitor(name="%s_violation_%s" % (v.monitor_id, v.step),
                           target=self.target,
                           location=self.location,
-                          kind=Sysmon.MonType.REMEDIATION,
+                          kind=Monitor.MonType.REMEDIATION,
                           formula=self.violation_formula,
                           description="Remediation monitor for monitor %s" % self.name,
                           debug=False,
@@ -157,7 +170,7 @@ class Mon_fx(Monitor):
         If there are decorator arguments, the function
         to be decorated is not passed to the constructor!
         """
-        super().__init__(name="name", target="HTTP", location="LOCAL", kind=Sysmon.MonType.FX, formula=formula,
+        super().__init__(name="name", target="HTTP", location="LOCAL", kind=Monitor.MonType.FX, formula=formula,
                       description="", debug=False, povo=True, violation_formula=None, liveness=None)
         self.sig = None
         Sysmon.add_fx_mon(self)
@@ -252,16 +265,12 @@ class Sysmon:
     """
     fx_monitors = []
     http_monitors = []
+    views_monitors = []
+    response_monitors = []
     main_mon = Fodtlmon("true", Trace())
     kv_implementation = KVector
     main_mon.KV = kv_implementation()
     actors = []
-
-    class MonType(Enum):
-        GENERIC = 0,
-        HTTP = 1,
-        FX = 2,
-        REMEDIATION = 3
 
     class LogAttributes(Enum):
         SCHEME = 0
@@ -273,7 +282,9 @@ class Sysmon:
 
     LGA = LogAttributes
 
-    log_attributes = [x for x in LGA]
+    log_http_attributes = [LGA.SCHEME, LGA.USER]
+    log_view_attributes = []
+    log_response_attributes = []
 
     def __init__(self):
         pass
@@ -303,7 +314,7 @@ class Sysmon:
     @staticmethod
     def add_http_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None):
         print("Adding http rule %s" % name)
-        mon = Mon_http(name=name, target="HTTP", location="LOCAL", kind=Sysmon.MonType.HTTP, formula=formula,
+        mon = Mon_http(name=name, target="HTTP", location="LOCAL", kind=Monitor.MonType.HTTP, formula=formula,
                     description=description, debug=False, povo=True, violation_formula=violation_formula, liveness=liveness)
         Sysmon.http_monitors.append(mon)
 

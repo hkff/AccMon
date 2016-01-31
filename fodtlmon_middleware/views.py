@@ -56,6 +56,14 @@ def show_stats(request):
     return render(request, 'pages/stats.html', args)
 
 
+def show_config(request):
+    args = {"log_http_attributes": Sysmon.log_http_attributes,
+            "log_view_attributes": Sysmon.log_view_attributes,
+            "log_response_attributes": Sysmon.log_response_attributes,
+            "LogAttributes": [x for x in Sysmon.LogAttributes]}
+    return render(request, 'pages/config.html', args)
+
+
 def show_mon_details(request, mon_id):
     m = Sysmon.get_mon_by_id(mon_id)
     return render(request, 'pages/monitor.html', {"monitor": m})

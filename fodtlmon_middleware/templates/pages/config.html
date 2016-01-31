@@ -1,0 +1,46 @@
+{% extends "pages/main.html" %}
+{% load staticfiles %}
+{% block title %} Syslon Configuration {% endblock %}
+
+{% block container %}
+
+<h2>Configuration</h2>
+    <div class="panel panel-default">
+        <div class="panel-heading"><b>Incoming HTTP Requests</b></div>
+        <div class="panel-body">
+            <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Log rule</th>
+                    <th>Status</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                 {% for rule in LogAttributes %}
+                  <tr>
+                    <td> {{ rule.name }} </td>
+                    <td>
+                        {% if rule in log_http_attributes %}
+                        <span class="label label-success">
+                            <input type="checkbox" checked> ON
+                        </span>
+                        {% else %}
+                        <span class="label label-danger">
+                            <input type="checkbox"> OFF
+                        </span>
+                        {% endif %}
+                    </td>
+
+                      <td>  </td>
+                  </tr>
+                 {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
