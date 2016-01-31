@@ -134,6 +134,11 @@ def update_log_rule(request):
                 if status == "ON":
                     rule.enabled = True
                 elif status == "OFF":
+                    # Check if all predicates of mons are logged
+                    for m in Sysmon.get_mons():
+                        predicates = m.mon.formula.walk(filter_type=Predicate)
+                        if rule.name in [p.name for p in predicates]:
+                            m.location = "Warning predicate is not logged !"
                     rule.enabled = False
                 return HttpResponse("Rule updated !")
     return HttpResponse("KO")

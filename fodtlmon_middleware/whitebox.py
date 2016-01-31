@@ -424,3 +424,7 @@ class Sysmon:
             Sysmon.log_response_attributes.append(attr)
         else:
             raise Exception("Please specify a target for your rule Monitor.MonType.(HTTP/VIEW/RESPONSE/)")
+
+    # TODO add initsysmon to perform some checks
+    # example : check if all predicates in formula can be logged
+    # safe /unsafe agents
