@@ -85,12 +85,22 @@ def show_http_trace(request):
 def change_mon_status(request, mon_id):
     if request.method == "POST":
         m = Sysmon.get_mon_by_id(mon_id)
-        status = request.POST.get('status', '')
-        if status == "ENABLED":
-            m.enabled = True
-        elif status == "DISABLED":
-            m.enabled = False
-        return HttpResponse("Status changed !")
+        res = request.POST.get('status', None)
+
+        if res is not None:
+            if res == "ENABLED":
+                m.enabled = True
+            elif res == "DISABLED":
+                m.enabled = False
+            return HttpResponse("Status changed !")
+
+        res = request.POST.get('controlType', '')
+        if res is not None:
+            if res == "REAL_TIME":
+                m.control_type = Monitor.MonControlType.REAL_TIME
+            elif res == "POSTERIORI":
+                m.control_type = Monitor.MonControlType.POSTERIORI
+            return HttpResponse("Status changed !")
     return HttpResponse("KO")
 
 
