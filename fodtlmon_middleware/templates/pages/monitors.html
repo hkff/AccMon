@@ -13,6 +13,7 @@
             <th>Name</th>
             <th>target</th>
             <th>location</th>
+            <th>Control type</th>
             <th>Formula</th>
             <th>Status</th>
             <th>Result</th>
@@ -28,6 +29,7 @@
             <td>{{ m.name}}</td>
             <td>{{ m.target }}</td>
             <td>{{ m.location }}</td>
+            <td>{{ m.control_type.name }}</td>
             <td>
                 <div data-toggle="tooltip" title="{{ m.formula }}">
                 {% if m.formula|length > 10 %}

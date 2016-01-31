@@ -60,6 +60,7 @@ class Monitor:
         self.debug = debug
         self.povo = povo
         self.enabled = True
+        self.control_type = control_type
         self.violations = []
         self.audits = []
         self.violation_formula = violation_formula
@@ -338,10 +339,12 @@ class Sysmon:
         Sysmon.fx_monitors.append(mon)
 
     @staticmethod
-    def add_http_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None):
+    def add_http_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
+                      control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding http rule %s" % name)
         mon = Mon_http(name=name, target="HTTP", location="LOCAL", kind=Monitor.MonType.HTTP, formula=formula,
-                    description=description, debug=False, povo=True, violation_formula=violation_formula, liveness=liveness)
+                     description=description, debug=False, povo=True, violation_formula=violation_formula,
+                     liveness=liveness, control_type=control_type)
         Sysmon.http_monitors.append(mon)
 
     @staticmethod

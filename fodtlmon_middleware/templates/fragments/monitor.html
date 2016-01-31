@@ -47,6 +47,15 @@
                   <td>{{ monitor.kind }}</td>
                 </tr>
                 <tr>
+                  <td class="mon_details_row_name"> Control type </td>
+                  <td>{{ monitor.control_type.name }}
+                    <button type="button" class="btn btn-primary btn-xs" title="Trigger remediation" onclick="">
+                        Switch to
+                        {% if monitor.control_type.name == "POSTERIORI" %} Real time {% else %} Posteriori {% endif %}
+                    </button>
+                  </td>
+                </tr>
+                <tr>
                   <td class="mon_details_row_name"> Formula </td>
                   <td>{{ monitor.formula }}</td>
                 </tr>
