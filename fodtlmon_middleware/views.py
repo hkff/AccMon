@@ -59,7 +59,8 @@ def show_stats(request):
 def show_config(request):
     args = {"log_http_attributes": Sysmon.log_http_attributes,
             "log_view_attributes": Sysmon.log_view_attributes,
-            "log_response_attributes": Sysmon.log_response_attributes}
+            "log_response_attributes": Sysmon.log_response_attributes,
+            "blackbox_controls": Sysmon.blackbox_controls}
     return render(request, 'pages/config.html', args)
 
 

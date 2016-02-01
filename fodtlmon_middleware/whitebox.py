@@ -314,6 +314,7 @@ class Sysmon:
     main_view_mon.KV = kv_implementation()
     main_response_mon.KV = kv_implementation()
     actors = []
+    blackbox_controls = Blackbox.controls
 
     class LogAttributes:
         """

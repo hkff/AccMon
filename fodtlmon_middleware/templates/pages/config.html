@@ -15,7 +15,7 @@
                     <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"> Blackbox configuration </a>
                 </h4>
             </div>
-            <div id="collapseOne" class="panel-collapse collapse">
+            <div id="collapseOne" class="panel-collapse collapse in">
                 <div class="panel-body">
                     <p> <b style="color:red;">Warning :</b> Enable this only if you run an untrusted code ! </p>
                 </div>
@@ -25,13 +25,25 @@
                           <tr>
                             <th>Control type</th>
                             <th>Status</th>
+                            <th>Description</th>
                           </tr>
                         </thead>
                         <tbody>
-                         {% for rule in log_http_attributes %}
+                         {% for control in blackbox_controls %}
                           <tr>
-                            <td> {{ rule.name }} </td>
-                            <td> {{ rule.description }} </td>
+                            <td> {{ control.name }} </td>
+                            <td>
+                               {% if control.enabled %}
+                                <span class="label label-success" style="font-size: 100%;">
+                                    <input type="checkbox" checked onchange=""> ON
+                                </span>
+                                {% else %}
+                                <span class="label label-danger" style="font-size: 100%;">
+                                    <input type="checkbox" onchange=""> OFF
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td> {{ control.description }} </td>
                           </tr>
                          {% endfor %}
                         </tbody>

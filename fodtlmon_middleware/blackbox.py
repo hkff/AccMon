@@ -15,6 +15,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+from enum import Enum
+
 from pycallgraph import PyCallGraph
 from pycallgraph.output import Output, GraphvizOutput
 
@@ -73,6 +75,29 @@ class CallTracer:
         return wrapped
 
 
+########################################################
+# Blackbox / Controls
+########################################################
+
+class Control:
+    def __init__(self):
+        self.name = self.__class__.__name__
+        self.enabled = False
+
+    def enable(self):
+        pass
+
+    def run(self):
+        pass
+
+
+class CALL_GRAPH(Control):
+    pass
+
 
 class Blackbox:
-    controls = []
+    """
+    Blackbox class that contains all available controls
+    """
+    controls = [CALL_GRAPH()]
+
