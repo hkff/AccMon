@@ -65,7 +65,7 @@ class FodtlmonMiddleware(object):
             return  # Log it may be usefull for audits
 
         # pushing the event
-        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_http_attributes), step=now))
+        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_http_attributes), step=now), Monitor.MonType.HTTP)
 
         # Trigger monitors
         if self.monitor(Sysmon.http_monitors) > 0:
@@ -91,8 +91,8 @@ class FodtlmonMiddleware(object):
         #     return  # Log it may be usefull for audits
 
         # pushing the event
-        # Sysmon.push_event(Event(self.log_events(request, Sysmon.log_view_attributes, view=view,
-        #                                         args=args, kwargs=kwargs), step=now))
+        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_view_attributes, view=view,
+                                                args=args, kwargs=kwargs), step=now), Monitor.MonType.VIEW)
 
         # Trigger monitors
         # if self.monitor(Sysmon.views_monitors) > 0:
@@ -114,7 +114,8 @@ class FodtlmonMiddleware(object):
         #     return  # Log it may be usefull for audits
 
         # pushing the event
-        # Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes, response=response), step=now))
+        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes, response=response),
+                                step=now), Monitor.MonType.RESPONSE)
 
         # Trigger monitors
         # if self.monitor(Sysmon.response_monitors) > 0:

@@ -33,8 +33,8 @@ class Monitor:
         REAL_TIME = 1
 
     def __init__(self, name="", description="", target=None, location="LOCAL", kind=None,
-                 control_type=MonControlType.POSTERIORI,
-                 formula=None, debug=False, povo=True, violation_formula=None, liveness=None):
+                 control_type=MonControlType.POSTERIORI, formula=None, debug=False, povo=True, violation_formula=None,
+                 liveness=None, mon_trace=None):
         """
         Init method
         :param name: The name of the monitor (for now the name is also the id)
@@ -56,7 +56,7 @@ class Monitor:
         self.description = description
         self.kind = Monitor.MonType.GENERIC if kind is None else kind  # DO NOT use default value for karg
         self.formula = formula
-        self.mon = Fodtlmon(self.formula, Sysmon.main_mon.trace)
+        self.mon = Fodtlmon(self.formula, mon_trace)
         self.debug = debug
         self.povo = povo
         self.enabled = True
@@ -143,7 +143,8 @@ class Monitor:
                           description="Remediation monitor for monitor %s" % self.name,
                           debug=False,
                           povo=True,
-                          violation_formula=None)
+                          violation_formula=None,
+                          mon_trace=self.target)
 
             # IMPORTANT : stat remediation monitoring after the violation occurs
             mon.mon.counter = int(v.step)
@@ -280,8 +281,12 @@ class Sysmon:
     views_monitors = []
     response_monitors = []
     main_mon = Fodtlmon("true", Trace())
+    main_view_mon = Fodtlmon("true", Trace())
+    main_response_mon = Fodtlmon("true", Trace())
     kv_implementation = KVector
     main_mon.KV = kv_implementation()
+    main_view_mon.KV = kv_implementation()
+    main_response_mon.KV = kv_implementation()
     actors = []
 
     class LogAttributes:
@@ -360,7 +365,7 @@ class Sysmon:
                       control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding http rule %s" % name)
         mon = Mon_http(name=name, target=Monitor.MonType.HTTP, location="LOCAL", kind=Monitor.MonType.HTTP,
-                       formula=formula, description=description, debug=False, povo=True,
+                       formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_mon.trace,
                        violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.http_monitors.append(mon)
 
@@ -369,7 +374,7 @@ class Sysmon:
                       control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding view rule %s" % name)
         mon = Mon_http(name=name, target=Monitor.MonType.VIEW, location="LOCAL", kind=Monitor.MonType.HTTP,
-                       formula=formula, description=description, debug=False, povo=True,
+                       formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_view_mon.trace,
                        violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.views_monitors.append(mon)
 
@@ -378,14 +383,19 @@ class Sysmon:
                       control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding response rule %s" % name)
         mon = Mon_http(name=name, target=Monitor.MonType.RESPONSE, location="LOCAL", kind=Monitor.MonType.HTTP,
-                       formula=formula, description=description, debug=False, povo=True,
+                       formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_response_mon.trace,
                        violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.response_monitors.append(mon)
 
     @staticmethod
-    def push_event(e: Event):
+    def push_event(e: Event, traget: Monitor.MonType):
         # Push the event to the main mon
-        Sysmon.main_mon.trace.push_event(e)
+        if traget is Monitor.MonType.HTTP:
+            Sysmon.main_mon.trace.push_event(e)
+        elif traget is Monitor.MonType.VIEW:
+            Sysmon.main_view_mon.trace.push_event(e)
+        elif traget is Monitor.MonType.RESPONSE:
+            Sysmon.main_response_mon.trace.push_event(e)
         # Store the event into the db
         pass
 

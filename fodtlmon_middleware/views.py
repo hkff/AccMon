@@ -78,8 +78,10 @@ def show_mon_violations(request, mon_id):
     return render(request, 'pages/violations.html', {"monitor": m})
 
 
-def show_http_trace(request):
-    return render(request, 'pages/full_http_trace.html', {"trace": Sysmon.main_mon.trace})
+def show_traces(request):
+    args = {"http_trace": Sysmon.main_mon.trace, "view_trace": Sysmon.main_view_mon.trace,
+            "response_trace": Sysmon.main_response_mon.trace}
+    return render(request, 'pages/traces.html', args)
 
 
 def change_mon_status(request, mon_id):
