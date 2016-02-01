@@ -1,9 +1,27 @@
+"""
+Whitebox
+Copyright (C) 2016 Walid Benghabrit
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
 import inspect
 import sys
 from fodtlmon.fodtl.fodtlmon import *
 from enum import Enum
 from datetime import datetime
 import time
+from fodtlmon_middleware.blackbox import *
 from fodtlmon_middleware.models import *
 import socket
 
@@ -33,8 +51,8 @@ class Monitor:
         REAL_TIME = 1
 
     def __init__(self, name="", description="", target=None, location="LOCAL", kind=None,
-                 control_type=MonControlType.POSTERIORI,
-                 formula=None, debug=False, povo=True, violation_formula=None, liveness=None):
+                 control_type=MonControlType.POSTERIORI, formula=None, debug=False, povo=True, violation_formula=None,
+                 liveness=None, mon_trace=None):
         """
         Init method
         :param name: The name of the monitor (for now the name is also the id)
@@ -56,7 +74,7 @@ class Monitor:
         self.description = description
         self.kind = Monitor.MonType.GENERIC if kind is None else kind  # DO NOT use default value for karg
         self.formula = formula
-        self.mon = Fodtlmon(self.formula, Sysmon.main_mon.trace)
+        self.mon = Fodtlmon(self.formula, mon_trace)
         self.debug = debug
         self.povo = povo
         self.enabled = True
@@ -143,7 +161,8 @@ class Monitor:
                           description="Remediation monitor for monitor %s" % self.name,
                           debug=False,
                           povo=True,
-                          violation_formula=None)
+                          violation_formula=None,
+                          mon_trace=self.target)
 
             # IMPORTANT : stat remediation monitoring after the violation occurs
             mon.mon.counter = int(v.step)
@@ -159,6 +178,14 @@ class Monitor:
 
 
 class Mon_http(Monitor):
+    pass
+
+
+class Mon_view(Monitor):
+    pass
+
+
+class Mon_reponse(Monitor):
     pass
 
 
@@ -280,9 +307,14 @@ class Sysmon:
     views_monitors = []
     response_monitors = []
     main_mon = Fodtlmon("true", Trace())
+    main_view_mon = Fodtlmon("true", Trace())
+    main_response_mon = Fodtlmon("true", Trace())
     kv_implementation = KVector
     main_mon.KV = kv_implementation()
+    main_view_mon.KV = kv_implementation()
+    main_response_mon.KV = kv_implementation()
     actors = []
+    blackbox_controls = Blackbox.controls
 
     class LogAttributes:
         """
@@ -360,7 +392,7 @@ class Sysmon:
                       control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding http rule %s" % name)
         mon = Mon_http(name=name, target=Monitor.MonType.HTTP, location="LOCAL", kind=Monitor.MonType.HTTP,
-                       formula=formula, description=description, debug=False, povo=True,
+                       formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_mon.trace,
                        violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.http_monitors.append(mon)
 
@@ -368,8 +400,8 @@ class Sysmon:
     def add_view_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
                       control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding view rule %s" % name)
-        mon = Mon_http(name=name, target=Monitor.MonType.VIEW, location="LOCAL", kind=Monitor.MonType.HTTP,
-                       formula=formula, description=description, debug=False, povo=True,
+        mon = Mon_view(name=name, target=Monitor.MonType.VIEW, location="LOCAL", kind=Monitor.MonType.HTTP,
+                       formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_view_mon.trace,
                        violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.views_monitors.append(mon)
 
@@ -377,15 +409,20 @@ class Sysmon:
     def add_response_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
                       control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding response rule %s" % name)
-        mon = Mon_http(name=name, target=Monitor.MonType.RESPONSE, location="LOCAL", kind=Monitor.MonType.HTTP,
-                       formula=formula, description=description, debug=False, povo=True,
+        mon = Mon_reponse(name=name, target=Monitor.MonType.RESPONSE, location="LOCAL", kind=Monitor.MonType.HTTP,
+                       formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_response_mon.trace,
                        violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.response_monitors.append(mon)
 
     @staticmethod
-    def push_event(e: Event):
+    def push_event(e: Event, traget: Monitor.MonType):
         # Push the event to the main mon
-        Sysmon.main_mon.trace.push_event(e)
+        if traget is Monitor.MonType.HTTP:
+            Sysmon.main_mon.trace.push_event(e)
+        elif traget is Monitor.MonType.VIEW:
+            Sysmon.main_view_mon.trace.push_event(e)
+        elif traget is Monitor.MonType.RESPONSE:
+            Sysmon.main_response_mon.trace.push_event(e)
         # Store the event into the db
         pass
 
@@ -412,6 +449,10 @@ class Sysmon:
     @staticmethod
     def get_actor_by_name(name):
         return next(filter(lambda x: x.name == name, Sysmon.actors), None)
+
+    @staticmethod
+    def get_blackbox_control_by_name(name):
+        return next(filter(lambda x: x.name == name, Sysmon.blackbox_controls), None)
 
     @staticmethod
     def add_log_attribute(attr: LogAttribute, target=Monitor.MonType.HTTP):

@@ -59,7 +59,8 @@ def show_stats(request):
 def show_config(request):
     args = {"log_http_attributes": Sysmon.log_http_attributes,
             "log_view_attributes": Sysmon.log_view_attributes,
-            "log_response_attributes": Sysmon.log_response_attributes}
+            "log_response_attributes": Sysmon.log_response_attributes,
+            "blackbox_controls": Sysmon.blackbox_controls}
     return render(request, 'pages/config.html', args)
 
 
@@ -78,8 +79,15 @@ def show_mon_violations(request, mon_id):
     return render(request, 'pages/violations.html', {"monitor": m})
 
 
-def show_http_trace(request):
-    return render(request, 'pages/full_http_trace.html', {"trace": Sysmon.main_mon.trace})
+def show_traces(request):
+    args = {"http_trace": Sysmon.main_mon.trace, "view_trace": Sysmon.main_view_mon.trace,
+            "response_trace": Sysmon.main_response_mon.trace}
+    return render(request, 'pages/traces.html', args)
+
+
+def show_control_details(request, control_name):
+    control = Sysmon.get_blackbox_control_by_name(control_name)
+    return render(request, 'pages/control.html', {"control": control})
 
 
 def change_mon_status(request, mon_id):
@@ -144,6 +152,21 @@ def update_log_rule(request):
     return HttpResponse("KO")
 
 
+def update_control_status(request):
+    if request.method == "POST":
+        status = request.POST.get('status', None)
+        control_name = request.POST.get('control_name', None)
+        if (status and control_name) is not None:
+            control = Sysmon.get_blackbox_control_by_name(control_name)
+            if control is not None:
+                if status == "ON":
+                    control.enabled = True
+                elif status == "OFF":
+                    control.enabled = False
+                return HttpResponse("Control updated !")
+    return HttpResponse("KO")
+
+
 ##########################
 # Sysmon API
 ##########################
@@ -151,7 +174,7 @@ def api_get_monitors_updates(request):
     res = {}
     mons = Sysmon.get_mons()
     for m in mons:
-        res["%s_status" % m.id] = '<span class="label label-info">Running...</span>'  if m.enabled \
+        res["%s_status" % m.id] = '<span class="label label-info">Running...</span>' if m.enabled \
             else '<span class="label label-default ">Stopped</span>'
 
         if m.mon.last == Boolean3.Unknown:

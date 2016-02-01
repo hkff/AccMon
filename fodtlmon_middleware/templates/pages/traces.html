@@ -1,0 +1,85 @@
+{% extends "pages/main.html" %}
+{% load staticfiles %}
+{% block title %} Full traces {% endblock %}
+
+{% block container %}
+
+<div>
+    <div class="panel-group" id="accordion">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"> Full HTTP trace </a>
+                </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p> Events logged when an HTTP request is received by the server.</p>
+                </div>
+                <table class="table">
+                    <tbody>
+                    {% for t in http_trace.events %}
+                        <tr>
+                            <td> {{ forloop.counter }}</td>
+                            <td class="col-md-2"> {{ t.step }}</td>
+                            <td> {{ t }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo"> Full View trace </a>
+                </h4>
+            </div>
+            <div id="collapseTwo" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p> Events logged when a view is being processed by the server.</p>
+                </div>
+                <table class="table">
+                    <tbody>
+                    {% for t in view_trace.events %}
+                        <tr>
+                            <td> {{ forloop.counter }}</td>
+                            <td class="col-md-2"> {{ t.step }}</td>
+                            <td> {{ t }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree"> Full Response trace </a>
+                </h4>
+            </div>
+            <div id="collapseThree" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p> Events logged when a response is emitted from the server.</p>
+                </div>
+                <table class="table">
+                    <tbody>
+                    {% for t in response_trace.events %}
+                        <tr>
+                            <td> {{ forloop.counter }}</td>
+                            <td class="col-md-2"> {{ t.step }}</td>
+                            <td> {{ t }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+	<p><strong>Note:</strong> Click on the linked heading text to expand or collapse panels.</p>
+</div>
+
+<a href="javascript: history.go(-1)">Back</a>
+
+{% endblock %}
+

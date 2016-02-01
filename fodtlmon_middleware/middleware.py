@@ -65,12 +65,11 @@ class FodtlmonMiddleware(object):
             return  # Log it may be usefull for audits
 
         # pushing the event
-        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_http_attributes), step=now))
+        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_http_attributes), step=now), Monitor.MonType.HTTP)
 
         # Trigger monitors
         if self.monitor(Sysmon.http_monitors) > 0:
             return render(request, "pages/access_denied.html")
-
 
     ############################################
     # 2. Processing a view after a request
@@ -87,12 +86,16 @@ class FodtlmonMiddleware(object):
         print("%s %s %s %s" % (request, view.__name__, args, kwargs))
         now = datetime.now()
 
-        if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
-            return  # Log it may be usefull for audits
+        # Processing blackbox controls
+        for control in Sysmon.blackbox_controls:
+            control.run(request, view, args, kwargs)
+
+        # if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
+        #     return  # Log it may be usefull for audits
 
         # pushing the event
         Sysmon.push_event(Event(self.log_events(request, Sysmon.log_view_attributes, view=view,
-                                                args=args, kwargs=kwargs), step=now))
+                                                args=args, kwargs=kwargs), step=now), Monitor.MonType.VIEW)
 
         # Trigger monitors
         if self.monitor(Sysmon.views_monitors) > 0:
@@ -110,11 +113,12 @@ class FodtlmonMiddleware(object):
         """
         now = datetime.now()
 
-        if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
-            return  # Log it may be usefull for audits
+        # if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
+        #     return  # Log it may be usefull for audits
 
         # pushing the event
-        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes, response=response), step=now))
+        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes, response=response),
+                                step=now), Monitor.MonType.RESPONSE)
 
         # Trigger monitors
         if self.monitor(Sysmon.response_monitors) > 0:

@@ -29,11 +29,13 @@ urlpatterns = [
     url(r'^sysmon/monitors/mon_violations/(?P<mon_id>.*)/$', views.show_mon_violations, name="monitor_violations"),
     url(r'^sysmon/monitors/mon_audits/(?P<mon_id>.*)/violation_audit/(?P<violation_id>.*)/$', views.mon_violation_audit,
         name="monitor_violation_audit"),
-    url(r'^sysmon/http_trace/$', views.show_http_trace, name="http_trace"),
+    url(r'^sysmon/traces/$', views.show_traces, name="traces"),
     url(r'^sysmon/monitors/(?P<mon_id>.*)/$', views.change_mon_status, name="mon_change_status"),
     url(r'^sysmon/actors/$', views.show_actors, name="actors"),
     url(r'^sysmon/actors/actor_details/(?P<actor_name>.*)/$', views.show_actor_details, name="actor_details"),
     url(r'^sysmon/config/update_log_rule/$', views.update_log_rule, name='update_log_rule'),
+    url(r'^sysmon/config/update_control_status/$', views.update_control_status, name='update_control_status'),
+    url(r'^sysmon/config/control/(?P<control_name>.*)/$', views.show_control_details, name="control_details"),
 
     # Sysmon API #
     url(r'^sysmon/api/get_mons_updates/$', views.api_get_monitors_updates, name='get_mons_updates'),

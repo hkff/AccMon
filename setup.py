@@ -30,5 +30,9 @@ setup(
     license='GPL3',
     author='Walid Benghabrit',
     author_email='Walid.Benghabrit@mines-nantes.fr',
-    description='FODTLMON-middleware is a monitoring middleware for django.'
+    description='FODTLMON-middleware is a monitoring middleware for django.',
+    install_requires=[
+        'fodtlmon>=1.0',
+        'pycallgraph>=1.0'
+    ]
 )
