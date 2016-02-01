@@ -1,9 +1,27 @@
+"""
+Whitebox
+Copyright (C) 2016 Walid Benghabrit
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
 import inspect
 import sys
 from fodtlmon.fodtl.fodtlmon import *
 from enum import Enum
 from datetime import datetime
 import time
+from fodtlmon_middleware.blackbox import *
 from fodtlmon_middleware.models import *
 import socket
 
@@ -160,6 +178,14 @@ class Monitor:
 
 
 class Mon_http(Monitor):
+    pass
+
+
+class Mon_view(Monitor):
+    pass
+
+
+class Mon_reponse(Monitor):
     pass
 
 
@@ -373,7 +399,7 @@ class Sysmon:
     def add_view_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
                       control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding view rule %s" % name)
-        mon = Mon_http(name=name, target=Monitor.MonType.VIEW, location="LOCAL", kind=Monitor.MonType.HTTP,
+        mon = Mon_view(name=name, target=Monitor.MonType.VIEW, location="LOCAL", kind=Monitor.MonType.HTTP,
                        formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_view_mon.trace,
                        violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.views_monitors.append(mon)
@@ -382,7 +408,7 @@ class Sysmon:
     def add_response_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
                       control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding response rule %s" % name)
-        mon = Mon_http(name=name, target=Monitor.MonType.RESPONSE, location="LOCAL", kind=Monitor.MonType.HTTP,
+        mon = Mon_reponse(name=name, target=Monitor.MonType.RESPONSE, location="LOCAL", kind=Monitor.MonType.HTTP,
                        formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_response_mon.trace,
                        violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.response_monitors.append(mon)
