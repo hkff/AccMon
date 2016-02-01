@@ -451,6 +451,10 @@ class Sysmon:
         return next(filter(lambda x: x.name == name, Sysmon.actors), None)
 
     @staticmethod
+    def get_blackbox_control_by_name(name):
+        return next(filter(lambda x: x.name == name, Sysmon.blackbox_controls), None)
+
+    @staticmethod
     def add_log_attribute(attr: LogAttribute, target=Monitor.MonType.HTTP):
         setattr(Sysmon.LogAttributes, attr.name, attr)
         if target is Monitor.MonType.HTTP:

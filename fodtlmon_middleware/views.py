@@ -147,6 +147,21 @@ def update_log_rule(request):
     return HttpResponse("KO")
 
 
+def update_control_status(request):
+    if request.method == "POST":
+        status = request.POST.get('status', None)
+        control_name = request.POST.get('control_name', None)
+        if (status and control_name) is not None:
+            control = Sysmon.get_blackbox_control_by_name(control_name)
+            if control is not None:
+                if status == "ON":
+                    control.enabled = True
+                elif status == "OFF":
+                    control.enabled = False
+                return HttpResponse("Control updated !")
+    return HttpResponse("KO")
+
+
 ##########################
 # Sysmon API
 ##########################

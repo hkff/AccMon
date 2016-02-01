@@ -87,12 +87,15 @@ class Control:
     def enable(self):
         pass
 
-    def run(self):
+    def run(self, request, view, args, kwargs):
         pass
 
 
 class CALL_GRAPH(Control):
-    pass
+
+    def run(self, request, view, args, kwargs):
+        if self.enabled:
+            print("analysing view  %s " % view)
 
 
 class Blackbox:

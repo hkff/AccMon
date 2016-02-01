@@ -86,6 +86,10 @@ class FodtlmonMiddleware(object):
         print("%s %s %s %s" % (request, view.__name__, args, kwargs))
         now = datetime.now()
 
+        # Processing blackbox controls
+        for control in Sysmon.blackbox_controls:
+            control.run(request, view, args, kwargs)
+
         # if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
         #     return  # Log it may be usefull for audits
 

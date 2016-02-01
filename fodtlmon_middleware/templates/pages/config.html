@@ -35,11 +35,11 @@
                             <td>
                                {% if control.enabled %}
                                 <span class="label label-success" style="font-size: 100%;">
-                                    <input type="checkbox" checked onchange=""> ON
+                                    <input type="checkbox" checked onchange="update_control('{{ control.name }}', 'OFF')"> ON
                                 </span>
                                 {% else %}
                                 <span class="label label-danger" style="font-size: 100%;">
-                                    <input type="checkbox" onchange=""> OFF
+                                    <input type="checkbox" onchange="update_control('{{ control.name }}', 'ON')"> OFF
                                 </span>
                                 {% endif %}
                             </td>
@@ -191,6 +191,21 @@
             data: {
                 rule_name: name,
                 kind: kind,
+                status: status
+            },
+            success: function(response){
+                location.reload();
+            }
+        });
+    }
+
+    function update_control(name, status) {
+        $.ajax({
+            dataType: 'text',
+            type:'POST',
+            url: '{% url 'update_control_status' %}',
+            data: {
+                control_name: name,
                 status: status
             },
             success: function(response){
