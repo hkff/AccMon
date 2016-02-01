@@ -151,7 +151,7 @@ def api_get_monitors_updates(request):
     res = {}
     mons = Sysmon.get_mons()
     for m in mons:
-        res["%s_status" % m.id] = '<span class="label label-info">Running...</span>'  if m.enabled \
+        res["%s_status" % m.id] = '<span class="label label-info">Running...</span>' if m.enabled \
             else '<span class="label label-default ">Stopped</span>'
 
         if m.mon.last == Boolean3.Unknown:
