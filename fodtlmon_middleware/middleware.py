@@ -71,7 +71,6 @@ class FodtlmonMiddleware(object):
         if self.monitor(Sysmon.http_monitors) > 0:
             return render(request, "pages/access_denied.html")
 
-
     ############################################
     # 2. Processing a view after a request
     ############################################
@@ -95,8 +94,8 @@ class FodtlmonMiddleware(object):
                                                 args=args, kwargs=kwargs), step=now), Monitor.MonType.VIEW)
 
         # Trigger monitors
-        # if self.monitor(Sysmon.views_monitors) > 0:
-        #     return render(request, "pages/access_denied.html")
+        if self.monitor(Sysmon.views_monitors) > 0:
+            return render(request, "pages/access_denied.html")
 
     ############################################
     # 3. Processing an HTTP response
@@ -118,8 +117,8 @@ class FodtlmonMiddleware(object):
                                 step=now), Monitor.MonType.RESPONSE)
 
         # Trigger monitors
-        # if self.monitor(Sysmon.response_monitors) > 0:
-        #     return render(request, "pages/access_denied.html")
+        if self.monitor(Sysmon.response_monitors) > 0:
+            return render(request, "pages/access_denied.html")
 
         # Update KV TODO filter
         response["KV"] = Sysmon.main_mon.KV
