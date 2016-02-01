@@ -1,0 +1,32 @@
+{% extends "pages/main.html" %}
+{% load staticfiles %}
+{% block title %} Violations {% endblock %}
+
+{% block container %}
+
+<h2>Control : {{ control.name }}</h2>
+<a href="javascript: history.go(-1)">Back</a>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>Time</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+         {% for entry in control.entries %}
+          <tr>
+            <td>{{ entry.id }}</td>
+            <td>{{ entry.timestamp }}</td>
+            <td>{{ v.comment }}</td>
+          </tr>
+         {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+

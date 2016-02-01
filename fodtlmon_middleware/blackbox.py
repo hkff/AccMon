@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+from datetime import datetime
 from enum import Enum
 
 from pycallgraph import PyCallGraph
@@ -80,9 +81,14 @@ class CallTracer:
 ########################################################
 
 class Control:
+    class Entry:
+        def __init__(self, timestamp=None):
+            self.timestamp = datetime.now() if timestamp is None else timestamp
+
     def __init__(self):
         self.name = self.__class__.__name__
         self.enabled = False
+        self.entries = []
 
     def enable(self):
         pass
@@ -96,11 +102,19 @@ class CALL_GRAPH(Control):
     def run(self, request, view, args, kwargs):
         if self.enabled:
             print("analysing view  %s " % view)
+            self.entries.append(Control.Entry())
+
+
+class IO_OP(Control):
+
+    def run(self, request, view, args, kwargs):
+        if self.enabled:
+            print("analysing view  %s " % view)
 
 
 class Blackbox:
     """
     Blackbox class that contains all available controls
     """
-    controls = [CALL_GRAPH()]
+    controls = [CALL_GRAPH(), IO_OP()]
 

@@ -85,6 +85,11 @@ def show_traces(request):
     return render(request, 'pages/traces.html', args)
 
 
+def show_control_details(request, control_name):
+    control = Sysmon.get_blackbox_control_by_name(control_name)
+    return render(request, 'pages/control.html', {"control": control})
+
+
 def change_mon_status(request, mon_id):
     if request.method == "POST":
         m = Sysmon.get_mon_by_id(mon_id)

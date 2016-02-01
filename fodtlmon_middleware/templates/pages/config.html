@@ -17,7 +17,7 @@
             </div>
             <div id="collapseOne" class="panel-collapse collapse in">
                 <div class="panel-body">
-                    <p> <b style="color:red;">Warning :</b> Enable this only if you run an untrusted code ! </p>
+                    <p> <b style="color:red;">Warning :</b> Enable this only if you run an untrusted code/agent due to the overhead ! </p>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-striped">
@@ -31,7 +31,7 @@
                         <tbody>
                          {% for control in blackbox_controls %}
                           <tr>
-                            <td> {{ control.name }} </td>
+                            <td> <a href="{% url 'control_details' control.name %}"> {{ control.name }} </a> </td>
                             <td>
                                {% if control.enabled %}
                                 <span class="label label-success" style="font-size: 100%;">
