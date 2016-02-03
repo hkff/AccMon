@@ -26,6 +26,7 @@
                             <th>Control type</th>
                             <th>Status</th>
                             <th>Description</th>
+                            <th>Severity</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -44,6 +45,7 @@
                                 {% endif %}
                             </td>
                             <td> {{ control.description }} </td>
+                            <td> {{ control.severity.name }} </td>
                           </tr>
                          {% endfor %}
                         </tbody>

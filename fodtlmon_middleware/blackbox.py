@@ -17,104 +17,151 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from datetime import datetime
 from enum import Enum
-
-from pycallgraph import PyCallGraph
-from pycallgraph.output import Output, GraphvizOutput
-
-
-class GraphCallOutput(Output):
-
-    def __init__(self, **kwargs):
-        Output.__init__(self, **kwargs)
-
-    def sanity_check(self):
-        return True
-
-    def done(self):
-        # source = self.generate()
-        # self.debug(source)
-        for edge in self.processor.edges():
-            print("edge %s " % edge.name)
-
-        for node in self.processor.nodes():
-            print("Node %s " % node.name)
-
-        for edge in self.processor.groups():
-            print(edge)
-
-
-class CallTracer:
-    """
-    Function/method decorator
-    """
-    def __init__(self):
-        """
-        If there are decorator arguments, the function
-        to be decorated is not passed to the constructor!
-        """
-        pass
-
-    def __call__(self, f):
-        """
-        If there are decorator arguments, __call__() is only called
-        once, as part of the decoration process! You can only give
-        it a single argument, which is the function object.
-        """
-        def wrapped(*args, **kargs):
-            #########################
-            # Performing the fx call
-            #########################
-            # self.print("=== Before calling %s%s%s" % (f.__name__, args, kargs))
-            graphviz = GraphvizOutput(output_file='filter_none.png')
-            with PyCallGraph(output=graphviz):
-                fx_ret = f(*args, **kargs)
-            # self.print("=== After calling %s%s%s" % (f.__name__, args, kargs))
-
-            # Push event into monitor
-            # self.mon.trace.push_event(Event(predicates))
-            return fx_ret
-        return wrapped
+from django.http import HttpResponse
 
 
 ########################################################
-# Blackbox / Controls
+# Methods calls tracer
 ########################################################
 
+class Stack:
+    """
+    Execution stack
+    """
+    frames = []
+
+    class STACK_EVENTS(Enum):
+        CALL = 0,
+        RETURN = 1
+
+
+    @staticmethod
+    def frame_to_dict(frame):
+        c_back = None if frame.f_back is None else Stack.frame_to_dict(frame.f_back)
+        c_func = frame.f_code.co_name
+        c_file = frame.f_code.co_filename
+        c_lineinfo = frame.f_lineno
+        c_class = frame.f_locals['self'].__class__.__name__ if 'self' in frame.f_locals else ''
+        c_module = frame.f_locals['self'].__class__.__module__ if 'self' in frame.f_locals else ''
+        return {"event": -1, "c_func": c_func, "c_file": c_file, "c_lineinfo": c_lineinfo,
+                "c_class": c_class, "c_c_module": c_module, "parent": c_back}
+
+    @staticmethod
+    def print_stack(file=None):
+        if file is None:
+            for x in Stack.frames:
+                p = '' if x.get("parent") is None else x.get("parent").get("c_func")
+                print("%s %s from %s" % (x.get("event").name, x.get("c_func"), p))
+        else:
+            with open(file, "w+") as f:
+                for x in Stack.frames:
+                    p = '' if x.get("parent") is None else x.get("parent").get("c_func")
+                    f.write("%s %s from %s\n" % (x.get("event").name, x.get("c_func"), p))
+
+    @staticmethod
+    def get_func_call(func_name):
+        return filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") == func_name, Stack.frames)
+
+
+def view_tracer(frame, event, arg):
+    """
+    Python tracer
+    :param frame:
+    :param event:
+    :param arg:
+    :return:
+    """
+    try:
+        # Current frame details
+        c_frame = Stack.frame_to_dict(frame.f_back)
+
+        if event == 'call' or event == 'c_call':
+            c_frame['event'] = Stack.STACK_EVENTS.CALL
+            Stack.frames.append(c_frame)
+            return view_tracer
+
+        elif event == 'return':
+            c_frame['event'] = Stack.STACK_EVENTS.RETURN
+            Stack.frames.append(c_frame)
+    except:
+        print("--------------- Error ---------")
+
+
+########################################################
+# Blackbox
+########################################################
 class Control:
+    """
+    Base control class for blackbox call graph controls
+    """
     class Entry:
-        def __init__(self, timestamp=None):
+        def __init__(self, timestamp=None, view="", details=""):
             self.timestamp = datetime.now() if timestamp is None else timestamp
+            self.view = view
+            self.details = details
 
-    def __init__(self):
+    def __init__(self, enabled=False, severity=None):
         self.name = self.__class__.__name__
-        self.enabled = False
+        self.enabled = enabled
+        self.severity = Blackbox.Severity.UNDEFINED if severity is None else severity
         self.entries = []
+        self.current_view_name = ""
+        self.description = self.__class__.__doc__
 
     def enable(self):
         pass
 
-    def run(self, request, view, args, kwargs):
+    def prepare(self, request, view, args, kwargs):
+        self.current_view_name = view.__name__
+
+    def run(self):
         pass
-
-
-class CALL_GRAPH(Control):
-
-    def run(self, request, view, args, kwargs):
-        if self.enabled:
-            print("analysing view  %s " % view)
-            self.entries.append(Control.Entry())
-
-
-class IO_OP(Control):
-
-    def run(self, request, view, args, kwargs):
-        if self.enabled:
-            print("analysing view  %s " % view)
 
 
 class Blackbox:
     """
     Blackbox class that contains all available controls
     """
-    controls = [CALL_GRAPH(), IO_OP()]
+    class Severity(Enum):
+        UNDEFINED = 0,
+        LOW = 1,
+        MEDIUM = 2,
+        HIGH = 3
 
+    controls = []
+
+
+########################################################
+# Controls
+########################################################
+class VIEWS_INTRACALLS(Control):
+    """
+    A view should not be called from another one.
+    """
+    def run(self):
+        print("analysing view  %s " % self.current_view_name)
+        self.entries.append(Control.Entry(view=self.current_view_name, details=" s => z"))
+        # self.current_view_name = ""
+        # Stack.print_stack()
+        view_call = next(Stack.get_func_call(self.current_view_name), None)
+        print("View called at : %s " % view_call)
+
+
+class IO_OP(Control):
+    """
+    Writing data in disk, may be a data disclosure
+    """
+    def run(self):
+        print("analysing view  %s " % self.current_view_name)
+        self.entries.append(Control.Entry(view=self.current_view_name, details=" s => z"))
+        # self.current_view_name = ""
+        Stack.print_stack(file="tmp2")
+        view_call = next(Stack.get_func_call(self.current_view_name), None)
+        print("View called at : %s " % view_call)
+
+
+# Adding controls to the available controls in the blackbox
+Blackbox.controls = [
+    VIEWS_INTRACALLS(enabled=False, severity=Blackbox.Severity.HIGH),
+    IO_OP(enabled=True, severity=Blackbox.Severity.MEDIUM)
+]
