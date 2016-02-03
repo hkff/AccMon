@@ -81,7 +81,7 @@ class Control:
 
     def __init__(self, enabled=False, severity=None):
         self.name = self.__class__.__name__
-        self.enabled = True
+        self.enabled = enabled
         self.severity = Blackbox.Severity.UNDEFINED if severity is None else severity
         self.entries = []
         self.current_view_name = ""
@@ -133,4 +133,4 @@ class IO_OP(Control):
 
 
 # Adding controls to the available controls in the blackbox
-Blackbox.controls = [VIEWS_INTRACALLS()]
+Blackbox.controls = [VIEWS_INTRACALLS(enabled=True)]
