@@ -20,12 +20,12 @@ from enum import Enum
 from django.http import HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import RegexURLResolver, RegexURLPattern, get_resolver
+import inspect
 
 
 ########################################################
 # Methods calls tracer
 ########################################################
-
 class Stack:
     """
     Execution stack
@@ -145,12 +145,13 @@ class VIEWS_INTRACALLS(Control):
 
     def run(self):
         print("analysing view  %s " % self.current_view_name)
-        self.entries.append(Control.Entry(view=self.current_view_name, details=" s => z"))
-        # self.current_view_name = ""
-        # Stack.print_stack()
         view_call = next(Stack.get_func_call(self.current_view_name), None)
-        print("View called at : %s " % view_call)
-        #print(get_resolver(None).reverse_dict)
+        views = [x.__name__ for x in list(filter(lambda y: inspect.isfunction(y), get_resolver(None).reverse_dict))]
+        r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") in views, Stack.frames))
+        for x in r:
+            if x.get("parent").get("c_func") in views:
+                details = "View %s called from view %s " % (x.get("c_func"), x.get("parent").get("c_func"))
+                self.entries.append(Control.Entry(view=self.current_view_name, details=details))
 
 
 class IO_OP(Control):
@@ -166,7 +167,9 @@ class IO_OP(Control):
         print("View called at : %s " % view_call)
 
 
+#############################################################
 # Adding controls to the available controls in the blackbox
+#############################################################
 Blackbox.controls = [
     VIEWS_INTRACALLS(enabled=True, severity=Blackbox.Severity.HIGH),
     IO_OP(enabled=False, severity=Blackbox.Severity.MEDIUM)
