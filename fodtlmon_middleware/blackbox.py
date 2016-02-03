@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import datetime
 from enum import Enum
 from django.http import HttpResponse
+from django.conf import settings
+from django.core.urlresolvers import RegexURLResolver, RegexURLPattern, get_resolver
 
 
 ########################################################
@@ -148,6 +150,7 @@ class VIEWS_INTRACALLS(Control):
         # Stack.print_stack()
         view_call = next(Stack.get_func_call(self.current_view_name), None)
         print("View called at : %s " % view_call)
+        #print(get_resolver(None).reverse_dict)
 
 
 class IO_OP(Control):
@@ -158,13 +161,13 @@ class IO_OP(Control):
         print("analysing view  %s " % self.current_view_name)
         self.entries.append(Control.Entry(view=self.current_view_name, details=" s => z"))
         # self.current_view_name = ""
-        Stack.print_stack(file="tmp2")
+        #Stack.print_stack(file="tmp2")
         view_call = next(Stack.get_func_call(self.current_view_name), None)
         print("View called at : %s " % view_call)
 
 
 # Adding controls to the available controls in the blackbox
 Blackbox.controls = [
-    VIEWS_INTRACALLS(enabled=False, severity=Blackbox.Severity.HIGH),
-    IO_OP(enabled=True, severity=Blackbox.Severity.MEDIUM)
+    VIEWS_INTRACALLS(enabled=True, severity=Blackbox.Severity.HIGH),
+    IO_OP(enabled=False, severity=Blackbox.Severity.MEDIUM)
 ]
