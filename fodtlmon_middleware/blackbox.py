@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import datetime
 from enum import Enum
 
+from django.http import HttpResponse
 from pycallgraph import PyCallGraph
 from pycallgraph.output import Output, GraphvizOutput
 
@@ -87,7 +88,7 @@ class Control:
 
     def __init__(self):
         self.name = self.__class__.__name__
-        self.enabled = False
+        self.enabled = True
         self.entries = []
 
     def enable(self):
@@ -108,9 +109,7 @@ class CALL_GRAPH(Control):
 class IO_OP(Control):
 
     def run(self, request, view, args, kwargs):
-        if self.enabled:
-            print("analysing view  %s " % view)
-
+        pass
 
 class Blackbox:
     """
