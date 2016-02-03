@@ -24,20 +24,32 @@ from django.http import HttpResponse
 # Methods calls tracer
 ########################################################
 
-# Execution stack
-class STACK_EVENTS(Enum):
-    CALL = 0,
-    RETURN = 1
+class Stack:
+    """
+    Execution stack
+    """
+    frames = []
+
+    class STACK_EVENTS(Enum):
+        CALL = 0,
+        RETURN = 1
 
 
-def frame_to_dict(frame):
-    c_func = frame.f_code.co_name
-    c_file = frame.f_code.co_filename
-    c_lineinfo = frame.f_lineno
-    c_class = frame.f_locals['self'].__class__.__name__ if 'self' in frame.f_locals else ''
-    c_module = frame.f_locals['self'].__class__.__module__ if 'self' in frame.f_locals else ''
-    return {"event": -1, "c_func": c_func, "c_file": c_file, "c_lineinfo": c_lineinfo,
-            "c_class": c_class, "c_c_module": c_module, "parent": None}
+    @staticmethod
+    def frame_to_dict(frame):
+        c_func = frame.f_code.co_name
+        c_file = frame.f_code.co_filename
+        c_lineinfo = frame.f_lineno
+        c_class = frame.f_locals['self'].__class__.__name__ if 'self' in frame.f_locals else ''
+        c_module = frame.f_locals['self'].__class__.__module__ if 'self' in frame.f_locals else ''
+        return {"event": -1, "c_func": c_func, "c_file": c_file, "c_lineinfo": c_lineinfo,
+                "c_class": c_class, "c_c_module": c_module, "parent": None}
+
+    @staticmethod
+    def print_stack():
+        for x in Stack.frames:
+            p = '' if x.get("parent") is None else x.get("parent").get("c_func")
+            print("%s %s %s" % (x.get("event").name, x.get("c_func"), p))
 
 
 def view_tracer(frame, event, arg):
@@ -50,20 +62,20 @@ def view_tracer(frame, event, arg):
     """
     try:
         # Parent frame details
-        p_frame = None if frame.f_back is None else frame_to_dict(frame.f_back)
+        p_frame = None if frame.f_back is None else Stack.frame_to_dict(frame.f_back)
 
         # Current frame details
-        c_frame = frame_to_dict(frame.f_back)
+        c_frame = Stack.frame_to_dict(frame.f_back)
         c_frame['parent'] = p_frame
 
         if event == 'call':
-            c_frame['event'] = STACK_EVENTS.CALL
-            Blackbox.STACK.append(c_frame)
+            c_frame['event'] = Stack.STACK_EVENTS.CALL
+            Stack.frames.append(c_frame)
             return view_tracer
 
         elif event == 'return':
-            c_frame['event'] = STACK_EVENTS.RETURN
-            Blackbox.STACK.append(c_frame)
+            c_frame['event'] = Stack.STACK_EVENTS.RETURN
+            Stack.frames.append(c_frame)
     except:
         print("--------------- Error ---------")
 
@@ -107,13 +119,6 @@ class Blackbox:
         HIGH = 3
 
     controls = []
-    STACK = []
-
-    @staticmethod
-    def print_stack():
-        for x in Blackbox.STACK:
-            p = '' if x.get("parent") is None else x.get("parent").get("c_func")
-            print("%s %s %s" % (x.get("event").name, x.get("c_func"), p))
 
 
 ########################################################
@@ -125,7 +130,7 @@ class VIEWS_INTRACALLS(Control):
         print("analysing view  %s " % self.current_view_name)
         self.entries.append(Control.Entry())
         self.current_view_name = ""
-        # Blackbox.print_stack()
+        # Stack.print_stack()
 
 
 class IO_OP(Control):

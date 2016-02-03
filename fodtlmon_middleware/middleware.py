@@ -55,7 +55,7 @@ class FodtlmonMiddleware(object):
             if control.enabled:
                 control.run()
         # Clean stack
-        Blackbox.STACK.clear()
+        Stack.frames.clear()
 
     ############################################
     # 1. Processing an incoming HTTP request
