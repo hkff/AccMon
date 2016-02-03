@@ -106,9 +106,11 @@ class FodtlmonMiddleware(object):
 
         # Enable sys tracing
         if "sysmon/api/" not in request.path:
-            for control in Sysmon.blackbox_controls:
-                control.prepare(request, view, args, kwargs)
-            sys.settrace(view_tracer)
+            enabled = next(filter(lambda x: x.enabled, Sysmon.blackbox_controls), None)
+            if enabled is not None:
+                for control in Sysmon.blackbox_controls:
+                    control.prepare(request, view, args, kwargs)
+                sys.settrace(view_tracer)
 
     ############################################
     # 3. Processing an HTTP response

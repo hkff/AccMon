@@ -138,6 +138,9 @@ class VIEWS_INTRACALLS(Control):
     """
     A view should not be called from another one.
     """
+    def __init__(self, enabled=False, severity=None):
+        super().__init__(enabled=enabled, severity=severity)
+
     def run(self):
         print("analysing view  %s " % self.current_view_name)
         self.entries.append(Control.Entry(view=self.current_view_name, details=" s => z"))
