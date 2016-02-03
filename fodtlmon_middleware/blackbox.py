@@ -37,19 +37,26 @@ class Stack:
 
     @staticmethod
     def frame_to_dict(frame):
+        c_back = None if frame.f_back is None else Stack.frame_to_dict(frame.f_back)
         c_func = frame.f_code.co_name
         c_file = frame.f_code.co_filename
         c_lineinfo = frame.f_lineno
         c_class = frame.f_locals['self'].__class__.__name__ if 'self' in frame.f_locals else ''
         c_module = frame.f_locals['self'].__class__.__module__ if 'self' in frame.f_locals else ''
         return {"event": -1, "c_func": c_func, "c_file": c_file, "c_lineinfo": c_lineinfo,
-                "c_class": c_class, "c_c_module": c_module, "parent": None}
+                "c_class": c_class, "c_c_module": c_module, "parent": c_back}
 
     @staticmethod
-    def print_stack():
-        for x in Stack.frames:
-            p = '' if x.get("parent") is None else x.get("parent").get("c_func")
-            print("%s %s from %s" % (x.get("event").name, x.get("c_func"), p))
+    def print_stack(file=None):
+        if file is None:
+            for x in Stack.frames:
+                p = '' if x.get("parent") is None else x.get("parent").get("c_func")
+                print("%s %s from %s" % (x.get("event").name, x.get("c_func"), p))
+        else:
+            with open(file, "w+") as f:
+                for x in Stack.frames:
+                    p = '' if x.get("parent") is None else x.get("parent").get("c_func")
+                    f.write("%s %s from %s\n" % (x.get("event").name, x.get("c_func"), p))
 
     @staticmethod
     def get_func_call(func_name):
@@ -65,14 +72,10 @@ def view_tracer(frame, event, arg):
     :return:
     """
     try:
-        # Parent frame details
-        p_frame = None if frame.f_back is None else Stack.frame_to_dict(frame.f_back)
-
         # Current frame details
         c_frame = Stack.frame_to_dict(frame.f_back)
-        c_frame['parent'] = p_frame
 
-        if event == 'call':
+        if event == 'call' or event == 'c_call':
             c_frame['event'] = Stack.STACK_EVENTS.CALL
             Stack.frames.append(c_frame)
             return view_tracer
@@ -103,6 +106,7 @@ class Control:
         self.severity = Blackbox.Severity.UNDEFINED if severity is None else severity
         self.entries = []
         self.current_view_name = ""
+        self.description = self.__class__.__doc__
 
     def enable(self):
         pass
@@ -132,7 +136,7 @@ class Blackbox:
 ########################################################
 class VIEWS_INTRACALLS(Control):
     """
-
+    A view should not be called from another one.
     """
     def run(self):
         print("analysing view  %s " % self.current_view_name)
@@ -143,13 +147,21 @@ class VIEWS_INTRACALLS(Control):
         print("View called at : %s " % view_call)
 
 
-
-
 class IO_OP(Control):
-    pass
+    """
+    Writing data in disk, may be a data disclosure
+    """
+    def run(self):
+        print("analysing view  %s " % self.current_view_name)
+        self.entries.append(Control.Entry(view=self.current_view_name, details=" s => z"))
+        # self.current_view_name = ""
+        Stack.print_stack(file="tmp2")
+        view_call = next(Stack.get_func_call(self.current_view_name), None)
+        print("View called at : %s " % view_call)
 
 
 # Adding controls to the available controls in the blackbox
 Blackbox.controls = [
-    VIEWS_INTRACALLS(enabled=True)
+    VIEWS_INTRACALLS(enabled=False, severity=Blackbox.Severity.HIGH),
+    IO_OP(enabled=True, severity=Blackbox.Severity.MEDIUM)
 ]
