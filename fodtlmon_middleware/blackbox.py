@@ -49,7 +49,11 @@ class Stack:
     def print_stack():
         for x in Stack.frames:
             p = '' if x.get("parent") is None else x.get("parent").get("c_func")
-            print("%s %s %s" % (x.get("event").name, x.get("c_func"), p))
+            print("%s %s from %s" % (x.get("event").name, x.get("c_func"), p))
+
+    @staticmethod
+    def get_func_call(func_name):
+        return filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") == func_name, Stack.frames)
 
 
 def view_tracer(frame, event, arg):
@@ -88,8 +92,10 @@ class Control:
     Base control class for blackbox call graph controls
     """
     class Entry:
-        def __init__(self, timestamp=None):
+        def __init__(self, timestamp=None, view="", details=""):
             self.timestamp = datetime.now() if timestamp is None else timestamp
+            self.view = view
+            self.details = details
 
     def __init__(self, enabled=False, severity=None):
         self.name = self.__class__.__name__
@@ -125,12 +131,18 @@ class Blackbox:
 # Controls
 ########################################################
 class VIEWS_INTRACALLS(Control):
+    """
 
+    """
     def run(self):
         print("analysing view  %s " % self.current_view_name)
-        self.entries.append(Control.Entry())
-        self.current_view_name = ""
+        self.entries.append(Control.Entry(view=self.current_view_name, details=" s => z"))
+        # self.current_view_name = ""
         # Stack.print_stack()
+        view_call = next(Stack.get_func_call(self.current_view_name), None)
+        print("View called at : %s " % view_call)
+
+
 
 
 class IO_OP(Control):
@@ -138,4 +150,6 @@ class IO_OP(Control):
 
 
 # Adding controls to the available controls in the blackbox
-Blackbox.controls = [VIEWS_INTRACALLS(enabled=True)]
+Blackbox.controls = [
+    VIEWS_INTRACALLS(enabled=True)
+]
