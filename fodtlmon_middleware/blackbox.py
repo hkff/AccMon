@@ -17,103 +17,120 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from datetime import datetime
 from enum import Enum
-
 from django.http import HttpResponse
-from pycallgraph import PyCallGraph
-from pycallgraph.output import Output, GraphvizOutput
-
-
-class GraphCallOutput(Output):
-
-    def __init__(self, **kwargs):
-        Output.__init__(self, **kwargs)
-
-    def sanity_check(self):
-        return True
-
-    def done(self):
-        # source = self.generate()
-        # self.debug(source)
-        for edge in self.processor.edges():
-            print("edge %s " % edge.name)
-
-        for node in self.processor.nodes():
-            print("Node %s " % node.name)
-
-        for edge in self.processor.groups():
-            print(edge)
-
-
-class CallTracer:
-    """
-    Function/method decorator
-    """
-    def __init__(self):
-        """
-        If there are decorator arguments, the function
-        to be decorated is not passed to the constructor!
-        """
-        pass
-
-    def __call__(self, f):
-        """
-        If there are decorator arguments, __call__() is only called
-        once, as part of the decoration process! You can only give
-        it a single argument, which is the function object.
-        """
-        def wrapped(*args, **kargs):
-            #########################
-            # Performing the fx call
-            #########################
-            # self.print("=== Before calling %s%s%s" % (f.__name__, args, kargs))
-            graphviz = GraphvizOutput(output_file='filter_none.png')
-            with PyCallGraph(output=graphviz):
-                fx_ret = f(*args, **kargs)
-            # self.print("=== After calling %s%s%s" % (f.__name__, args, kargs))
-
-            # Push event into monitor
-            # self.mon.trace.push_event(Event(predicates))
-            return fx_ret
-        return wrapped
 
 
 ########################################################
-# Blackbox / Controls
+# Methods calls tracer
 ########################################################
 
+# Execution stack
+class STACK_EVENTS(Enum):
+    CALL = 0,
+    RETURN = 1
+
+
+def frame_to_dict(frame):
+    c_func = frame.f_code.co_name
+    c_file = frame.f_code.co_filename
+    c_lineinfo = frame.f_lineno
+    c_class = frame.f_locals['self'].__class__.__name__ if 'self' in frame.f_locals else ''
+    c_module = frame.f_locals['self'].__class__.__module__ if 'self' in frame.f_locals else ''
+    return {"event": -1, "c_func": c_func, "c_file": c_file, "c_lineinfo": c_lineinfo,
+            "c_class": c_class, "c_c_module": c_module, "parent": None}
+
+
+def view_tracer(frame, event, arg):
+    """
+    Python tracer
+    :param frame:
+    :param event:
+    :param arg:
+    :return:
+    """
+    try:
+        # Parent frame details
+        p_frame = None if frame.f_back is None else frame_to_dict(frame.f_back)
+
+        # Current frame details
+        c_frame = frame_to_dict(frame.f_back)
+        c_frame['parent'] = p_frame
+
+        if event == 'call':
+            c_frame['event'] = STACK_EVENTS.CALL
+            Blackbox.STACK.append(c_frame)
+            return view_tracer
+
+        elif event == 'return':
+            c_frame['event'] = STACK_EVENTS.RETURN
+            Blackbox.STACK.append(c_frame)
+    except:
+        print("--------------- Error ---------")
+
+
+########################################################
+# Blackbox
+########################################################
 class Control:
+    """
+    Base control class for blackbox call graph controls
+    """
     class Entry:
         def __init__(self, timestamp=None):
             self.timestamp = datetime.now() if timestamp is None else timestamp
 
-    def __init__(self):
+    def __init__(self, enabled=False, severity=None):
         self.name = self.__class__.__name__
         self.enabled = True
+        self.severity = Blackbox.Severity.UNDEFINED if severity is None else severity
         self.entries = []
+        self.current_view_name = ""
 
     def enable(self):
         pass
 
-    def run(self, request, view, args, kwargs):
+    def prepare(self, request, view, args, kwargs):
+        self.current_view_name = view.__name__
+
+    def run(self):
         pass
 
-
-class CALL_GRAPH(Control):
-
-    def run(self, request, view, args, kwargs):
-        if self.enabled:
-            print("analysing view  %s " % view)
-            self.entries.append(Control.Entry())
-
-
-class IO_OP(Control):
-
-    def run(self, request, view, args, kwargs):
-        pass
 
 class Blackbox:
     """
     Blackbox class that contains all available controls
     """
-    controls = [CALL_GRAPH(), IO_OP()]
+    class Severity(Enum):
+        UNDEFINED = 0,
+        LOW = 1,
+        MEDIUM = 2,
+        HIGH = 3
 
+    controls = []
+    STACK = []
+
+    @staticmethod
+    def print_stack():
+        for x in Blackbox.STACK:
+            p = '' if x.get("parent") is None else x.get("parent").get("c_func")
+            print("%s %s %s" % (x.get("event").name, x.get("c_func"), p))
+
+
+########################################################
+# Controls
+########################################################
+class VIEWS_INTRACALLS(Control):
+
+    def run(self):
+        print("analysing view  %s " % self.current_view_name)
+        self.entries.append(Control.Entry())
+        self.current_view_name = ""
+        # Blackbox.print_stack()
+
+
+class IO_OP(Control):
+    pass
+
+
+# Adding controls to the available controls in the blackbox
+Blackbox.controls = [VIEWS_INTRACALLS()]

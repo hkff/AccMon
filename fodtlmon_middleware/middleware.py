@@ -50,6 +50,13 @@ class FodtlmonMiddleware(object):
                     threading.Thread(target=m.monitor).start()
         return violations
 
+    def run_controls(self):
+        for control in Sysmon.blackbox_controls:
+            if control.enabled:
+                control.run()
+        # Clean stack
+        Blackbox.STACK.clear()
+
     ############################################
     # 1. Processing an incoming HTTP request
     ############################################
@@ -87,8 +94,8 @@ class FodtlmonMiddleware(object):
         now = datetime.now()
 
         # Processing blackbox controls TODO to be done automatically
-        # for control in Sysmon.blackbox_controls:
-        #     control.run(request, view, args, kwargs)
+        for control in Sysmon.blackbox_controls:
+            control.prepare(request, view, args, kwargs)
 
         # if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
         #     return  # Log it may be usefull for audits
@@ -100,6 +107,9 @@ class FodtlmonMiddleware(object):
         # Trigger monitors
         if self.monitor(Sysmon.views_monitors) > 0:
             return render(request, "pages/access_denied.html")
+
+        # Enable sys tracing
+        sys.settrace(view_tracer)
 
     ############################################
     # 3. Processing an HTTP response
@@ -113,8 +123,11 @@ class FodtlmonMiddleware(object):
         """
         now = datetime.now()
 
-        # if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
-        #     return  # Log it may be usefull for audits
+        # Disable sys tracing
+        sys.settrace(None)
+
+        # Processing blackbox controls
+        threading.Thread(target=self.run_controls).start()
 
         # pushing the event
         Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes, response=response),
