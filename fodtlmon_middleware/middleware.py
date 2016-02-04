@@ -52,12 +52,6 @@ class FodtlmonMiddleware(object):
                     threading.Thread(target=m.monitor).start()
         return violations
 
-    def run_controls(self):
-        for control in Blackbox.CONTROLS:
-            if control.enabled:
-                control.run()
-        # Clean stack
-        Stack.frames.clear()
 
     ############################################
     # 1. Processing an incoming HTTP request
@@ -123,7 +117,6 @@ class FodtlmonMiddleware(object):
                 if enabled is not None:
                     for control in Blackbox.CONTROLS:
                         control.prepare(request, view, args, kwargs)
-                    sys.settrace(view_tracer)
 
     ############################################
     # 3. Processing an HTTP response
@@ -138,14 +131,7 @@ class FodtlmonMiddleware(object):
         global TIMER
         now = datetime.now()
 
-        # Disable sys tracing
-        sys.settrace(None)
-
         if "sysmon/api/" not in request.path:
-
-            # Processing blackbox controls
-            if "sysmon/" not in request.path:  # TODO make this condition secure
-                threading.Thread(target=self.run_controls).start()
 
             # pushing the event
             Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes, response=response),

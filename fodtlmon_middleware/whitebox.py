@@ -17,13 +17,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import inspect
 import sys
-
 from django.http.response import HttpResponseBase
 from fodtlmon.fodtl.fodtlmon import *
 from enum import Enum
 from datetime import datetime
 import time
 from fodtlmon_middleware.blackbox import *
+# from django.http import HttpResponse
+from django.conf import settings
+from django.core.urlresolvers import RegexURLResolver, RegexURLPattern, get_resolver
 from fodtlmon_middleware.models import *
 import socket
 import urllib.request
@@ -377,7 +379,7 @@ class Sysmon:
         Blackbox.INSTALLED_APPS = settings.INSTALLED_APPS
         Blackbox.MIDDLEWARE_CLASSES = settings.MIDDLEWARE_CLASSES
         # TODO check if all predicates in formula can be logged
-        # HttpResponseBase.__init__ = HttpResponseBaseIntercepter(HttpResponseBase.__init__)
+        HttpResponseBase.__init__ = HttpResponseBaseIntercepter(HttpResponseBase.__init__)
 
     @staticmethod
     def register_mon(name, formula, target, location, kind, description):

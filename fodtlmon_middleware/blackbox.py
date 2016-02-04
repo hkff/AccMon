@@ -17,88 +17,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from datetime import datetime
 from enum import Enum
-from django.http import HttpResponse
-from django.conf import settings
-from django.core.urlresolvers import RegexURLResolver, RegexURLPattern, get_resolver
 import inspect
-import linecache
 
 
 ########################################################
 # Methods calls tracer
 ########################################################
-class Stack:
-    """
-    Execution stack
-    """
-    frames = []
-
-    class STACK_EVENTS(Enum):
-        CALL = 0,
-        RETURN = 1,
-        LINE = 2
-
-
-    @staticmethod
-    def frame_to_dict(frame):
-        c_back = None if frame.f_back is None else Stack.frame_to_dict(frame.f_back)
-        c_func = frame.f_code.co_name
-        c_file = frame.f_code.co_filename
-        c_lineno = frame.f_lineno
-        c_class = frame.f_locals['self'].__class__.__name__ if 'self' in frame.f_locals else ''
-        c_module = frame.f_locals['self'].__class__.__module__ if 'self' in frame.f_locals else ''
-        return {"event": -1, "c_func": c_func, "c_file": c_file, "c_lineno": c_lineno,
-                "c_class": c_class, "c_module": c_module, "parent": c_back, "line_code": ''}
-
-    @staticmethod
-    def print_stack(file=None):
-        res = "%s\n  Stack length : %s\n  On : %s\n\n" % ("="*40, len(Stack.frames), datetime.now())
-        for x in Stack.frames:
-            p = '' if x.get("parent") is None else x.get("parent").get("c_func")
-            res += "%s %s from %s line : %s\n" % (x.get("event").name, x.get("c_func"), p, x.get("line_code"))
-        if file is None:
-            print(res)
-        else:
-            with open(file, "w+") as f:
-                    f.write(res)
-
-    @staticmethod
-    def get_func_call(func_name):
-        return filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") == func_name, Stack.frames)
-
-
-def view_tracer(frame, event, arg):
-    """
-    Python tracer
-    :param frame:
-    :param event:
-    :param arg:
-    :return:
-    """
-    # TODO consider building ast
-    try:
-        # Current frame details TODO : need to be aggressively optimized
-        c_frame = Stack.frame_to_dict(frame.f_back)
-
-        if event == 'call' or event == 'c_call':
-            c_frame['event'] = Stack.STACK_EVENTS.CALL
-            Stack.frames.append(c_frame)
-            return view_tracer
-
-        elif event == 'return' or event == 'c_return':
-            c_frame['event'] = Stack.STACK_EVENTS.RETURN
-            Stack.frames.append(c_frame)
-        elif event == 'line':
-            line = linecache.getline(c_frame.get("c_file"), int(c_frame.get("c_lineno")))
-            c_frame['event'] = Stack.STACK_EVENTS.LINE
-            c_frame['line_code'] = line.rstrip()
-            Stack.frames.append(c_frame)
-        else:
-            print("---- Strange Event %s line %s " %(event, frame.f_lineno))
-    except:
-        print("--------------- Error -----------")
-
-
 def HttpResponseBaseIntercepter(fn):
     """
     Django base http response decorator
@@ -106,11 +30,21 @@ def HttpResponseBaseIntercepter(fn):
     :return:
     """
     def call_fn(*argv, **kwargs):
-        print("before")
         res = fn(*argv, **kwargs)
-        print("after")
+
+        # Stack inspection
+        stack = inspect.stack()
+        try:
+            # Call the controls
+            for control in Blackbox.CONTROLS:
+                if control.enabled:
+                    control.run(stack)
+        finally:
+            del stack
+
         return res
     return call_fn
+
 
 ########################################################
 # Blackbox
@@ -139,7 +73,7 @@ class Control:
     def prepare(self, request, view, args, kwargs):
         self.current_view_name = view.__name__
 
-    def run(self):
+    def run(self, stack):
         pass
 
 
@@ -170,52 +104,54 @@ class VIEWS_INTRACALLS(Control):
     def __init__(self, enabled=False, severity=None):
         super().__init__(enabled=enabled, severity=severity)
 
-    def run(self):
-        Stack.print_stack(file="tmp3")
-        # view_call = next(Stack.get_func_call(self.current_view_name), None)
-        # views = [x.__name__ for x in list(filter(lambda y: inspect.isfunction(y), get_resolver(None).reverse_dict))]
-        r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") in Blackbox.VIEWS, Stack.frames))
-        for x in r:
-            if x.get("parent").get("c_func") in Blackbox.VIEWS:
-                details = "View %s called from view %s " % (x.get("c_func"), x.get("parent").get("c_func"))
-                self.entries.append(Control.Entry(view=self.current_view_name, details=details))
+    def run(self, stack):
+        calle_views = []
+        for x in stack:
+            if str(x[3]) in Blackbox.VIEWS:
+                calle_views.append(x[3])
+
+        if len(calle_views) > 1:
+            details = "View %s called from view %s " % (calle_views[1], calle_views[0])
+            self.entries.append(Control.Entry(view=self.current_view_name, details=details))
 
 
 class IO_OP(Control):
     """
     Writing data in disk, may be a data disclosure
     """
-
-    # Notes : builts in functions are not logged by sys tracer, need to perform static analysis
-    # or a tricky stack analysis
     # TODO : use regexp instead
     IO_OPS = [' open', ' print']
 
-    def run(self):
+    def run(self, stack):
+        # TODO
         # Stack.print_stack(file="tmp3") # FIXME duplicated entries
-        r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.LINE and x.get("c_func") in Blackbox.VIEWS
-                                  and len([x for z in self.IO_OPS if z in x.get("line_code")]) > 0, Stack.frames))
-        for x in r:
-            details = "at line %s : %s " % (x.get("c_lineno"), x.get("line_code"))
-            self.entries.append(Control.Entry(view=self.current_view_name, details=details))
+        # r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.LINE and x.get("c_func") in Blackbox.VIEWS
+        #                           and len([x for z in self.IO_OPS if z in x.get("line_code")]) > 0, Stack.frames))
+        # for x in r:
+        #     details = "at line %s : %s " % (x.get("c_lineno"), x.get("line_code"))
+        #     self.entries.append(Control.Entry(view=self.current_view_name, details=details))
+        for x in stack:
+            print(x[3])
 
 
 class URL_OPEN(Control):
     """
     Performing external http requests
     """
-    def run(self):
-        r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") == "urlopen", Stack.frames))
-        for x in r:
-            details = "In %s at line %s : %s " % (x.get("c_file"), x.get("c_lineno"), x.get("line_code"))
-            self.entries.append(Control.Entry(view=self.current_view_name, details=details))
+    def run(self, stack):
+        # TODO
+        # r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") == "urlopen", Stack.frames))
+        # for x in r:
+        #     details = "In %s at line %s : %s " % (x.get("c_file"), x.get("c_lineno"), x.get("line_code"))
+        #     self.entries.append(Control.Entry(view=self.current_view_name, details=details))
+        pass
 
 
 #############################################################
 # Adding controls to the available controls in the blackbox
 #############################################################
 Blackbox.CONTROLS = [
-    VIEWS_INTRACALLS(enabled=False, severity=Blackbox.Severity.HIGH),
-    IO_OP(enabled=False, severity=Blackbox.Severity.MEDIUM),
-    URL_OPEN(enabled=False, severity=Blackbox.Severity.HIGH)
+    VIEWS_INTRACALLS(enabled=True, severity=Blackbox.Severity.HIGH),
+    # IO_OP(enabled=False, severity=Blackbox.Severity.MEDIUM),
+    # URL_OPEN(enabled=False, severity=Blackbox.Severity.HIGH)
 ]
