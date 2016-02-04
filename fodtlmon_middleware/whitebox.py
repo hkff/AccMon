@@ -17,6 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import inspect
 import sys
+
+from django.http.response import HttpResponseBase
 from fodtlmon.fodtl.fodtlmon import *
 from enum import Enum
 from datetime import datetime
@@ -369,6 +371,7 @@ class Sysmon:
         Blackbox.VIEWS = [x.__name__ for x in list(filter(lambda y: inspect.isfunction(y), get_resolver(None).reverse_dict))]
         Blackbox.INSTALLED_APPS = settings.INSTALLED_APPS
         # TODO check if all predicates in formula can be logged
+        # HttpResponseBase.__init__ = HttpResponseBaseIntercepter(HttpResponseBase.__init__)
 
     @staticmethod
     def register_mon(name, formula, target, location, kind, description):

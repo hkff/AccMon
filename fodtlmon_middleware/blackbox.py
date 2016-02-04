@@ -99,6 +99,19 @@ def view_tracer(frame, event, arg):
         print("--------------- Error -----------")
 
 
+def HttpResponseBaseIntercepter(fn):
+    """
+    Django base http response decorator
+    :param fn:
+    :return:
+    """
+    def call_fn(*argv, **kwargs):
+        print("before")
+        res = fn(*argv, **kwargs)
+        print("after")
+        return res
+    return call_fn
+
 ########################################################
 # Blackbox
 ########################################################
