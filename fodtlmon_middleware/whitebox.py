@@ -94,13 +94,10 @@ class Monitor:
         Handling remote formulas
         :return:
         """
-        # 1. Create the Knowledge vector
-        # kv = self.kv_implementation()
-
-        # 2. Get all remote formulas
+        # Get all remote formulas
         remotes = self.mon.formula.walk(filter_type=At)
 
-        # 3. Compute formulas hash
+        # Compute formulas hash
         for f in remotes:
             f.compute_hash(sid=self.id)
             Sysmon.main_mon.KV.add_entry(self.kv_implementation.Entry(f.fid, agent=self.name, value=Boolean3.Unknown, timestamp=0))
@@ -110,7 +107,7 @@ class Monitor:
         # IMPORTANT
         self.mon.reset()
 
-        # 4. Add the knowledge vector
+        # Add the knowledge vector
         self.mon.KV = Sysmon.main_mon.KV
 
     def monitor(self):
@@ -138,6 +135,10 @@ class Monitor:
         if self.kind is Monitor.MonType.REMEDIATION and res.get("result") is Boolean3.Top:
             # Disable monitor
             self.enabled = False
+
+        # Update KV
+        if self.location != "LOCAL":
+            self.mon.KV.update(IKVector.Entry(self.id, agent="", value=res.get("result"), timestamp=self.mon.counter))
 
         print(res)
         return res
@@ -187,7 +188,7 @@ class Mon_view(Monitor):
     pass
 
 
-class Mon_reponse(Monitor):
+class Mon_response(Monitor):
     pass
 
 
@@ -317,7 +318,6 @@ class Sysmon:
     main_response_mon.KV = kv_implementation()
     actors = []
     blackbox_controls = Blackbox.controls
-    views = []
 
     class LogAttributes:
         """
@@ -425,9 +425,9 @@ class Sysmon:
     def add_response_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
                       control_type=Monitor.MonControlType.POSTERIORI):
         print("Adding response rule %s" % name)
-        mon = Mon_reponse(name=name, target=Monitor.MonType.RESPONSE, location="LOCAL", kind=Monitor.MonType.HTTP,
-                       formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_response_mon.trace,
-                       violation_formula=violation_formula, liveness=liveness, control_type=control_type)
+        mon = Mon_response(name=name, target=Monitor.MonType.RESPONSE, location="LOCAL", kind=Monitor.MonType.HTTP,
+                           formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_response_mon.trace,
+                           violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.response_monitors.append(mon)
 
     @staticmethod
@@ -496,5 +496,7 @@ class Sysmon:
                 data = urllib.parse.urlencode(data)
                 data = data.encode('ascii')
                 res = urllib.request.urlopen(actor.ip_addr + "/mon/sysmon/remote/register_formula/", data)  # FIXME
-                print(res.info().get('KV'))
-                print(res.read().decode('utf-8'))
+                kv = res.info().get('KV')
+                # res.read().decode('utf-8'))
+                if kv is not None:
+                    Sysmon.main_mon.update_kv(Sysmon.kv_implementation.parse(kv))

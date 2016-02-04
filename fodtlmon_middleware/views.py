@@ -208,16 +208,13 @@ def api_register_actor_formulas(request, actor_name):
 
 @csrf_exempt
 def register_formula(request):
-    # actor = Sysmon.get_actor_by_name(actor_name)
     formula = request.POST.get("formula", None)
     if formula is None:
         return HttpResponse("No formula provided !")
     formula_id = request.POST.get("formula_id", None)
-
     target = request.POST.get("target", None)  # the sender
     kind = request.POST.get("kind", Monitor.MonType.HTTP)
     description = request.POST.get("description", "")
-
+    # TODO change depending on kind
     Sysmon.add_http_rule(formula_id, formula, description=description)
-
-    return HttpResponse("KO")
+    return HttpResponse("OK")
