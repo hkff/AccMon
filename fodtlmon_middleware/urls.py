@@ -20,8 +20,9 @@ from fodtlmon_middleware import views
 
 urlpatterns = [
     # Sysmon app #
-    url(r'^sysmon/$', views.index, name='sysmon'),
-    url(r'^sysmon/config$', views.show_config, name='config'),
+    url(r'^$', views.index, name='sysmon'),
+    url(r'^sysmon/config/$', views.show_config, name='config'),
+    url(r'^sysmon/help/$', views.show_help, name='help'),
     url(r'^sysmon/login$', views.login, name='sysmon_login'),
     url(r'^sysmon/monitors/$', views.show_monitors, name="monitors"),
     url(r'^sysmon/stats/$', views.show_stats, name="stats"),

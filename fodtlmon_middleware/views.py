@@ -46,6 +46,10 @@ def show_monitors(request):
     return render(request, 'pages/monitors.html', {"monitors": Sysmon.get_mons()})
 
 
+def show_help(request):
+    return render(request, 'pages/sysmon_help.html')
+
+
 def show_actors(request):
     return render(request, 'pages/actors.html', {"actors": Sysmon.actors, "KV": Sysmon.main_mon.KV})
 
