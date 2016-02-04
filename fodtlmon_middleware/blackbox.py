@@ -75,6 +75,7 @@ def view_tracer(frame, event, arg):
     :param arg:
     :return:
     """
+    # TODO consider building ast
     try:
         # Current frame details TODO : need to be aggressively optimized
         c_frame = Stack.frame_to_dict(frame.f_back)
@@ -159,7 +160,7 @@ class VIEWS_INTRACALLS(Control):
         Stack.print_stack(file="tmp3")
         # view_call = next(Stack.get_func_call(self.current_view_name), None)
         # views = [x.__name__ for x in list(filter(lambda y: inspect.isfunction(y), get_resolver(None).reverse_dict))]
-        r = list(filter(lambda z: z.get("event") == Stack.STACK_EVENTS.CALL and z.get("c_func") in Blackbox.VIEWS, Stack.frames))
+        r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") in Blackbox.VIEWS, Stack.frames))
         for x in r:
             if x.get("parent").get("c_func") in Blackbox.VIEWS:
                 details = "View %s called from view %s " % (x.get("c_func"), x.get("parent").get("c_func"))
@@ -170,13 +171,29 @@ class IO_OP(Control):
     """
     Writing data in disk, may be a data disclosure
     """
+
+    # Notes : builts in functions are not logged by sys tracer, need to perform static analysis
+    # or a tricky stack analysis
+    # TODO : use regexp instead
+    IO_OPS = [' open', ' print']
+
     def run(self):
         # Stack.print_stack(file="tmp3") # FIXME duplicated entries
         r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.LINE and x.get("c_func") in Blackbox.VIEWS
-                                  and 'open' in x.get("line_code"), Stack.frames))
+                                  and len([x for z in self.IO_OPS if z in x.get("line_code")]) > 0, Stack.frames))
         for x in r:
-            details = "In %s at line %s : %s " \
-                      % (x.get("c_file"), x.get("c_lineno"), x.get("line_code"))
+            details = "at line %s : %s " % (x.get("c_lineno"), x.get("line_code"))
+            self.entries.append(Control.Entry(view=self.current_view_name, details=details))
+
+
+class URL_OPEN(Control):
+    """
+    Performing external http requests
+    """
+    def run(self):
+        r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") == "urlopen", Stack.frames))
+        for x in r:
+            details = "In %s at line %s : %s " % (x.get("c_file"), x.get("c_lineno"), x.get("line_code"))
             self.entries.append(Control.Entry(view=self.current_view_name, details=details))
 
 
@@ -185,5 +202,6 @@ class IO_OP(Control):
 #############################################################
 Blackbox.controls = [
     VIEWS_INTRACALLS(enabled=True, severity=Blackbox.Severity.HIGH),
-    IO_OP(enabled=False, severity=Blackbox.Severity.MEDIUM)
+    IO_OP(enabled=False, severity=Blackbox.Severity.MEDIUM),
+    URL_OPEN(enabled=True, severity=Blackbox.Severity.HIGH)
 ]
