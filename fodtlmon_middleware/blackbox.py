@@ -153,7 +153,7 @@ class Blackbox:
         MEDIUM = 2,
         HIGH = 3
 
-    controls = []
+    CONTROLS = []
     VIEWS = []
     MODELS = []
     INSTALLED_APPS = []
@@ -213,7 +213,7 @@ class URL_OPEN(Control):
 #############################################################
 # Adding controls to the available controls in the blackbox
 #############################################################
-Blackbox.controls = [
+Blackbox.CONTROLS = [
     VIEWS_INTRACALLS(enabled=False, severity=Blackbox.Severity.HIGH),
     IO_OP(enabled=False, severity=Blackbox.Severity.MEDIUM),
     URL_OPEN(enabled=False, severity=Blackbox.Severity.HIGH)

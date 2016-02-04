@@ -53,7 +53,7 @@ class FodtlmonMiddleware(object):
         return violations
 
     def run_controls(self):
-        for control in Sysmon.blackbox_controls:
+        for control in Blackbox.CONTROLS:
             if control.enabled:
                 control.run()
         # Clean stack
@@ -119,9 +119,9 @@ class FodtlmonMiddleware(object):
 
             # Enable sys tracing
             if "sysmon/" not in request.path:  # TODO make this condition secure
-                enabled = next(filter(lambda x: x.enabled, Sysmon.blackbox_controls), None)
+                enabled = next(filter(lambda x: x.enabled, Blackbox.CONTROLS), None)
                 if enabled is not None:
-                    for control in Sysmon.blackbox_controls:
+                    for control in Blackbox.CONTROLS:
                         control.prepare(request, view, args, kwargs)
                     sys.settrace(view_tracer)
 

@@ -319,7 +319,6 @@ class Sysmon:
     main_view_mon.KV = kv_implementation()
     main_response_mon.KV = kv_implementation()
     actors = []
-    blackbox_controls = Blackbox.controls
 
     class LogAttributes:
         """
@@ -471,7 +470,7 @@ class Sysmon:
 
     @staticmethod
     def get_blackbox_control_by_name(name):
-        return next(filter(lambda x: x.name == name, Sysmon.blackbox_controls), None)
+        return next(filter(lambda x: x.name == name, Blackbox.CONTROLS), None)
 
     @staticmethod
     def add_log_attribute(attr: LogAttribute, target=Monitor.MonType.HTTP):
