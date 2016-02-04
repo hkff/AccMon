@@ -32,18 +32,27 @@ Usage
         Sysmon.init()
 
 
-2. Create a python file (eg.: http_rules.py)
+2. Create a python file (eg.: sysmon_rules.py)
     Note that the code above should be executed only once when the server starts
         
         from fodtlmon_middleware.whitebox import *
         
         # Define your Interpreted predicates here
         
-        # Add your http rules here
-        Sysmon.add_http_rule(<monitor_name>, <formula_to_monitor>)
+        # Add your http request rules here
+        Sysmon.add_http_rule(<monitor_name>, <formula_to_monitor>, args...)
 
+        # Add your view rules here
+        Sysmon.add_view_rule(<monitor_name>, <formula_to_monitor>, args...)
         
-3. At the top of settings.py import the http_rules
+        # Add your response rules here
+        Sysmon.add_response_rule(<monitor_name>, <formula_to_monitor>, args...)
+
+    where args are the following optional arguments  :
+    
+        description="", violation_formula: str=None, liveness=None, control_type=Monitor.MonControlType.POSTERIORI | REAL_TIME
+                      
+3. At the top of settings.py import the sysmon_rules
 
 4. In urls.py :
     Add the following import
