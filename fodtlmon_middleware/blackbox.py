@@ -171,10 +171,13 @@ class IO_OP(Control):
     Writing data in disk, may be a data disclosure
     """
     def run(self):
-        self.entries.append(Control.Entry(view=self.current_view_name, details=" s => z"))
-        #Stack.print_stack(file="tmp2")
-        view_call = next(Stack.get_func_call(self.current_view_name), None)
-        print("View called at : %s " % view_call)
+        # Stack.print_stack(file="tmp3") # FIXME duplicated entries
+        r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.LINE and x.get("c_func") in Blackbox.VIEWS
+                                  and 'open' in x.get("line_code"), Stack.frames))
+        for x in r:
+            details = "In %s at line %s : %s " \
+                      % (x.get("c_file"), x.get("c_lineno"), x.get("line_code"))
+            self.entries.append(Control.Entry(view=self.current_view_name, details=details))
 
 
 #############################################################
