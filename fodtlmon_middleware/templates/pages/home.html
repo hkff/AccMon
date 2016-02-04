@@ -24,6 +24,15 @@
         </div>
 
         <div class="col-md-4">
+            <h2>Controls</h2>
+            <ul class="list-group">
+                {% for c in controls %}
+                    <li class="list-group-item"> {{ c.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="col-md-4">
             <h2>Installed Apps</h2>
             <ul class="list-group">
                 {% for app in apps %}
@@ -32,14 +41,6 @@
             </ul>
         </div>
 
-        <div class="col-md-4">
-            <h2>Controls</h2>
-            <ul class="list-group">
-                {% for app in apps %}
-                    <li class="list-group-item"> {{ app }}</li>
-                {% endfor %}
-            </ul>
-        </div>
     </div>
 </div>
 

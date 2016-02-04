@@ -369,6 +369,7 @@ class Sysmon:
         """
         Blackbox.VIEWS = [x.__name__ for x in list(filter(lambda y: inspect.isfunction(y), get_resolver(None).reverse_dict))]
         Blackbox.INSTALLED_APPS = settings.INSTALLED_APPS
+        Blackbox.MIDDLEWARE_CLASSES = settings.MIDDLEWARE_CLASSES
         # TODO check if all predicates in formula can be logged
         # HttpResponseBase.__init__ = HttpResponseBaseIntercepter(HttpResponseBase.__init__)
 

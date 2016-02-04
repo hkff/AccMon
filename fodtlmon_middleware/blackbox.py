@@ -157,6 +157,7 @@ class Blackbox:
     VIEWS = []
     MODELS = []
     INSTALLED_APPS = []
+    MIDDLEWARE_CLASSES = []
 
 
 ########################################################

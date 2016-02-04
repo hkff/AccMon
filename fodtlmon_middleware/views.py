@@ -38,6 +38,7 @@ def index(request):
     args["running_mons"] = len(list(filter(lambda x: x.enabled, mons)))
     args["offline_mons"] = len(mons) - args["running_mons"]
     args["apps"] = Blackbox.INSTALLED_APPS
+    args["controls"] = Blackbox.CONTROLS
     return render(request, 'pages/home.html', args)
 
 
