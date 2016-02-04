@@ -17,8 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from fodtlmon_middleware.middleware import *
 from django.contrib.auth.decorators import login_required
+
 
 ##########################
 # Sysmon APP
@@ -197,3 +199,25 @@ def api_get_monitors_updates(request):
 def api_get_mon_details(request, mon_id):
     m = Sysmon.get_mon_by_id(mon_id)
     return render(request, 'fragments/monitor.html', {"monitor": m})
+
+
+def api_register_actor_formulas(request, actor_name):
+    Sysmon.register_actor_formulas(actor_name)
+    return HttpResponse("ok")
+
+
+@csrf_exempt
+def register_formula(request):
+    # actor = Sysmon.get_actor_by_name(actor_name)
+    formula = request.POST.get("formula", None)
+    if formula is None:
+        return HttpResponse("No formula provided !")
+    formula_id = request.POST.get("formula_id", None)
+
+    target = request.POST.get("target", None)  # the sender
+    kind = request.POST.get("kind", Monitor.MonType.HTTP)
+    description = request.POST.get("description", "")
+
+    Sysmon.add_http_rule(formula_id, formula, description=description)
+
+    return HttpResponse("KO")

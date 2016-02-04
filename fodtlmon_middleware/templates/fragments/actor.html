@@ -9,17 +9,16 @@
                      {% else %}
                     title="Enable"
                     onclick="change_mon_status(0)"
-                    {% endif %}
-            >
+                    {% endif %}>
                 <span class="glyphicon {% if monitor.enabled %} glyphicon-eye-open {% else %} glyphicon-eye-close {% endif %}"
                       aria-hidden="true"></span>
             </button>
             <button type="button" class="btn btn-default btn-xs" title="Restart">
                 <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
             </button>
-            <a type="button" class="btn btn-default btn-xs" title="Audit" href="{% url 'monitor_violations' monitor.id %}">
+            <button type="button" class="btn btn-default btn-xs" title="Register formulas" onclick="register_formulas()" >
                 <span class="glyphicon glyphicon-education" aria-hidden="true"></span>
-            </a>
+            </button>
         </div>
         </h3>
     </div>
@@ -46,23 +45,16 @@
 
 <script type="application/javascript">
 
-function change_mon_status(v) {
-    var status = 0;
-    if(v === 0)
-        status = "ENABLED";
-    else if(v === 1)
-        status = "DISABLED";
-
+function register_formulas() {
     $.ajax({
         dataType: 'text',
         type:'POST',
-        url: '{% url 'mon_change_status' monitor.id %}',
+        url: '{% url 'register_actor_formulas' actor.name %}',
         data: {
-            mon_id: "{{ monitor.id }}",
-            status: status
+            actor_name: "{{ actor.name }}"
         },
         success: function(response){
-            location.reload();
+            console.log(response)
         }
     });
 }

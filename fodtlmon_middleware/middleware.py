@@ -77,6 +77,18 @@ class FodtlmonMiddleware(object):
         # pushing the event
         Sysmon.push_event(Event(self.log_events(request, Sysmon.log_http_attributes), step=now), Monitor.MonType.HTTP)
 
+        # Check and update KV
+        if request.method == 'POST':
+            kv = request.POST.get("KV")
+            if kv is not None:
+                Sysmon.main_mon.update_kv(Sysmon.kv_implementation.parse(kv))
+                print(kv)
+        elif request.method == 'GET':
+            kv = request.GET.get("KV")
+            if kv is not None:
+                Sysmon.main_mon.update_kv(Sysmon.kv_implementation.parse(kv))
+                print(kv)
+
         # Trigger monitors
         if self.monitor(Sysmon.http_monitors) > 0:
             return render(request, "pages/access_denied.html")
@@ -131,7 +143,7 @@ class FodtlmonMiddleware(object):
 
         if "sysmon/api/" not in request.path:
 
-            # Processing blackbox controls
+            # Processing blackbox controls
             if "sysmon/" not in request.path:  # TODO make this condition secure
                 threading.Thread(target=self.run_controls).start()
 
@@ -144,6 +156,14 @@ class FodtlmonMiddleware(object):
                 return render(request, "pages/access_denied.html")
 
             # Update KV TODO filter
-            response["KV"] = Sysmon.main_mon.KV
+            if request.method == 'POST':
+                kv = request.POST.get("KV")
+                if kv is not None:
+                    response["KV"] = Sysmon.main_mon.KV
+            elif request.method == 'GET':
+                kv = request.GET.get("KV")
+                if kv is not None:
+                    response["KV"] = Sysmon.main_mon.KV
+
             print("****************** response time %s " % (time.time() - TIMER))
         return response

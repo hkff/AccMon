@@ -24,6 +24,8 @@ import time
 from fodtlmon_middleware.blackbox import *
 from fodtlmon_middleware.models import *
 import socket
+import urllib.request
+import urllib.parse
 
 try:
     HOSTNAME = socket.gethostname()
@@ -103,7 +105,7 @@ class Monitor:
             f.compute_hash(sid=self.id)
             Sysmon.main_mon.KV.add_entry(self.kv_implementation.Entry(f.fid, agent=self.name, value=Boolean3.Unknown, timestamp=0))
             sysactor = Sysmon.get_actor_by_name(f.agent)
-            sysactor.formulas.append(f.inner)
+            sysactor.formulas.append(f)
 
         # IMPORTANT
         self.mon.reset()
@@ -352,7 +354,7 @@ class Sysmon:
 
     LGA = LogAttributes
 
-    # Log attributes lists
+    # Log attributes lists
     log_http_attributes = [LGA.SCHEME, LGA.PATH, LGA.USER, LGA.REMOTE_ADDR, LGA.CONTENT_TYPE, LGA.QUERY_STRING]
     log_view_attributes = [LGA.VIEW_NAME]
     log_response_attributes = []
@@ -456,8 +458,8 @@ class Sysmon:
 
     @staticmethod
     def register_actor(name, addr):
-        addr = addr.split(":")  # TODO check and secure
-        a = Actor(name, addr[0], addr[1])
+        # addr = addr.split(":")  # TODO check and secure
+        a = Actor(name, addr, 8080)
         Sysmon.actors.append(a)
 
     @staticmethod
@@ -479,3 +481,20 @@ class Sysmon:
             Sysmon.log_response_attributes.append(attr)
         else:
             raise Exception("Please specify a target for your rule Monitor.MonType.(HTTP/VIEW/RESPONSE/)")
+
+    @staticmethod
+    def register_actor_formulas(actor_id):
+        actor = Sysmon.get_actor_by_name(actor_id)
+        if actor is not None:
+            for formula in actor.formulas:
+                data = {
+                    "formula": formula.inner,
+                    "formula_id": formula.fid,
+                    "target": HOSTNAME,
+                    "KV": Sysmon.main_mon.KV
+                }
+                data = urllib.parse.urlencode(data)
+                data = data.encode('ascii')
+                res = urllib.request.urlopen(actor.ip_addr + "/mon/sysmon/remote/register_formula/", data)  # FIXME
+                print(res.info().get('KV'))
+                print(res.read().decode('utf-8'))

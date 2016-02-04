@@ -40,5 +40,9 @@ urlpatterns = [
     # Sysmon API #
     url(r'^sysmon/api/get_mons_updates/$', views.api_get_monitors_updates, name='get_mons_updates'),
     url(r'^sysmon/api/get_mon_details/(?P<mon_id>.*)/$', views.api_get_mon_details, name="get_mon_details"),
+    url(r'^sysmon/api/register_actor_formulas/(?P<actor_name>.*)/$', views.api_register_actor_formulas, name="register_actor_formulas"),
+
+    # Actors API #
+    url(r'^sysmon/remote/register_formula/$', views.register_formula, name='register_formula'),
 
 ]
