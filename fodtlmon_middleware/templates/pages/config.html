@@ -45,7 +45,15 @@
                                 {% endif %}
                             </td>
                             <td> {{ control.description }} </td>
-                            <td> {{ control.severity.name }} </td>
+                            <td>
+                            <span style="display: block; width: 60px;" class=
+                            {% if control.severity.name == "HIGH" %} "label label-danger">
+                            {% elif control.severity.name == "MEDIUM" %} "label label-warning">
+                            {% elif control.severity.name == "LOW" %} "label label-info severity">
+                            {% else %} "label label-default severity">
+                            {% endif %}
+                            {{ control.severity.name }}</span>
+                            </td>
                           </tr>
                          {% endfor %}
                         </tbody>
