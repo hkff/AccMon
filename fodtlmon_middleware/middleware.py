@@ -96,24 +96,22 @@ class FodtlmonMiddleware(object):
         print("%s %s %s %s" % (request, view.__name__, args, kwargs))
         now = datetime.now()
 
-        # if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
-        #     return  # Log it may be usefull for audits
+        if "sysmon/api/" not in request.path:
+            # pushing the event
+            Sysmon.push_event(Event(self.log_events(request, Sysmon.log_view_attributes, view=view,
+                                                   args=args, kwargs=kwargs), step=now), Monitor.MonType.VIEW)
 
-        # pushing the event
-        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_view_attributes, view=view,
-                                                args=args, kwargs=kwargs), step=now), Monitor.MonType.VIEW)
+            # Trigger monitors
+            if self.monitor(Sysmon.views_monitors) > 0:
+                return render(request, "pages/access_denied.html")
 
-        # Trigger monitors
-        if self.monitor(Sysmon.views_monitors) > 0:
-            return render(request, "pages/access_denied.html")
-
-        # Enable sys tracing
-        if "sysmon/" not in request.path:  # TODO make this condition secure
-            enabled = next(filter(lambda x: x.enabled, Sysmon.blackbox_controls), None)
-            if enabled is not None:
-                for control in Sysmon.blackbox_controls:
-                    control.prepare(request, view, args, kwargs)
-                sys.settrace(view_tracer)
+            # Enable sys tracing
+            if "sysmon/" not in request.path:  # TODO make this condition secure
+                enabled = next(filter(lambda x: x.enabled, Sysmon.blackbox_controls), None)
+                if enabled is not None:
+                    for control in Sysmon.blackbox_controls:
+                        control.prepare(request, view, args, kwargs)
+                    sys.settrace(view_tracer)
 
     ############################################
     # 3. Processing an HTTP response
@@ -131,19 +129,21 @@ class FodtlmonMiddleware(object):
         # Disable sys tracing
         sys.settrace(None)
 
-        # Processing blackbox controls
-        if "sysmon/" not in request.path: # TODO make this condition secure
-            threading.Thread(target=self.run_controls).start()
+        if "sysmon/api/" not in request.path:
 
-        # pushing the event
-        Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes, response=response),
-                                step=now), Monitor.MonType.RESPONSE)
+            # Processing blackbox controls
+            if "sysmon/" not in request.path:  # TODO make this condition secure
+                threading.Thread(target=self.run_controls).start()
 
-        # Trigger monitors
-        if self.monitor(Sysmon.response_monitors) > 0:
-            return render(request, "pages/access_denied.html")
+            # pushing the event
+            Sysmon.push_event(Event(self.log_events(request, Sysmon.log_response_attributes, response=response),
+                                    step=now), Monitor.MonType.RESPONSE)
 
-        # Update KV TODO filter
-        response["KV"] = Sysmon.main_mon.KV
-        print("****************** response time %s " % (time.time() - TIMER))
+            # Trigger monitors
+            if self.monitor(Sysmon.response_monitors) > 0:
+                return render(request, "pages/access_denied.html")
+
+            # Update KV TODO filter
+            response["KV"] = Sysmon.main_mon.KV
+            print("****************** response time %s " % (time.time() - TIMER))
         return response
