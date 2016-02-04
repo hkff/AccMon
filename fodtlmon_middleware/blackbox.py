@@ -50,15 +50,15 @@ class Stack:
 
     @staticmethod
     def print_stack(file=None):
+        res = "%s\n  Stack length : %s\n  On : %s\n\n" % ("="*40, len(Stack.frames), datetime.now())
+        for x in Stack.frames:
+            p = '' if x.get("parent") is None else x.get("parent").get("c_func")
+            res += "%s %s from %s\n" % (x.get("event").name, x.get("c_func"), p)
         if file is None:
-            for x in Stack.frames:
-                p = '' if x.get("parent") is None else x.get("parent").get("c_func")
-                print("%s %s from %s" % (x.get("event").name, x.get("c_func"), p))
+            print(res)
         else:
             with open(file, "w+") as f:
-                for x in Stack.frames:
-                    p = '' if x.get("parent") is None else x.get("parent").get("c_func")
-                    f.write("%s %s from %s\n" % (x.get("event").name, x.get("c_func"), p))
+                    f.write(res)
 
     @staticmethod
     def get_func_call(func_name):
@@ -74,7 +74,7 @@ def view_tracer(frame, event, arg):
     :return:
     """
     try:
-        # Current frame details
+        # Current frame details TODO : need to be aggressively optimized
         c_frame = Stack.frame_to_dict(frame.f_back)
 
         if event == 'call' or event == 'c_call':
@@ -86,7 +86,7 @@ def view_tracer(frame, event, arg):
             c_frame['event'] = Stack.STACK_EVENTS.RETURN
             Stack.frames.append(c_frame)
     except:
-        print("--------------- Error ---------")
+        print("--------------- Error -----------")
 
 
 ########################################################
@@ -144,10 +144,10 @@ class VIEWS_INTRACALLS(Control):
         super().__init__(enabled=enabled, severity=severity)
 
     def run(self):
-        print("analysing view  %s " % self.current_view_name)
+        # Stack.print_stack(file="tmp2")
         view_call = next(Stack.get_func_call(self.current_view_name), None)
         views = [x.__name__ for x in list(filter(lambda y: inspect.isfunction(y), get_resolver(None).reverse_dict))]
-        r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") in views, Stack.frames))
+        r = list(filter(lambda z: z.get("event") == Stack.STACK_EVENTS.CALL and z.get("c_func") in views, Stack.frames))
         for x in r:
             if x.get("parent").get("c_func") in views:
                 details = "View %s called from view %s " % (x.get("c_func"), x.get("parent").get("c_func"))

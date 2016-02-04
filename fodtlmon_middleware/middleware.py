@@ -22,6 +22,8 @@ from django.shortcuts import render
 from fodtlmon_middleware.whitebox import *
 import threading
 
+TIMER = 0
+
 
 class FodtlmonMiddleware(object):
 
@@ -66,10 +68,11 @@ class FodtlmonMiddleware(object):
         :param request:
         :return:
         """
+        global TIMER
         now = datetime.now()
-
-        if "sysmon/api/" in request.path:  # Do not log and monitor the middleware
-            return  # Log it may be usefull for audits
+        TIMER = time.time()
+        if "sysmon/api/" in request.path:  # TODO make this condition secure
+            return
 
         # pushing the event
         Sysmon.push_event(Event(self.log_events(request, Sysmon.log_http_attributes), step=now), Monitor.MonType.HTTP)
@@ -105,7 +108,7 @@ class FodtlmonMiddleware(object):
             return render(request, "pages/access_denied.html")
 
         # Enable sys tracing
-        if "sysmon/api/" not in request.path:
+        if "sysmon/" not in request.path:  # TODO make this condition secure
             enabled = next(filter(lambda x: x.enabled, Sysmon.blackbox_controls), None)
             if enabled is not None:
                 for control in Sysmon.blackbox_controls:
@@ -122,13 +125,14 @@ class FodtlmonMiddleware(object):
         :param response:
         :return:
         """
+        global TIMER
         now = datetime.now()
 
         # Disable sys tracing
         sys.settrace(None)
 
         # Processing blackbox controls
-        if "sysmon/api/" not in request.path:
+        if "sysmon/" not in request.path: # TODO make this condition secure
             threading.Thread(target=self.run_controls).start()
 
         # pushing the event
@@ -141,5 +145,5 @@ class FodtlmonMiddleware(object):
 
         # Update KV TODO filter
         response["KV"] = Sysmon.main_mon.KV
-
+        print("****************** response time %s " % (time.time() - TIMER))
         return response
