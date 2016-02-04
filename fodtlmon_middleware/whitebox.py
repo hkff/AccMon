@@ -352,8 +352,16 @@ class Sysmon:
     log_view_attributes = []
     log_response_attributes = []
 
-    def __init__(self):
-        pass
+    @staticmethod
+    def init():
+        """
+        Initialize the sysmon
+        this method should be called after the server starts
+        :return:
+        """
+        Blackbox.VIEWS = [x.__name__ for x in list(filter(lambda y: inspect.isfunction(y), get_resolver(None).reverse_dict))]
+        Blackbox.INSTALLED_APPS = settings.INSTALLED_APPS
+        # TODO check if all predicates in formula can be logged
 
     @staticmethod
     def register_mon(name, formula, target, location, kind, description):
@@ -466,8 +474,3 @@ class Sysmon:
             Sysmon.log_response_attributes.append(attr)
         else:
             raise Exception("Please specify a target for your rule Monitor.MonType.(HTTP/VIEW/RESPONSE/)")
-
-    # TODO add initsysmon to perform some checks
-    # example : check if all predicates in formula can be logged
-    # safe /unsafe agents : call another view inside a view
-    # view and response needs to have separate traces
