@@ -25,6 +25,13 @@ Usage
     add the following app 'fodtlmon_middleware' to INSTALLED_APPS 
     add 'fodtlmon_middleware.middleware.FodtlmonMiddleware' in the MIDDLEWARE_CLASSES
 
+2. In your django project wsgi.py :
+    add the init call to the monitoring system
+    
+        from fodtlmon_middleware.whitebox import Sysmon
+        Sysmon.init()
+
+
 2. Create a python file (eg.: http_rules.py)
     Note that the code above should be executed only once when the server starts
         
