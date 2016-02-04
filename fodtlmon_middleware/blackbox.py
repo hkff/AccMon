@@ -21,6 +21,7 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import RegexURLResolver, RegexURLPattern, get_resolver
 import inspect
+import linecache
 
 
 ########################################################
@@ -34,7 +35,8 @@ class Stack:
 
     class STACK_EVENTS(Enum):
         CALL = 0,
-        RETURN = 1
+        RETURN = 1,
+        LINE = 2
 
 
     @staticmethod
@@ -42,18 +44,18 @@ class Stack:
         c_back = None if frame.f_back is None else Stack.frame_to_dict(frame.f_back)
         c_func = frame.f_code.co_name
         c_file = frame.f_code.co_filename
-        c_lineinfo = frame.f_lineno
+        c_lineno = frame.f_lineno
         c_class = frame.f_locals['self'].__class__.__name__ if 'self' in frame.f_locals else ''
         c_module = frame.f_locals['self'].__class__.__module__ if 'self' in frame.f_locals else ''
-        return {"event": -1, "c_func": c_func, "c_file": c_file, "c_lineinfo": c_lineinfo,
-                "c_class": c_class, "c_c_module": c_module, "parent": c_back}
+        return {"event": -1, "c_func": c_func, "c_file": c_file, "c_lineno": c_lineno,
+                "c_class": c_class, "c_module": c_module, "parent": c_back}
 
     @staticmethod
     def print_stack(file=None):
         res = "%s\n  Stack length : %s\n  On : %s\n\n" % ("="*40, len(Stack.frames), datetime.now())
         for x in Stack.frames:
             p = '' if x.get("parent") is None else x.get("parent").get("c_func")
-            res += "%s %s from %s\n" % (x.get("event").name, x.get("c_func"), p)
+            res += "%s %s from %s line : %s\n" % (x.get("event").name, x.get("c_func"), p, x.get("line_code"))
         if file is None:
             print(res)
         else:
@@ -82,9 +84,16 @@ def view_tracer(frame, event, arg):
             Stack.frames.append(c_frame)
             return view_tracer
 
-        elif event == 'return':
+        elif event == 'return' or event == 'c_return':
             c_frame['event'] = Stack.STACK_EVENTS.RETURN
             Stack.frames.append(c_frame)
+        elif event == 'line':
+            line = linecache.getline(c_frame.get("c_file"), int(c_frame.get("c_lineno")))
+            c_frame['event'] = Stack.STACK_EVENTS.LINE
+            c_frame['line_code'] = line.rstrip()
+            Stack.frames.append(c_frame)
+        else:
+            print("---- Strange Event %s line %s " %(event, frame.f_lineno))
     except:
         print("--------------- Error -----------")
 
@@ -144,8 +153,8 @@ class VIEWS_INTRACALLS(Control):
         super().__init__(enabled=enabled, severity=severity)
 
     def run(self):
-        # Stack.print_stack(file="tmp2")
-        view_call = next(Stack.get_func_call(self.current_view_name), None)
+        # Stack.print_stack(file="tmp3")
+        # view_call = next(Stack.get_func_call(self.current_view_name), None)
         views = [x.__name__ for x in list(filter(lambda y: inspect.isfunction(y), get_resolver(None).reverse_dict))]
         r = list(filter(lambda z: z.get("event") == Stack.STACK_EVENTS.CALL and z.get("c_func") in views, Stack.frames))
         for x in r:
@@ -159,9 +168,7 @@ class IO_OP(Control):
     Writing data in disk, may be a data disclosure
     """
     def run(self):
-        print("analysing view  %s " % self.current_view_name)
         self.entries.append(Control.Entry(view=self.current_view_name, details=" s => z"))
-        # self.current_view_name = ""
         #Stack.print_stack(file="tmp2")
         view_call = next(Stack.get_func_call(self.current_view_name), None)
         print("View called at : %s " % view_call)
