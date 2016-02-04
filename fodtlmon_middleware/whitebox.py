@@ -321,35 +321,40 @@ class Sysmon:
         """
         Log attributes list
         """
-        SCHEME = LogAttribute("SCHEME", description="HTTP request schema.", enabled=True,
+        SCHEME = LogAttribute("SCHEME", description="The scheme of the request (http or https usually).", enabled=True,
                               eval_fx=lambda request, view, args, kwargs, response:
                               P("SCHEME", args=[Constant(request.scheme)]))
 
-        PATH = LogAttribute("PATH", description="", enabled=True, # IMPORTANT Parse path as regexp TODO for META also
+        PATH = LogAttribute("PATH", description="The full path to the requested page, not including the scheme or domain.",
+                            enabled=True, # IMPORTANT Parse path as regexp TODO for META also
                             eval_fx=lambda request, view, args, kwargs, response:
                             P(request.method, args=[Constant('"%s"' % request.path)]))
 
-        USER = LogAttribute("USER", description="HTTP logged user id.", enabled=True,
+        USER = LogAttribute("USER", description="The currently logged-in user.", enabled=True,
                               eval_fx=lambda request, view, args, kwargs, response:
                               P("USER", args=[Constant(request.user)]))
 
-        REMOTE_ADDR = LogAttribute("REMOTE_ADDR", description="Client ip adresse.", enabled=True,
+        REMOTE_ADDR = LogAttribute("REMOTE_ADDR", description="The IP address of the client.", enabled=True,
                               eval_fx=lambda request, view, args, kwargs, response:
                               P("REMOTE_ADDR", args=[Constant(str(request.META.get("REMOTE_ADDR")))]))
 
-        CONTENT_TYPE = LogAttribute("CONTENT_TYPE", description="Client ip adresse.", enabled=True,
+        CONTENT_TYPE = LogAttribute("CONTENT_TYPE", description="The MIME type of the request body.", enabled=True,
                               eval_fx=lambda request, view, args, kwargs, response:
                               P("CONTENT_TYPE", args=[Constant(str(request.META.get("CONTENT_TYPE")))]))
 
-        QUERY_STRING = LogAttribute("QUERY_STRING", description="Client ip adresse.", enabled=True,
+        QUERY_STRING = LogAttribute("QUERY_STRING", description=" The query string, as a single (unparsed) string.", enabled=True,
                               eval_fx=lambda request, view, args, kwargs, response:
                               P("QUERY_STRING", args=[Constant(str(request.META.get("QUERY_STRING")))]))
+
+        VIEW_NAME = LogAttribute("VIEW_NAME", description=" The current called django view.", enabled=True,
+                              eval_fx=lambda request, view, args, kwargs, response:
+                              P("VIEW", args=[Constant(str(view.__name__))]))
 
     LGA = LogAttributes
 
     # Log attributes lists
     log_http_attributes = [LGA.SCHEME, LGA.PATH, LGA.USER, LGA.REMOTE_ADDR, LGA.CONTENT_TYPE, LGA.QUERY_STRING]
-    log_view_attributes = []
+    log_view_attributes = [LGA.VIEW_NAME]
     log_response_attributes = []
 
     @staticmethod

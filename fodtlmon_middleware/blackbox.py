@@ -201,7 +201,7 @@ class URL_OPEN(Control):
 # Adding controls to the available controls in the blackbox
 #############################################################
 Blackbox.controls = [
-    VIEWS_INTRACALLS(enabled=True, severity=Blackbox.Severity.HIGH),
+    VIEWS_INTRACALLS(enabled=False, severity=Blackbox.Severity.HIGH),
     IO_OP(enabled=False, severity=Blackbox.Severity.MEDIUM),
-    URL_OPEN(enabled=True, severity=Blackbox.Severity.HIGH)
+    URL_OPEN(enabled=False, severity=Blackbox.Severity.HIGH)
 ]
