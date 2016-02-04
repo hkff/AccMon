@@ -16,17 +16,29 @@
         <div class="col-md-4">
             <h2>Sysmon status</h2>
             <ul class="list-group">
-                <li class="list-group-item"> <span class="badge"> {{ violations_nbr }} </span> Violations number</li>
-                <li class="list-group-item"> <span class="badge"> {{ audits_nbr }} </span> Audits number</li>
-                <li class="list-group-item"> <span class="badge"> {{ running_mons }} </span> Running monitors</li>
+                <li class="list-group-item"> <span class="badge" style="background-color:red;"> {{ violations_nbr }} </span> Violations number</li>
+                <li class="list-group-item"> <span class="badge" style="background-color: orange;"> {{ audits_nbr }} </span> Audits number</li>
+                <li class="list-group-item"> <span class="badge" style="background-color: #5bc0de;"> {{ running_mons }} </span> Running monitors</li>
                 <li class="list-group-item"> <span class="badge"> {{ offline_mons }} </span> Offline monitors</li>
             </ul>
         </div>
 
         <div class="col-md-4">
-            <h2>Heading</h2>
-            <p> </p>
-            <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+            <h2>Installed Apps</h2>
+            <ul class="list-group">
+                {% for app in apps %}
+                    <li class="list-group-item"> {{ app }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="col-md-4">
+            <h2>Controls</h2>
+            <ul>
+                {% for app in apps %}
+                    <li> {{ app }}</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 </div>

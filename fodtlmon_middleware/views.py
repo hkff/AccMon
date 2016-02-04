@@ -19,7 +19,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from fodtlmon_middleware.middleware import *
 from django.contrib.auth.decorators import login_required
-
+from django.apps import apps
+from django.conf import settings
 
 ##########################
 # Sysmon APP
@@ -36,6 +37,7 @@ def index(request):
     args["audits_nbr"] = sum(map(lambda x: len(x.audits), mons))
     args["running_mons"] = len(list(filter(lambda x: x.enabled, mons)))
     args["offline_mons"] = len(mons) - args["running_mons"]
+    args["apps"] = settings.INSTALLED_APPS
     return render(request, 'pages/home.html', args)
 
 
