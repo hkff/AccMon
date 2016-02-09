@@ -26,10 +26,9 @@ TIMER = 0
 
 
 class FodtlmonMiddleware(object):
+    """
 
-    def __init__(self):
-        self.monitors = []
-
+    """
     def log_events(self, request, attributes, view=None, response=None, args=None, kwargs=None):
         predicates = list()
         for l in attributes:

@@ -46,6 +46,15 @@ class Monitor:
     Generic monitor
     """
     class MonType(Enum):
+        """
+        Contains different monitors types :
+            GENERIC     : a generic monitor (not used)
+            HTTP        : monitoring is performed when receving an HTTP request
+            FX          : monitoring is performed on a python function/method
+            REMEDIATION : a remediation monitor
+            VIEW        : monitoring is performed on view processing
+            RESPONSE    : monitoring is performed on response
+        """
         GENERIC = 0,
         HTTP = 1,
         FX = 2,
@@ -54,6 +63,11 @@ class Monitor:
         RESPONSE = 5
 
     class MonControlType(Enum):
+        """
+        Monitor control types, we have two types of controls :
+            POSTERIORI : The monitor's run is not blocking
+            REAL_TIME  : The monitor's run is blocking, and if a violation occurs
+        """
         POSTERIORI = 0,
         REAL_TIME = 1
 
@@ -63,7 +77,7 @@ class Monitor:
         """
         Init method
         :param name: The name of the monitor (for now the name is also the id)
-        :param description:
+        :param description: a short description of what the monitor does
         :param target:
         :param location: Monitor location (LOCAL / REMOTE_addr)
         :param kind: see Monitor.MonType
@@ -71,7 +85,7 @@ class Monitor:
         :param debug:
         :param povo: Print the result to sys out
         :param violation_formula: The formula to monitor when a remediation is triggered
-        :param liveness: Livness delay :
+        :param liveness:
         :return:
         """
         self.id = name
@@ -117,7 +131,12 @@ class Monitor:
 
     def monitor(self):
         """
-        Monitoring method
+        Trigger the monitor
+        - If the result is ⊥ then the monitor status is changed to ? and a violation is created.
+        - If the result is ? and the liveness parameter is given and the formula is a liveness formula :
+            * The liveness counter is decremented if the monitor is in a good prefix.
+            * The liveness counter is rested if the monitor is in a bad prefix.
+        - If the result is ⊤ and the monitor's kind is remediation then the monitor is disabled.
         :return:
         """
         res = self.mon.monitor(once=True, struct_res=True)
@@ -149,6 +168,11 @@ class Monitor:
         return res
 
     def reset(self):
+        """
+        Reset the monitor formula and set the last result to ? .
+        Note that the current monitor step is not reinitialized.
+        :return:
+        """
         self.mon.last = Boolean3.Unknown
         self.mon.reset()
 
@@ -156,9 +180,19 @@ class Monitor:
         pass
 
     def get_violation_by_id(self, vid) -> Violation:
+        """
+        Returns the violation of the corresponding id if exists else None
+        :param vid:
+        :return:
+        """
         return next(filter(lambda x: x.vid == vid, self.violations), None)
 
     def trigger_remediation(self, violation_id):
+        """
+        Trigger a remediation for the corresponding violation
+        :param violation_id:
+        :return:
+        """
         v = self.get_violation_by_id(violation_id)
         if v is not None:
             mon = Monitor(name="%s_violation_%s" % (v.monitor_id, v.step),
@@ -172,13 +206,17 @@ class Monitor:
                           violation_formula=None,
                           mon_trace=self.target)
 
-            # IMPORTANT : stat remediation monitoring after the violation occurs
+            # IMPORTANT : start remediation monitoring after the violation occurs
             mon.mon.counter = int(v.step)
             mon.mon.counter2 = int(v.step)
             v.remediation_mon = mon
             Sysmon.http_monitors.append(mon)
 
-    def is_liveness_expired(self):
+    def is_liveness_expired(self) -> bool:
+        """
+        Compare the current liveness counter with the base liveness
+        :return: Boolean
+        """
         if self.liveness is not None:
             res = self.liveness_counter <= 0
             return abs(self.liveness_counter) if res else False
@@ -298,6 +336,21 @@ class Mon_fx(Monitor):
 class Sysmon:
     """
     The main system that contains all submonitors
+        fx_monitors
+        http_monitors
+        views_monitors
+        response_monitors
+        main_mon
+        main_view_mon
+        main_response_mon
+        kv_implementation
+        main_mon.KV
+        main_view_mon.KV
+        main_response_mon.KV
+        actors
+        log_http_attributes
+        log_view_attributes
+        log_response_attributes
     """
     fx_monitors = []
     http_monitors = []
@@ -330,19 +383,6 @@ class Sysmon:
         # TODO check if all predicates in formula can be logged
         HttpResponseBase.__init__ = HttpResponseBaseIntercepter(HttpResponseBase.__init__)
 
-    @staticmethod
-    def register_mon(name, formula, target, location, kind, description):
-        """
-        Register a monitor
-        :param name:
-        :param formula:
-        :param target:
-        :param location:
-        :param kind:
-        :param description:
-        :return:
-        """
-        pass
 
     @staticmethod
     def get_mon_by_id(mon_id) -> Monitor:
@@ -366,6 +406,16 @@ class Sysmon:
     @staticmethod
     def add_http_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
                       control_type=Monitor.MonControlType.POSTERIORI):
+        """
+
+        :param name:
+        :param formula:
+        :param description:
+        :param violation_formula:
+        :param liveness:
+        :param control_type:
+        :return:
+        """
         print("Adding http rule %s" % name)
         mon = Mon_http(name=name, target=Monitor.MonType.HTTP, location="LOCAL", kind=Monitor.MonType.HTTP,
                        formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_mon.trace,
@@ -375,6 +425,16 @@ class Sysmon:
     @staticmethod
     def add_view_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
                       control_type=Monitor.MonControlType.POSTERIORI):
+        """
+
+        :param name:
+        :param formula:
+        :param description:
+        :param violation_formula:
+        :param liveness:
+        :param control_type:
+        :return:
+        """
         print("Adding view rule %s" % name)
         mon = Mon_view(name=name, target=Monitor.MonType.VIEW, location="LOCAL", kind=Monitor.MonType.HTTP,
                        formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_view_mon.trace,
@@ -384,6 +444,16 @@ class Sysmon:
     @staticmethod
     def add_response_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
                       control_type=Monitor.MonControlType.POSTERIORI):
+        """
+
+        :param name:
+        :param formula:
+        :param description:
+        :param violation_formula:
+        :param liveness:
+        :param control_type:
+        :return:
+        """
         print("Adding response rule %s" % name)
         mon = Mon_response(name=name, target=Monitor.MonType.RESPONSE, location="LOCAL", kind=Monitor.MonType.HTTP,
                            formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_response_mon.trace,
@@ -391,13 +461,19 @@ class Sysmon:
         Sysmon.response_monitors.append(mon)
 
     @staticmethod
-    def push_event(e: Event, traget: Monitor.MonType):
+    def push_event(e: Event, target: Monitor.MonType):
+        """
+        Push an event into the corresponding main monitor (HTTP/VIEW/RESPONSE)
+        :param e: the event
+        :param target: the target (MonType.HTTP | MonType.VIEW | MonType.RESPONSE)
+        :return:
+        """
         # Push the event to the main mon
-        if traget is Monitor.MonType.HTTP:
+        if target is Monitor.MonType.HTTP:
             Sysmon.main_mon.trace.push_event(e)
-        elif traget is Monitor.MonType.VIEW:
+        elif target is Monitor.MonType.VIEW:
             Sysmon.main_view_mon.trace.push_event(e)
-        elif traget is Monitor.MonType.RESPONSE:
+        elif target is Monitor.MonType.RESPONSE:
             Sysmon.main_response_mon.trace.push_event(e)
         # Store the event into the db
         pass
@@ -408,6 +484,14 @@ class Sysmon:
 
     @staticmethod
     def audit(mon_id, violation_id, comment, verdict):
+        """
+        Performs an audit
+        :param mon_id:
+        :param violation_id:
+        :param comment:
+        :param verdict:
+        :return:
+        """
         m = Sysmon.get_mon_by_id(mon_id)
         if m is not None:
             v = next(filter(lambda x: x.vid == violation_id, m.violations))
@@ -418,6 +502,12 @@ class Sysmon:
 
     @staticmethod
     def register_actor(name, addr):
+        """
+        Register an actor
+        :param name:
+        :param addr:
+        :return:
+        """
         # addr = addr.split(":")  # TODO check and secure
         a = Actor(name, addr, 8080)
         Sysmon.actors.append(a)
@@ -432,6 +522,12 @@ class Sysmon:
 
     @staticmethod
     def add_log_attribute(attr: LogAttribute, target=Monitor.MonType.HTTP):
+        """
+        Adding a custom logging attribute
+        :param attr: The LogAttribute to add
+        :param target: the target (MonType.HTTP | MonType.VIEW | MonType.RESPONSE)
+        :return:
+        """
         setattr(LogAttributes, attr.name, attr)
         if target is Monitor.MonType.HTTP:
             Sysmon.log_http_attributes.append(attr)
