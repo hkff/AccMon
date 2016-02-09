@@ -20,7 +20,8 @@ from django.db import models
 from datetime import datetime
 from hashlib import md5
 from enum import Enum
-from fodtlmon_middleware.whitebox import *
+from django.conf import settings
+from fodtlmon_middleware.sysmon import *
 
 # class Audit(models.Model):
 #     auditor = ""
@@ -36,6 +37,7 @@ from fodtlmon_middleware.whitebox import *
 #     comment = ""
 #     trace = ""
 #     step = ""
+
 
 
 class Violation:

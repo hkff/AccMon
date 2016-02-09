@@ -1,5 +1,5 @@
 """
-Whitebox
+sysmon
 Copyright (C) 2016 Walid Benghabrit
 
 This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import inspect
 import sys
+from fodtlmon_middleware.logging import *
 from django.http.response import HttpResponseBase
 from fodtlmon.fodtl.fodtlmon import *
 from enum import Enum
@@ -51,7 +52,7 @@ class Monitor:
         REMEDIATION = 3,
         VIEW = 4,
         RESPONSE = 5
-    
+
     class MonControlType(Enum):
         POSTERIORI = 0,
         REAL_TIME = 1
@@ -294,17 +295,6 @@ class Mon_fx(Monitor):
 ########################################################
 # Sysmon
 ########################################################
-class LogAttribute:
-    """
-
-    """
-    def __init__(self, name, eval_fx=None, description="", enabled=True):
-        self.name = name
-        self.description = description
-        self.eval_fx = eval_fx
-        self.enabled = enabled
-
-
 class Sysmon:
     """
     The main system that contains all submonitors
@@ -321,47 +311,6 @@ class Sysmon:
     main_view_mon.KV = kv_implementation()
     main_response_mon.KV = kv_implementation()
     actors = []
-
-    class LogAttributes:
-        """
-        Log attributes list
-        """
-        SCHEME = LogAttribute("SCHEME", description="The scheme of the request (http or https usually).", enabled=True,
-                              eval_fx=lambda request, view, args, kwargs, response:
-                              P("SCHEME", args=[Constant(request.scheme)]))
-
-        PATH = LogAttribute("PATH", description="The full path to the requested page, not including the scheme or domain.",
-                            enabled=True, # IMPORTANT Parse path as regexp TODO for META also
-                            eval_fx=lambda request, view, args, kwargs, response:
-                            P(request.method, args=[Constant('"%s"' % request.path)]))
-
-        USER = LogAttribute("USER", description="The currently logged-in user.", enabled=True,
-                              eval_fx=lambda request, view, args, kwargs, response:
-                              P("USER", args=[Constant(request.user)]))
-
-        REMOTE_ADDR = LogAttribute("REMOTE_ADDR", description="The IP address of the client.", enabled=True,
-                              eval_fx=lambda request, view, args, kwargs, response:
-                              P("REMOTE_ADDR", args=[Constant(str(request.META.get("REMOTE_ADDR")))]))
-
-        CONTENT_TYPE = LogAttribute("CONTENT_TYPE", description="The MIME type of the request body.", enabled=True,
-                              eval_fx=lambda request, view, args, kwargs, response:
-                              P("CONTENT_TYPE", args=[Constant(str(request.META.get("CONTENT_TYPE")))]))
-
-        QUERY_STRING = LogAttribute("QUERY_STRING", description=" The query string, as a single (unparsed) string.", enabled=True,
-                              eval_fx=lambda request, view, args, kwargs, response:
-                              P("QUERY_STRING", args=[Constant(str(request.META.get("QUERY_STRING")))]))
-
-        # View specific
-        VIEW_NAME = LogAttribute("VIEW_NAME", description=" The current called django view.", enabled=True,
-                              eval_fx=lambda request, view, args, kwargs, response:
-                              P("VIEW", args=[Constant(str(view.__name__))]))
-
-        # Response specific
-        STATUS_CODE = LogAttribute("STATUS_CODE", description=" The HTTP status code for the response.", enabled=True,
-                              eval_fx=lambda request, view, args, kwargs, response:
-                              P("STATUS_CODE", args=[Constant(str(response.status_code))]))
-
-    LGA = LogAttributes
 
     # Log attributes lists
     log_http_attributes = [LGA.SCHEME, LGA.PATH, LGA.USER, LGA.REMOTE_ADDR, LGA.CONTENT_TYPE, LGA.QUERY_STRING]
@@ -483,7 +432,7 @@ class Sysmon:
 
     @staticmethod
     def add_log_attribute(attr: LogAttribute, target=Monitor.MonType.HTTP):
-        setattr(Sysmon.LogAttributes, attr.name, attr)
+        setattr(LogAttributes, attr.name, attr)
         if target is Monitor.MonType.HTTP:
             Sysmon.log_http_attributes.append(attr)
         elif target is Monitor.MonType.VIEW:

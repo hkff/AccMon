@@ -20,6 +20,23 @@ from enum import Enum
 import inspect
 
 
+class Blackbox:
+    """
+    Blackbox class that contains all available controls
+    """
+    class Severity(Enum):
+        UNDEFINED = 0,
+        LOW = 1,
+        MEDIUM = 2,
+        HIGH = 3
+
+    CONTROLS = []
+    VIEWS = []
+    MODELS = []
+    INSTALLED_APPS = []
+    MIDDLEWARE_CLASSES = []
+
+
 ########################################################
 # Methods calls tracer
 ########################################################
@@ -75,23 +92,6 @@ class Control:
 
     def run(self, stack):
         pass
-
-
-class Blackbox:
-    """
-    Blackbox class that contains all available controls
-    """
-    class Severity(Enum):
-        UNDEFINED = 0,
-        LOW = 1,
-        MEDIUM = 2,
-        HIGH = 3
-
-    CONTROLS = []
-    VIEWS = []
-    MODELS = []
-    INSTALLED_APPS = []
-    MIDDLEWARE_CLASSES = []
 
 
 ########################################################

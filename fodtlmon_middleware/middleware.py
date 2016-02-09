@@ -19,7 +19,7 @@ from django.http import HttpResponse
 from django.contrib.auth import *
 from django.contrib.auth.models import User
 from django.shortcuts import render
-from fodtlmon_middleware.whitebox import *
+from fodtlmon_middleware.sysmon import *
 import threading
 
 TIMER = 0
@@ -51,7 +51,6 @@ class FodtlmonMiddleware(object):
                     # TODO make it thread safe
                     threading.Thread(target=m.monitor).start()
         return violations
-
 
     ############################################
     # 1. Processing an incoming HTTP request
@@ -148,7 +147,7 @@ class FodtlmonMiddleware(object):
                     response["KV"] = Sysmon.main_mon.KV
             elif request.method == 'GET':
                 kv = request.GET.get("KV")
-                if kv is not None:
+                if kv is not None:  # Add it to meta ?
                     response["KV"] = Sysmon.main_mon.KV
 
             print("****************** response time %s " % (time.time() - TIMER))
