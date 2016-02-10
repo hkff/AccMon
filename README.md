@@ -1,3 +1,7 @@
+[![License](https://img.shields.io/badge/version-1.0-orange.svg)]()
+[![License](https://img.shields.io/badge/license-GPL3-blue.svg)]()
+[![License](https://img.shields.io/badge/python->%3D3.4-green.svg)]()
+
 # django-fodtlmon-middleware
 FODTLMON-middleware Version 1.0
 
