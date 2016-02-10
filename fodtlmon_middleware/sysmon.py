@@ -380,9 +380,20 @@ class Sysmon:
         Blackbox.VIEWS = [x.__name__ for x in list(filter(lambda y: inspect.isfunction(y), get_resolver(None).reverse_dict))]
         Blackbox.INSTALLED_APPS = settings.INSTALLED_APPS
         Blackbox.MIDDLEWARE_CLASSES = settings.MIDDLEWARE_CLASSES
-        # TODO check if all predicates in formula can be logged
         HttpResponseBase.__init__ = HttpResponseBaseIntercepter(HttpResponseBase.__init__)
 
+    @staticmethod
+    def check_logged_predicates():
+        active_attributes = [x.name for x in list(filter(lambda x: x.enabled, Sysmon.get_log_attributes()))]
+        for mon in Sysmon.get_mons():
+            predicates = mon.mon.formula.walk(filter_type=Predicate)
+            for p in predicates:
+                if p.name not in active_attributes:
+                    print("Warning predicate %s may be not logged ! " % p.name)
+
+    @staticmethod
+    def get_log_attributes():
+        return Sysmon.log_http_attributes + Sysmon.log_view_attributes + Sysmon.log_response_attributes
 
     @staticmethod
     def get_mon_by_id(mon_id) -> Monitor:
