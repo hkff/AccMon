@@ -366,7 +366,7 @@ class Sysmon:
     actors = []
 
     # Log attributes lists
-    log_http_attributes = [LGA.SCHEME, LGA.PATH, LGA.USER, LGA.REMOTE_ADDR, LGA.CONTENT_TYPE, LGA.QUERY_STRING]
+    log_http_attributes = [LGA.SCHEME, LGA.PATH, LGA.USER, LGA.REMOTE_ADDR, LGA.CONTENT_TYPE, LGA.QUERY_STRING, LGA.REAL_IP]
     log_view_attributes = [LGA.VIEW_NAME]
     log_response_attributes = [LGA.STATUS_CODE]
 

@@ -21,7 +21,7 @@ from datetime import datetime
 from hashlib import md5
 from enum import Enum
 from django.conf import settings
-from fodtlmon_middleware.sysmon import *
+#from fodtlmon_middleware.sysmon import *
 
 # class Audit(models.Model):
 #     auditor = ""
@@ -38,6 +38,9 @@ from fodtlmon_middleware.sysmon import *
 #     trace = ""
 #     step = ""
 
+
+class v2(models.Model):
+            pass
 
 
 class Violation:
