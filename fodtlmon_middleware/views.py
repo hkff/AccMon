@@ -15,21 +15,42 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from fodtlmon_middleware.middleware import *
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout, login
+from django.contrib.auth.decorators import user_passes_test
 
 
 ##########################
 # Sysmon APP
 ##########################
-def login(request):
-    return render(request, 'pages/login.html')
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return redirect(index)
+            else:
+                return render(request, 'pages/login.html')
+        else:
+            return render(request, 'pages/login.html')
+    else:
+        return render(request, 'pages/login.html')
 
 
-#@login_required(login_url='sysmon_login')
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
+def logout_view(request):
+    logout(request)
+    return redirect(index)
+
+
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def index(request):
     args = {}
     mons = Sysmon.get_mons()
@@ -42,18 +63,22 @@ def index(request):
     return render(request, 'pages/home.html', args)
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_monitors(request):
     return render(request, 'pages/monitors.html', {"monitors": Sysmon.get_mons()})
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_help(request):
     return render(request, 'pages/sysmon_help.html')
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_actors(request):
     return render(request, 'pages/actors.html', {"actors": Sysmon.actors, "KV": Sysmon.main_mon.KV})
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_stats(request):
     mons = Sysmon.get_mons()
     t = len(list(filter(lambda m: m.mon.last is Boolean3.Top, mons)))
@@ -63,6 +88,7 @@ def show_stats(request):
     return render(request, 'pages/stats.html', args)
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_config(request):
     args = {"log_http_attributes": Sysmon.log_http_attributes,
             "log_view_attributes": Sysmon.log_view_attributes,
@@ -71,32 +97,38 @@ def show_config(request):
     return render(request, 'pages/config.html', args)
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_mon_details(request, mon_id):
     m = Sysmon.get_mon_by_id(mon_id)
     return render(request, 'pages/monitor.html', {"monitor": m})
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_actor_details(request, actor_name):
     a = Sysmon.get_actor_by_name(actor_name)
     return render(request, 'pages/actor.html', {"actor": a})
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_mon_violations(request, mon_id):
     m = Sysmon.get_mon_by_id(mon_id)
     return render(request, 'pages/violations.html', {"monitor": m})
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_traces(request):
     args = {"http_trace": Sysmon.main_mon.trace, "view_trace": Sysmon.main_view_mon.trace,
             "response_trace": Sysmon.main_response_mon.trace}
     return render(request, 'pages/traces.html', args)
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_control_details(request, control_name):
     control = Sysmon.get_blackbox_control_by_name(control_name)
     return render(request, 'pages/control.html', {"control": control})
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def change_mon_status(request, mon_id):
     if request.method == "POST":
         m = Sysmon.get_mon_by_id(mon_id)
@@ -119,6 +151,7 @@ def change_mon_status(request, mon_id):
     return HttpResponse("KO")
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def mon_violation_audit(request, mon_id, violation_id):
     if request.method == "POST":
         comment = request.POST.get('comment', '')
@@ -138,6 +171,7 @@ def mon_violation_audit(request, mon_id, violation_id):
         return render(request, 'pages/audit.html', {"monitor": m, "violation": v})
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def update_log_rule(request):
     if request.method == "POST":
         kind = request.POST.get('kind', None)
@@ -159,6 +193,7 @@ def update_log_rule(request):
     return HttpResponse("KO")
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def update_control_status(request):
     if request.method == "POST":
         status = request.POST.get('status', None)
@@ -177,6 +212,7 @@ def update_control_status(request):
 ##########################
 # Sysmon API
 ##########################
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def api_get_monitors_updates(request):
     res = {}
     mons = Sysmon.get_mons()
@@ -201,16 +237,19 @@ def api_get_monitors_updates(request):
     return JsonResponse(res)
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def api_get_mon_details(request, mon_id):
     m = Sysmon.get_mon_by_id(mon_id)
     return render(request, 'fragments/monitor.html', {"monitor": m})
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def api_register_actor_formulas(request, actor_name):
     Sysmon.register_actor_formulas(actor_name)
     return HttpResponse("ok")
 
 
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 @csrf_exempt
 def register_formula(request):
     formula = request.POST.get("formula", None)
