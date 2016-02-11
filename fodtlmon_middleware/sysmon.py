@@ -141,10 +141,14 @@ class Monitor:
         """
         res = self.mon.monitor(once=True, struct_res=True)
         if res.get("result") is Boolean3.Bottom:
-            self.mon.last = Boolean3.Unknown
-            self.mon.reset()
-            v = Violation(self.id, step=self.mon.counter, trace=self.mon.trace.events[self.mon.counter-1])
-            self.violations.append(v)
+            # Only G(...) formulas can be violated multiple time, other formula are violated once
+            if len(self.violations) == 0 or isinstance(self.mon.formula, Always):
+                v = Violation(self.id, step=self.mon.counter, trace=self.mon.trace.events[self.mon.counter-1])
+                self.violations.append(v)
+            # Reset only if it's a formula G(...)
+            if isinstance(self.mon.formula, Always):
+                self.mon.last = Boolean3.Unknown
+                self.mon.reset()
 
         elif res.get("result") is Boolean3.Unknown:
             # test liveness

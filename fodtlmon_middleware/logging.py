@@ -95,12 +95,12 @@ class LogAttributes:
                           P("SESSION", args=[Constant(str(request.session.session_key))]) if request.session else None)
 
     # View specific
-    VIEW_NAME = LogAttribute("VIEW_NAME", description=" The current called django view.", enabled=True,
+    VIEW_NAME = LogAttribute("VIEW_NAME", description="The current called django view.", enabled=True,
                           eval_fx=lambda request, view, args, kwargs, response:
                           P("VIEW", args=[Constant(str(view.__name__))]))
 
     # Response specific
-    STATUS_CODE = LogAttribute("STATUS_CODE", description=" The HTTP status code for the response.", enabled=True,
+    STATUS_CODE = LogAttribute("STATUS_CODE", description="The HTTP status code for the response.", enabled=True,
                           eval_fx=lambda request, view, args, kwargs, response:
                           P("STATUS_CODE", args=[Constant(str(response.status_code))]))
 
