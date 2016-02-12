@@ -86,7 +86,7 @@ class LogAttributes:
                           eval_fx=lambda request, view, args, kwargs, response:
                           P("USER_AGENT", args=[Constant(str(request.META.get("HTTP_USER_AGENT")))]))
 
-    ADMIN = LogAttribute("ADMIN", description="If the logged user is admin.", enabled=False,
+    ADMIN = LogAttribute("ADMIN", description="If the logged user is admin.", enabled=True,
                           eval_fx=lambda request, view, args, kwargs, response:
                           P("ADMIN", args=[Constant(str(request.user))]) if request.user.is_superuser else None)
 

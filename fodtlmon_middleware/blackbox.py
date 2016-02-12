@@ -147,11 +147,22 @@ class URL_OPEN(Control):
         pass
 
 
+class XSS(Control):
+    """
+    XSS control
+    """
+    def prepare(self, request, view, args, kwargs):
+        self.current_view_name = view.__name__
+
+    def run(self, stack):
+        pass
+
 #############################################################
 # Adding controls to the available controls in the blackbox
 #############################################################
 Blackbox.CONTROLS = [
     VIEWS_INTRACALLS(enabled=True, severity=Blackbox.Severity.HIGH),
+    XSS(enabled=True, severity=Blackbox.Severity.HIGH),
     # IO_OP(enabled=False, severity=Blackbox.Severity.MEDIUM),
     # URL_OPEN(enabled=False, severity=Blackbox.Severity.HIGH)
 ]
