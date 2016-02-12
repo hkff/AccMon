@@ -87,6 +87,9 @@ class Control:
     def enable(self):
         pass
 
+    def initialize(self):
+        pass
+
     def prepare(self, request, view, args, kwargs):
         self.current_view_name = view.__name__
 
@@ -120,7 +123,7 @@ class VIEWS_INTRACALLS(Control):
 ##########################
 class INJECTION(Control):
     """
-    A1- SQL injection
+    A1- Code injection
     """
     pass
 
@@ -162,16 +165,32 @@ class XSS(Control):
 
 class IDOR(Control):
     """
-    A4- Insecure Direct Object Reference (IDOR)
+    A4- Insecure Direct Object Reference (IDOR).
     """
-    pass
+    def initialize(self):
+        from django.db.models.signals import pre_delete, pre_save
+        pre_save.connect(self.access_check, dispatch_uid="sysmon.idor.accesscheck")
+        pre_delete.connect(self.access_check, dispatch_uid="sysmon.idor.deletecheck")
+
+    def access_check(self, sender, **kwargs):
+        details = "A user is being accessed: %s" % sender
+        self.entries.append(Control.Entry(view="_", details=details))
+
+    def delete_check(self, sender, **kwargs):
+        details = "A user is being deleted : %s" % sender
+        self.entries.append(Control.Entry(view="_", details=details))
 
 
 class MISCONFIG(Control):
     """
     A5- Security Misconfiguration
     """
-    pass
+    def initialize(self):
+        from django.conf import settings
+        if settings.DEBUG:
+            details = "Warning DEBUG mode is enabled, if you are in production you should set DEBUG to False " \
+                      "in your settings."
+            self.entries.append(Control.Entry(view="_", details=details))
 
 
 class EXPOS(Control):
@@ -192,7 +211,11 @@ class CSRF(Control):
     """
     A8- Cross-site Request Forgery
     """
-    pass
+    def prepare(self, request, view, args, kwargs):
+        if hasattr(view, "csrf_exempt"):
+            if getattr(view, "csrf_exempt"):
+                details = "A view with CSRF exempt is being to be called"
+                self.entries.append(Control.Entry(view=view.__name__, details=details))
 
 
 class COMPONENTS(Control):
@@ -213,14 +236,14 @@ class REDIR(Control):
 #############################################################
 Blackbox.CONTROLS = [
     VIEWS_INTRACALLS(enabled=True, severity=Blackbox.Severity.HIGH),
-    INJECTION(enabled=True, severity=Blackbox.Severity.HIGH),
-    AUTH(enabled=True, severity=Blackbox.Severity.HIGH),
+    INJECTION(enabled=False, severity=Blackbox.Severity.HIGH),
+    AUTH(enabled=False, severity=Blackbox.Severity.HIGH),
     XSS(enabled=True, severity=Blackbox.Severity.HIGH),
     IDOR(enabled=True, severity=Blackbox.Severity.HIGH),
     MISCONFIG(enabled=True, severity=Blackbox.Severity.HIGH),
-    EXPOS(enabled=True, severity=Blackbox.Severity.HIGH),
-    ACCESS(enabled=True, severity=Blackbox.Severity.HIGH),
-    CSRF(enabled=True, severity=Blackbox.Severity.HIGH),
-    COMPONENTS(enabled=True, severity=Blackbox.Severity.HIGH),
-    REDIR(enabled=True, severity=Blackbox.Severity.HIGH),
+    EXPOS(enabled=False, severity=Blackbox.Severity.HIGH),
+    ACCESS(enabled=False, severity=Blackbox.Severity.HIGH),
+    CSRF(enabled=True, severity=Blackbox.Severity.LOW),
+    COMPONENTS(enabled=False, severity=Blackbox.Severity.HIGH),
+    REDIR(enabled=False, severity=Blackbox.Severity.HIGH),
 ]

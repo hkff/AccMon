@@ -388,6 +388,8 @@ class Sysmon:
         Blackbox.INSTALLED_APPS = settings.INSTALLED_APPS
         Blackbox.MIDDLEWARE_CLASSES = settings.MIDDLEWARE_CLASSES
         HttpResponseBase.__init__ = HttpResponseBaseIntercepter(HttpResponseBase.__init__)
+        for control in Blackbox.CONTROLS:
+            control.initialize()
 
     @staticmethod
     def check_logged_predicates():
