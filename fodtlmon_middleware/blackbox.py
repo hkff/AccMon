@@ -115,54 +115,112 @@ class VIEWS_INTRACALLS(Control):
             self.entries.append(Control.Entry(view=self.current_view_name, details=details))
 
 
-class IO_OP(Control):
+##########################
+# OWASP top 10 controls
+##########################
+class INJECTION(Control):
     """
-    Writing data in disk, may be a data disclosure
+    A1- SQL injection
     """
-    # TODO : use regexp instead
-    IO_OPS = [' open', ' print']
-
-    def run(self, stack):
-        # TODO
-        # Stack.print_stack(file="tmp3") # FIXME duplicated entries
-        # r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.LINE and x.get("c_func") in Blackbox.VIEWS
-        #                           and len([x for z in self.IO_OPS if z in x.get("line_code")]) > 0, Stack.frames))
-        # for x in r:
-        #     details = "at line %s : %s " % (x.get("c_lineno"), x.get("line_code"))
-        #     self.entries.append(Control.Entry(view=self.current_view_name, details=details))
-        for x in stack:
-            print(x[3])
+    pass
 
 
-class URL_OPEN(Control):
+class AUTH(Control):
     """
-    Performing external http requests
+    A2- Broken authentication
     """
-    def run(self, stack):
-        # TODO
-        # r = list(filter(lambda x: x.get("event") == Stack.STACK_EVENTS.CALL and x.get("c_func") == "urlopen", Stack.frames))
-        # for x in r:
-        #     details = "In %s at line %s : %s " % (x.get("c_file"), x.get("c_lineno"), x.get("line_code"))
-        #     self.entries.append(Control.Entry(view=self.current_view_name, details=details))
-        pass
+    pass
 
 
 class XSS(Control):
     """
-    XSS control
+    A3- XSS (Cross-Site Scripting) input sanitizer
     """
     def prepare(self, request, view, args, kwargs):
+        # TODO : try to implement owasp XSS rules
         self.current_view_name = view.__name__
+        data = {}
+        if request.method == 'GET':
+            data = request.GET
+        elif request.method == 'POST':
+            data = request.POST
+
+        for x in data:
+            if data.get(x).startswith("javascript"):
+                import cgi
+                mutable = data._mutable
+                data._mutable = True
+                #data[x] = "cgi.escape(data.get(x))"
+                data._mutable = mutable
+                details = "Potential XSS attack on %s with arg %s : %s" % (self.current_view_name, x, data.get(x))
+                self.entries.append(Control.Entry(view=self.current_view_name, details=details))
+                #return False
 
     def run(self, stack):
         pass
+
+
+class IDOR(Control):
+    """
+    A4- Insecure Direct Object Reference (IDOR)
+    """
+    pass
+
+
+class MISCONFIG(Control):
+    """
+    A5- Security Misconfiguration
+    """
+    pass
+
+
+class EXPOS(Control):
+    """
+    A6- Sensitive Data Exposure
+    """
+    pass
+
+
+class ACCESS(Control):
+    """
+    A7- Missing Function Level Access Control
+    """
+    pass
+
+
+class CSRF(Control):
+    """
+    A8- Cross-site Request Forgery
+    """
+    pass
+
+
+class COMPONENTS(Control):
+    """
+    A9- Using Components with Known Vulnerabilities
+    """
+    pass
+
+
+class REDIR(Control):
+    """
+    A10- Insecure Redirect
+    """
+    pass
 
 #############################################################
 # Adding controls to the available controls in the blackbox
 #############################################################
 Blackbox.CONTROLS = [
     VIEWS_INTRACALLS(enabled=True, severity=Blackbox.Severity.HIGH),
+    INJECTION(enabled=True, severity=Blackbox.Severity.HIGH),
+    AUTH(enabled=True, severity=Blackbox.Severity.HIGH),
     XSS(enabled=True, severity=Blackbox.Severity.HIGH),
-    # IO_OP(enabled=False, severity=Blackbox.Severity.MEDIUM),
-    # URL_OPEN(enabled=False, severity=Blackbox.Severity.HIGH)
+    IDOR(enabled=True, severity=Blackbox.Severity.HIGH),
+    MISCONFIG(enabled=True, severity=Blackbox.Severity.HIGH),
+    EXPOS(enabled=True, severity=Blackbox.Severity.HIGH),
+    ACCESS(enabled=True, severity=Blackbox.Severity.HIGH),
+    CSRF(enabled=True, severity=Blackbox.Severity.HIGH),
+    COMPONENTS(enabled=True, severity=Blackbox.Severity.HIGH),
+    REDIR(enabled=True, severity=Blackbox.Severity.HIGH),
 ]

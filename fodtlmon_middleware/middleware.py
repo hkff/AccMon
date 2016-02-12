@@ -114,7 +114,9 @@ class FodtlmonMiddleware(object):
                 enabled = next(filter(lambda x: x.enabled, Blackbox.CONTROLS), None)
                 if enabled is not None:
                     for control in Blackbox.CONTROLS:
-                        control.prepare(request, view, args, kwargs)
+                        res = control.prepare(request, view, args, kwargs)
+                        if res is not None:
+                            return render(request, "pages/access_denied.html")
 
     ############################################
     # 3. Processing an HTTP response
