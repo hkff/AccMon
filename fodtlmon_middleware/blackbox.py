@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import datetime
 from enum import Enum
 import inspect
+from django.contrib.auth.models import User
 
 
 class Blackbox:
@@ -130,9 +131,26 @@ class INJECTION(Control):
 
 class AUTH(Control):
     """
-    A2- Broken authentication
+    A2- Broken authentication (privileges escalation checks)
     """
-    pass
+    def initialize(self):
+        from django.db.models.signals import pre_save
+        pre_save.connect(self.access_check, dispatch_uid="sysmon.auth.accesscheck")
+
+    def prepare(self, request, view, args, kwargs):
+        self.user=request.user
+        self.current_view_name = view.__name__
+
+    def access_check(self, sender, **kwargs):
+        if issubclass(sender, User):
+            i = kwargs.get("instance")
+            if i is not None:
+                u = User.objects.filter(username=self.user).first()
+                if u is not None:
+                    if i.is_superuser and (u == "AnonymousUser" or (u is not None and not u.is_superuser)):
+                        details = "Privileges escalation the user %s is being admin by a non admin." % i.username
+                        self.entries.append(Control.Entry(view=self.current_view_name, details=details))
+            self.user=None
 
 
 class XSS(Control):
@@ -237,7 +255,7 @@ class REDIR(Control):
 Blackbox.CONTROLS = [
     VIEWS_INTRACALLS(enabled=True, severity=Blackbox.Severity.HIGH),
     INJECTION(enabled=False, severity=Blackbox.Severity.HIGH),
-    AUTH(enabled=False, severity=Blackbox.Severity.HIGH),
+    AUTH(enabled=True, severity=Blackbox.Severity.HIGH),
     XSS(enabled=True, severity=Blackbox.Severity.HIGH),
     IDOR(enabled=True, severity=Blackbox.Severity.HIGH),
     MISCONFIG(enabled=True, severity=Blackbox.Severity.HIGH),
