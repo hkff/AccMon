@@ -138,7 +138,7 @@ class AUTH(Control):
         pre_save.connect(self.access_check, dispatch_uid="sysmon.auth.accesscheck")
 
     def prepare(self, request, view, args, kwargs):
-        self.user=request.user
+        self.user = request.user
         self.current_view_name = view.__name__
 
     def access_check(self, sender, **kwargs):
@@ -147,7 +147,7 @@ class AUTH(Control):
             u = User.objects.filter(username=self.user).first()
             escale = False
             if i is not None:
-                if u is None or "AnonymousUser":
+                if u is None:
                     if i.is_superuser:
                         escale = True
                 else:
@@ -156,7 +156,7 @@ class AUTH(Control):
                 if escale:
                     details = "Privileges escalation the user %s is being admin by a non admin." % i.username
                     self.entries.append(Control.Entry(view=self.current_view_name, details=details))
-            self.user=None
+            # self.user = None
 
 
 class XSS(Control):
@@ -196,13 +196,26 @@ class IDOR(Control):
         pre_save.connect(self.access_check, dispatch_uid="sysmon.idor.accesscheck")
         pre_delete.connect(self.access_check, dispatch_uid="sysmon.idor.deletecheck")
 
+    def prepare(self, request, view, args, kwargs):
+        self.current_view_name = view.__name__
+        self.user = request.user
+
     def access_check(self, sender, **kwargs):
-        details = "A user is being accessed: %s" % sender
-        self.entries.append(Control.Entry(view="_", details=details))
+        # details = "A user is being accessed: %s" % sender
+        # self.entries.append(Control.Entry(view="_", details=details))
+        pass
 
     def delete_check(self, sender, **kwargs):
-        details = "A user is being deleted : %s" % sender
-        self.entries.append(Control.Entry(view="_", details=details))
+        if issubclass(sender, User):
+            i = kwargs.get("instance")
+            u = User.objects.filter(username=self.user).first()
+            if u is not None:
+                if i.username != u.username and not i.is_superuser:
+                    details = "The user %s is being deleted by a non admin user %s" % (i.username, u.username)
+                    self.entries.append(Control.Entry(view="_", details=details))
+            else:
+                    details = "The user %s is being deleted by a an anonymous user %s" % (i.username, u)
+                    self.entries.append(Control.Entry(view="_", details=details))
 
 
 class MISCONFIG(Control):
@@ -260,14 +273,14 @@ class REDIR(Control):
 #############################################################
 Blackbox.CONTROLS = [
     VIEWS_INTRACALLS(enabled=True, severity=Blackbox.Severity.HIGH),
-    INJECTION(enabled=False, severity=Blackbox.Severity.HIGH),
+    #INJECTION(enabled=False, severity=Blackbox.Severity.HIGH),
     AUTH(enabled=True, severity=Blackbox.Severity.HIGH),
     XSS(enabled=True, severity=Blackbox.Severity.HIGH),
     IDOR(enabled=True, severity=Blackbox.Severity.HIGH),
     MISCONFIG(enabled=True, severity=Blackbox.Severity.HIGH),
-    EXPOS(enabled=False, severity=Blackbox.Severity.HIGH),
-    ACCESS(enabled=False, severity=Blackbox.Severity.HIGH),
+    #EXPOS(enabled=False, severity=Blackbox.Severity.HIGH),
+    #ACCESS(enabled=False, severity=Blackbox.Severity.HIGH),
     CSRF(enabled=True, severity=Blackbox.Severity.LOW),
-    COMPONENTS(enabled=False, severity=Blackbox.Severity.HIGH),
-    REDIR(enabled=False, severity=Blackbox.Severity.HIGH),
+    #COMPONENTS(enabled=False, severity=Blackbox.Severity.HIGH),
+    #REDIR(enabled=False, severity=Blackbox.Severity.HIGH),
 ]
