@@ -32,14 +32,14 @@ Usage
 2. In your django project wsgi.py :
     add the init call to the monitoring system
     
-        from fodtlmon_middleware.whitebox import Sysmon
+        from fodtlmon_middleware.sysmon import Sysmon
         Sysmon.init()
 
 
 2. Create a python file (eg.: sysmon_rules.py)
     Note that the code above should be executed only once when the server starts
         
-        from fodtlmon_middleware.whitebox import *
+        from fodtlmon_middleware.sysmon import *
         
         # Define your Interpreted predicates here
         
@@ -56,7 +56,7 @@ Usage
     
         description="", violation_formula: str=None, liveness=None, control_type=Monitor.MonControlType.POSTERIORI | REAL_TIME
                       
-3. At the top of settings.py import the sysmon_rules
+3. Add the import of sysmon_rules in your wsgi.py
 
 4. In urls.py :
     Add the following import
@@ -66,7 +66,7 @@ Usage
     and the url pattern :
         (eg.: here the system monitor app will be accessed via http../your_base_url/mon)
         
-        url(r'^mon', include(fodtlurls.urlpatterns)),
+        url(r'^mon/', include(fodtlurls.urlpatterns)),
 
 5. Optional : 
     You can also define monitors on functions and class methods using the decorator @mon_fx
