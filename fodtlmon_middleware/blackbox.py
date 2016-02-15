@@ -144,12 +144,18 @@ class AUTH(Control):
     def access_check(self, sender, **kwargs):
         if issubclass(sender, User):
             i = kwargs.get("instance")
+            u = User.objects.filter(username=self.user).first()
+            escale = False
             if i is not None:
-                u = User.objects.filter(username=self.user).first()
-                if u is not None:
-                    if i.is_superuser and (u == "AnonymousUser" or (u is not None and not u.is_superuser)):
-                        details = "Privileges escalation the user %s is being admin by a non admin." % i.username
-                        self.entries.append(Control.Entry(view=self.current_view_name, details=details))
+                if u is None or "AnonymousUser":
+                    if i.is_superuser:
+                        escale = True
+                else:
+                    if i.is_superuser and not u.is_superuser:
+                        escale=True
+                if escale:
+                    details = "Privileges escalation the user %s is being admin by a non admin." % i.username
+                    self.entries.append(Control.Entry(view=self.current_view_name, details=details))
             self.user=None
 
 
