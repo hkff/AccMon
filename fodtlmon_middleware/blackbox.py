@@ -134,6 +134,7 @@ class AUTH(Control):
     A2- Broken authentication (privileges escalation checks)
     """
     def initialize(self):
+        setattr(self, "user", None)
         from django.db.models.signals import pre_save
         pre_save.connect(self.access_check, dispatch_uid="sysmon.auth.accesscheck")
 
