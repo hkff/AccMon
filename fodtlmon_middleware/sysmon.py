@@ -393,8 +393,10 @@ class Sysmon:
             control.initialize()
 
         # Import plugins
-        from fodtlmon_middleware.plugins import system, arduino
-        Sysmon.plugins = [system.System(), arduino.Arduino()]
+        from fodtlmon_middleware.plugins import system, arduino, remote
+        Sysmon.plugins = [system.System(), arduino.Arduino(), remote.Remote()]
+        Sysmon.plugins[2].start(10000)
+        #Sysmon.plugins[1].connect()
 
     @staticmethod
     def check_logged_predicates():
