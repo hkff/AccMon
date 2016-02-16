@@ -74,6 +74,11 @@ def show_help(request):
 
 
 @user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
+def show_plugins(request):
+    return render(request, 'pages/plugins.html')
+
+
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_actors(request):
     return render(request, 'pages/actors.html', {"actors": Sysmon.actors, "KV": Sysmon.main_mon.KV})
 
