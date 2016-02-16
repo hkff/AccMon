@@ -1,1 +1,7 @@
 arduino plugin content
+<label for="sel1">Select list :</label>
+<select class="form-control" id="sel1">
+    {% for tty in ttys %}
+        <option>{{ tty }}</option>
+    {% endfor %}
+</select>

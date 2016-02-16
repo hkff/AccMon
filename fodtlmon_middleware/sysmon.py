@@ -505,7 +505,10 @@ class Sysmon:
 
     @staticmethod
     def get_mons():
-        return Sysmon.fx_monitors + Sysmon.http_monitors + Sysmon.views_monitors + Sysmon.response_monitors
+        plugins = []
+        for x in Sysmon.plugins:
+            plugins.extend(x.monitors)
+        return Sysmon.fx_monitors + Sysmon.http_monitors + Sysmon.views_monitors + Sysmon.response_monitors + plugins
 
     @staticmethod
     def audit(mon_id, violation_id, comment, verdict):

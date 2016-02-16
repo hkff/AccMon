@@ -22,13 +22,24 @@ class Plugin:
     """
     Plugin
     """
+    monitors = []
+
     def __init__(self):
         self.name = self.__class__.__name__
-        self.monitors = []
-        self.enabled = False
+        setattr(self.__class__, "enabled", False)
+        setattr(self.__class__, "monitors", [])
+        setattr(self.__class__, "main_mon", Fodtlmon("true", Trace()))
 
     def get_template_args(self):
         return {}
 
     def handle_request(self, request):
         pass
+
+    @classmethod
+    def add_rule(cls, name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
+                      control_type=Monitor.MonControlType.POSTERIORI):
+        mon = Monitor(name=name, target=Monitor.MonType.GENERIC, location=cls.__name__, kind=Monitor.MonType.GENERIC,
+                       formula=formula, description=description, debug=False, povo=True, mon_trace=cls.main_mon.trace,
+                       violation_formula=violation_formula, liveness=liveness, control_type=control_type)
+        cls.monitors.append(mon)
