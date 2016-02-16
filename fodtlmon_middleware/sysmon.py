@@ -368,6 +368,7 @@ class Sysmon:
     main_view_mon.KV = kv_implementation()
     main_response_mon.KV = kv_implementation()
     actors = []
+    plugins = []
 
     # Log attributes lists
     log_http_attributes = [
@@ -390,6 +391,10 @@ class Sysmon:
         HttpResponseBase.__init__ = HttpResponseBaseIntercepter(HttpResponseBase.__init__)
         for control in Blackbox.CONTROLS:
             control.initialize()
+
+        # Import plugins
+        from fodtlmon_middleware.plugins import system, arduino
+        Sysmon.plugins = [system.System(), arduino.Arduino()]
 
     @staticmethod
     def check_logged_predicates():

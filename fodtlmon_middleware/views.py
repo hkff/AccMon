@@ -75,7 +75,10 @@ def show_help(request):
 
 @user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_plugins(request):
-    return render(request, 'pages/plugins.html')
+    args = {"plugins": Sysmon.plugins}
+    for p in Sysmon.plugins:
+        args.update(p.get_template_args())
+    return render(request, 'pages/plugins.html', args)
 
 
 @user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')

@@ -4,6 +4,23 @@
 
 {% block container %}
 
-<a> Plugins </a>
-{% endblock %}
+<div class="container">
+    <h2>Plugins</h2>
+    <ul class="nav nav-tabs">
+        {% for p in plugins %}
+            <li><a data-toggle="tab" href="#{{ p.name }}">{{ p.name }}</a></li>
+        {% endfor %}
+    </ul>
 
+    <div class="tab-content">
+        {% for p in plugins %}
+        <div id="{{ p.name }}" class="tab-pane fade">
+            <h3>{{ p.name }}</h3>
+            {% with template_name=p.name|stringformat:"s"|add:".html" %}
+                {% include "fragments/plugins/"|add:template_name %}
+            {% endwith %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
