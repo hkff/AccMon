@@ -103,13 +103,16 @@ class Remote(Plugin):
         def handle_req(self, path, args, method):
             res = "Error"
             try:
-                e = Event.parse(args.get("event")[0])
-                if e is not None:
-                    self.main_mon.push_event(e, step=datetime.now())
-                    for x in self.monitors:
-                        x.monitor()
-                    return "Pushed"
-                else:
-                    return "Bad event format !"
-            finally:
+                if path.startswith("/event"):
+                    e = Event.parse(args.get("event")[0])
+                    e.step = datetime.now()
+                    if e is not None:
+                        Remote.main_mon.push_event(e)
+                        for x in Remote.monitors:
+                            x.monitor()
+                        return "Pushed"
+                    else:
+                        return "Bad event format !"
+                return res
+            except:
                 return res
