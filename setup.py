@@ -33,6 +33,6 @@ setup(
     description='FODTLMON-middleware is a monitoring middleware for django.',
     install_requires=[
         'fodtlmon>=1.0',
-        'pycallgraph>=1.0'
+        'pyserial>=3.0'
     ]
 )
