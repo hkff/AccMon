@@ -20,11 +20,11 @@ from distutils.core import setup
 setup(
     name='django-fodtlmon-middleware',
     version='1.0',
-    packages=['fodtlmon_middleware'],
+    packages=['fodtlmon_middleware', 'fodtlmon_middleware/plugins'],
     package_data={
         'fodtlmon_middleware': [
             'static/*', 'static/css/*', 'static/js/*', 'static/fonts/*',
-            'templates/*', 'templates/pages/*', 'templates/fragments/*'
+            'templates/*', 'templates/pages/*', 'templates/fragments/*', 'templates/fragments/plugins/*'
         ]},
     url='https://github.com/hkff/django-fodtlmon-middleware',
     license='GPL3',
