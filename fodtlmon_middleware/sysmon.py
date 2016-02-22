@@ -197,6 +197,8 @@ class Monitor:
         :param violation_id:
         :return:
         """
+        if self.violation_formula is None:
+            return
         v = self.get_violation_by_id(violation_id)
         if v is not None:
             mon = Monitor(name="%s_violation_%s" % (v.monitor_id, v.step),
