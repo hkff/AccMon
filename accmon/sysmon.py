@@ -17,17 +17,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import inspect
 import sys
-from fodtlmon_middleware.logging import *
+from accmon.logging import *
 from django.http.response import HttpResponseBase
 from fodtlmon.fodtl.fodtlmon import *
 from enum import Enum
 from datetime import datetime
 import time
-from fodtlmon_middleware.blackbox import *
+from accmon.blackbox import *
 # from django.http import HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import RegexURLResolver, RegexURLPattern, get_resolver
-from fodtlmon_middleware.models import *
+from accmon.models import *
 import socket
 import urllib.request
 import urllib.parse
@@ -395,7 +395,7 @@ class Sysmon:
             control.initialize()
 
         # Import plugins
-        from fodtlmon_middleware.plugins import system, arduino, remote
+        from accmon.plugins import system, arduino, remote
         Sysmon.plugins = [system.System(), arduino.Arduino(), remote.Remote()]
         Sysmon.plugins[2].start(10000)
         #Sysmon.plugins[1].connect()

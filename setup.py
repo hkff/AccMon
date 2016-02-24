@@ -1,5 +1,5 @@
 """
-django-fodtlmon-middleware version 1.0
+accmon version 1.0
 Copyright (C) 2016 Walid Benghabrit
 
 This program is free software: you can redistribute it and/or modify
@@ -18,19 +18,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from distutils.core import setup
 
 setup(
-    name='django-fodtlmon-middleware',
+    name='accmon',
     version='1.0',
-    packages=['fodtlmon_middleware', 'fodtlmon_middleware/plugins'],
+    packages=['accmon', 'accmon/plugins'],
     package_data={
-        'fodtlmon_middleware': [
+        'accmon': [
             'static/*', 'static/css/*', 'static/js/*', 'static/fonts/*',
             'templates/*', 'templates/pages/*', 'templates/fragments/*', 'templates/fragments/plugins/*'
         ]},
-    url='https://github.com/hkff/django-fodtlmon-middleware',
+    url='https://github.com/hkff/Accmon',
     license='GPL3',
     author='Walid Benghabrit',
     author_email='Walid.Benghabrit@mines-nantes.fr',
-    description='FODTLMON-middleware is a monitoring middleware for django.',
+    description='Accmon is an accountability monitoring middleware for django.',
     install_requires=[
         'fodtlmon>=1.0',
         'pyserial>=3.0'

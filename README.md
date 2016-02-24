@@ -2,13 +2,13 @@
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)]()
 [![License](https://img.shields.io/badge/python->%3D3.4-green.svg)]()
 
-# django-fodtlmon-middleware
-FODTLMON-middleware Version 1.0
+# Accmon
+Accmon Version 1.0
 
 What is it?
 -----------
 
-FODTLMON-middleware is a monitoring middleware for django, using FODTLMON a monitor based on distributed first order 
+Accmon is a monitoring middleware for django, using FODTLMON a monitor based on distributed first order 
 linear temporal logic. It allows to monitor formula defined on HTTP traffic and formula defined on python code 
 function / class methods.
 Note that this framework is a research prototype and should not be used in production !
@@ -26,20 +26,20 @@ Usage
 -----
 
 1. In your django project settings.py :
-    add the following app 'fodtlmon_middleware' to INSTALLED_APPS 
-    add 'fodtlmon_middleware.middleware.FodtlmonMiddleware' in the MIDDLEWARE_CLASSES
+    add the following app 'accmon' to INSTALLED_APPS 
+    add 'accmon.middleware.FodtlmonMiddleware' in the MIDDLEWARE_CLASSES
 
 2. In your django project wsgi.py :
     add the init call to the monitoring system
     
-        from fodtlmon_middleware.sysmon import Sysmon
+        from accmon.sysmon import Sysmon
         Sysmon.init()
 
 
 2. Create a python file (eg.: sysmon_rules.py)
     Note that the code above should be executed only once when the server starts
         
-        from fodtlmon_middleware.sysmon import *
+        from accmon.sysmon import *
         
         # Define your Interpreted predicates here
         
@@ -61,7 +61,7 @@ Usage
 4. In urls.py :
     Add the following import
         
-        from fodtlmon_middleware import urls as fodtlurls
+        from accmon import urls as fodtlurls
 
     and the url pattern :
         (eg.: here the system monitor app will be accessed via http../your_base_url/mon)

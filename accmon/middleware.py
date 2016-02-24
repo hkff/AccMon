@@ -1,5 +1,5 @@
 """
-django-fodtlmon-middleware version 1.0
+accmon version 1.0
 Copyright (C) 2016 Walid Benghabrit
 
 This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@ from django.http import HttpResponse
 from django.contrib.auth import *
 from django.contrib.auth.models import User
 from django.shortcuts import render
-from fodtlmon_middleware.sysmon import *
+from accmon.sysmon import *
 import threading
 
 TIMER = 0

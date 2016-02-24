@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import threading
 from time import sleep
 import serial
-from fodtlmon_middleware.plugins.plugin import *
+from accmon.plugins.plugin import *
 import glob
 
 

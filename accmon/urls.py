@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from django.conf.urls import include, url
-from fodtlmon_middleware import views
+from accmon import views
 
 urlpatterns = [
     # Sysmon app #
