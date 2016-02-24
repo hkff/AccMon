@@ -1,12 +1,12 @@
 {% extends "pages/main.html" %}
 {% load staticfiles %}
-{% block title %} Sysmon {% endblock %}
+{% block title %} Accmon {% endblock %}
 
 {% block container %}
 
 <div class="jumbotron">
       <div class="container">
-        <h1>Welcome to Sysmon</h1>
+        <h1>Welcome to Accmon</h1>
         <p></p>
         <p><a class="btn btn-primary btn-lg" href="{% url 'monitors' %}" role="button">Show monitors status &raquo;</a></p>
       </div>
@@ -14,7 +14,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4">
-            <h2>Sysmon status</h2>
+            <h2>Accmon status</h2>
             <ul class="list-group">
                 <li class="list-group-item"> <span class="badge" style="background-color:red;"> {{ violations_nbr }} </span> Violations number</li>
                 <li class="list-group-item"> <span class="badge" style="background-color: orange;"> {{ audits_nbr }} </span> Audits number</li>
