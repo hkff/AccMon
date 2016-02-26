@@ -2,13 +2,13 @@
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)]()
 [![License](https://img.shields.io/badge/python->%3D3.4-green.svg)]()
 
-# Accmon
-Accmon Version 1.0
+# AccMon
+AccMon Version 1.0
 
 What is it?
 -----------
 
-Accmon is a monitoring middleware for django, using FODTLMON a monitor based on distributed first order 
+AccMon is a monitoring middleware for django, using FodtlMon a monitor based on distributed first order 
 linear temporal logic. It allows to monitor formula defined on HTTP traffic and formula defined on python code 
 function / class methods.
 Note that this framework is a research prototype and should not be used in production !

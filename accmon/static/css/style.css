@@ -70,3 +70,9 @@ body {
     margin: 0 auto;
 }
 
+.logoHeader {
+    width: 38px;
+    float: left;
+    padding-top: 7px;
+    margin-right: 10px;
+}
