@@ -58,9 +58,9 @@ class LogAttributes:
                           P("SCHEME", args=[Constant(request.scheme)]))
 
     PATH = LogAttribute("PATH", description="The full path to the requested page, not including the scheme or domain.",
-                        enabled=True, # IMPORTANT Parse path as regexp TODO for META also
+                        enabled=True,
                         eval_fx=lambda request, view, args, kwargs, response:
-                        P(request.method, args=[Constant('"%s"' % request.path)]))
+                        P(request.method, args=[Constant('%s' % request.path)]))
 
     USER = LogAttribute("USER", description="The currently logged-in user.", enabled=True,
                           eval_fx=lambda request, view, args, kwargs, response:
