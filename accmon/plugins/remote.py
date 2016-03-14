@@ -1,5 +1,5 @@
 """
-System plugin
+Remote API plugin
 Copyright (C) 2016 Walid Benghabrit
 
 This program is free software: you can redistribute it and/or modify

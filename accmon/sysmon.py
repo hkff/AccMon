@@ -395,8 +395,8 @@ class Sysmon:
             control.initialize()
 
         # Import plugins
-        from accmon.plugins import system, arduino, remote
-        Sysmon.plugins = [system.System(), arduino.Arduino(), remote.Remote()]
+        from accmon.plugins import system, arduino, remote, sandbox, apache
+        Sysmon.plugins = [system.System(), arduino.Arduino(), remote.Remote(), sandbox.Sandbox(), apache.Apache()]
         Sysmon.plugins[2].start(10000)
         #Sysmon.plugins[1].connect()
 

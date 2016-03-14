@@ -1,0 +1,47 @@
+<div class="panel panel-default">
+  <div class="panel-heading">Formula</div>
+  <div class="panel-body">
+    <div class="input-group" id="formula">
+        <input type="text" class="form-control" aria-label="Formula" placeholder="Formula">
+        <div class="input-group-btn">
+            <button type="button" class="btn btn-default" aria-label="Help">
+                <span class="glyphicon glyphicon-ok"></span>
+            </button>
+        </div>
+    </div>
+    </div>
+</div>
+
+
+<div class="panel panel-default">
+  <div class="panel-heading">Trace</div>
+  <div class="panel-body">
+
+    <label for="trace">enter a trace :</label>
+    <div class="input-group" id="trace">
+        <input type="text" class="form-control" aria-label="Trace" placeholder="Trace">
+        <div class="input-group-btn">
+            <button type="button" class="btn btn-default" aria-label="Help">
+                <span class="glyphicon glyphicon-ok"></span>
+            </button>
+        </div>
+    </div>
+    </br>
+    <label for="sel1">or select a trace provider :</label>
+    <select class="form-control" id="sel1">
+        {% for x in sandbox_trace_providers %}
+            <option>{{ x }}</option>
+        {% endfor %}
+    </select>
+  </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">Result</div>
+    <div class="panel-body">
+        <button type="button" class="btn btn-default" aria-label="Check">
+             <span class="glyphicon glyphicon-ok"></span> Check
+        </button>
+    </div>
+    </div>
+</div>
