@@ -22,10 +22,33 @@ class Sandbox(Plugin):
 
     def __init__(self):
         super().__init__()
+        self.traces = ['HTTP', 'VIEW', 'RESPONSE']
 
     def handle_request(self, request):
-        pass
+        if request.method == "POST":
+            res = "Action not supported !"
+            action = request.POST.get('action')
+            if action == "monitor":
+                formula = request.POST.get('formula')
+                trace = request.POST.get('trace')
+                r = self.monitor(formula, trace)
+                res = r
+            return HttpResponse(res)
+        else:
+            return HttpResponse("Only POST method is allowed")
 
     def get_template_args(self):
-        trace_providers = []
+        trace_providers = ['HTTP', 'VIEW', 'RESPONSE']
         return {"sandbox_trace_providers": trace_providers}
+
+    def monitor(self, formula, trace):
+        tr = ""
+        if trace in self.traces:
+            if trace == 'HTTP': tr = Sysmon.main_mon.trace
+            elif trace == 'VIEW': tr = Sysmon.main_view_mon.trace
+            elif trace == 'RESPONSE': tr = Sysmon.main_response_mon.trace
+        else:
+            tr = Trace().parse(trace)
+        fl = FodtlParser.parse(formula)
+        mon = Fodtlmon(fl, tr)
+        return mon.monitor()
