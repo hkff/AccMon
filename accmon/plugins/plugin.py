@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from accmon.sysmon import *
+from django.http import HttpResponse
 
 
 class Plugin:
@@ -34,7 +35,7 @@ class Plugin:
         return {}
 
     def handle_request(self, request):
-        pass
+        return HttpResponseBase("")
 
     @classmethod
     def add_rule(cls, name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,

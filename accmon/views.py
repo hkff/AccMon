@@ -82,6 +82,15 @@ def show_plugins(request):
 
 
 @user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
+def plugin(request, plugin):
+    plugins = list(filter(lambda x: x.__class__.__name__ == plugin, Sysmon.plugins))
+    if len(plugins) > 0:
+        return plugins[0].handle_request(request)
+    else:
+        return HttpResponse("Plugin not found !")
+
+
+@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_actors(request):
     return render(request, 'pages/actors.html', {"actors": Sysmon.actors, "KV": Sysmon.main_mon.KV})
 

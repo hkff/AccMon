@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^sysmon/config/$', views.show_config, name='config'),
     url(r'^sysmon/help/$', views.show_help, name='help'),
     url(r'^sysmon/plugins/$', views.show_plugins, name='plugins'),
+    url(r'^sysmon/plugin/(?P<plugin>.*)/$', views.plugin, name='plugin'),
     url(r'^sysmon/login$', views.login_view, name='sysmon_login'),
     url(r'^sysmon/logout$', views.logout_view, name='sysmon_logout'),
     url(r'^sysmon/monitors/$', views.show_monitors, name="monitors"),
