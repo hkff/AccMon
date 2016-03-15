@@ -17,6 +17,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from accmon.plugins.plugin import *
 
+apache_import_err = None
+try:
+    import apache_log_parser
+except:
+    apache_import_err = "Missing apache_log_parser."
+
 
 class Apache(Plugin):
 
