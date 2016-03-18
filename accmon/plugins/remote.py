@@ -33,7 +33,8 @@ class Remote(Plugin):
     def get_template_args(self):
         super_args = super(Remote, self).get_template_args()
         args = {"remote_is_running": self.is_running}
-        return super_args.update(args)
+        args.update(super_args)
+        return args
 
     def handle_request(self, request):
         if request.method == "POST":

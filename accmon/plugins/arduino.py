@@ -35,7 +35,8 @@ class Arduino(Plugin):
         super_args = super(Arduino, self).get_template_args()
         ttys = glob.glob('/dev/tty*')
         args = {"ttys": ttys}
-        return super_args.update(args)
+        args.update(super_args)
+        return args
 
     def start_arduino(self):
         ser = serial.Serial('/dev/ttyUSB0', 9600)

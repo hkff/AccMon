@@ -41,7 +41,8 @@ class Sandbox(Plugin):
         super_args = super(Sandbox, self).get_template_args()
         trace_providers = ['HTTP', 'VIEW', 'RESPONSE']
         args = {"sandbox_trace_providers": trace_providers}
-        return super_args.update(args)
+        args.update(super_args)
+        return args
 
     def monitor(self, formula, trace):
         tr = ""
