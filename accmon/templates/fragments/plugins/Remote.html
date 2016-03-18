@@ -32,7 +32,7 @@ function remote_run() {
     $.ajax({
         dataType: 'text',
         type:'POST',
-        url: '{% url 'plugin' 'Remote' %}',
+        url: '{% url 'plugin' args.name %}',
         data: {
             action: 'run',
             port: port

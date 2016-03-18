@@ -29,6 +29,7 @@ class Remote(Plugin):
 
     def __init__(self):
         super().__init__()
+        setattr(self.HTTPRequestHandler, "PLUGIN", self.__class__)
 
     def get_template_args(self):
         super_args = super(Remote, self).get_template_args()
@@ -40,6 +41,7 @@ class Remote(Plugin):
         if request.method == "POST":
             res = "Action not supported !"
             action = request.POST.get('action')
+            # action = self.HTTPRequestHandler.get_request_arg(request, "action")
             if action == "run":
                 port = request.POST.get('port')
                 try:
@@ -61,15 +63,15 @@ class Remote(Plugin):
 
     def start(self, port=10000):
         Remote.server_port = port
-        threading.Thread(target=Remote.run).start()
+        threading.Thread(target=Remote.run, args=(self.__class__,)).start()
         self.is_running = True
         return "Plugin started on port %s " % port
 
     @staticmethod
-    def run(server_class=ThreadingSimpleServer):
-        server_address = ('', Remote.server_port)
-        httpd = server_class(server_address, HTTPRequestHandler)
-        print("Server start on port " + str(Remote.server_port))
+    def run(plugin, server_class=ThreadingSimpleServer):
+        server_address = ('', plugin.server_port)
+        httpd = server_class(server_address, plugin.HTTPRequestHandler)
+        print("Server start on port " + str(plugin.server_port))
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
@@ -94,47 +96,46 @@ class Remote(Plugin):
         except:
             return res
 
+    class HTTPRequestHandler(SimpleHTTPRequestHandler):
 
-class HTTPRequestHandler(SimpleHTTPRequestHandler):
+        @staticmethod
+        def get_arg(args, name, method):
+            try:
+                if method == "GET":
+                    return args[name]
+                elif method == "POST":
+                    return args[name][0]
+                else:
+                    return "Method error"
+            except:
+                return None
 
-    @staticmethod
-    def get_arg(args, name, method):
-        try:
-            if method == "GET":
-                return args[name]
-            elif method == "POST":
-                return args[name][0]
-            else:
-                return "Method error"
-        except:
-            return None
-
-    def do_GET(self):
-        # print("[GET] " + self.path)
-        p = self.path
-        k = urlparse(p).query
-        args = parse_qs(k)
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        path = p.replace(k, "")
-        if path[-1] == "?":
-            path = path[:-1]
-        res = self.handle_req(path, args, "GET")
-        self.wfile.write(res.encode("utf-8"))
-
-    def do_POST(self):
-        k = urlparse(self.path).query
-        var_len = int(self.headers['Content-Length'])
-        post_vars = self.rfile.read(var_len).decode('utf-8')
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-
-        if len(post_vars) == 0:
+        def do_GET(self):
+            # print("[GET] " + self.path)
+            p = self.path
+            k = urlparse(p).query
             args = parse_qs(k)
-        else:
-            args = parse_qs(post_vars, encoding="utf8")
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            path = p.replace(k, "")
+            if path[-1] == "?":
+                path = path[:-1]
+            res = self.PLUGIN.handle_req(path, args, "GET")
+            self.wfile.write(res.encode("utf-8"))
 
-        res = self.handle_req(self.path, args, "POST")
-        self.wfile.write(res.encode("utf-8"))
+        def do_POST(self):
+            k = urlparse(self.path).query
+            var_len = int(self.headers['Content-Length'])
+            post_vars = self.rfile.read(var_len).decode('utf-8')
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+
+            if len(post_vars) == 0:
+                args = parse_qs(k)
+            else:
+                args = parse_qs(post_vars, encoding="utf8")
+
+            res = self.PLUGIN.handle_req(self.path, args, "POST")
+            self.wfile.write(res.encode("utf-8"))
