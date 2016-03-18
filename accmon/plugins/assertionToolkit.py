@@ -102,7 +102,15 @@ class AtLoggerSnapshot(AtLogger):
 class AtLoggerDataDeletion(AtLogger):
     name = "DataDeletion"
     regexp = r'.*?PII delete message.*?date: ([\d-]+) ([\d:\.]+).*'
-    args_number = 2
+
+    @classmethod
+    def log(cls, log, log_type):
+        res = None
+        match = re.search(cls.regexp, log)
+        if match is not None:
+            res = Predicate(name="%s_%s" % (log_type, cls.name),
+                            args=[Constant("%s%s" % (match.group(1), match.group(2)))])
+        return res
 
 
 ###################################################
