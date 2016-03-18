@@ -26,62 +26,41 @@ class AtLogger:
     enabled = True
     name = ""
     regexp = ""
+    args_number = 1
 
     @classmethod
     def log(cls, log, log_type):
         res = None
-        match = re.search(cls.regexp, log)
-        if match is not None:
-            res = Predicate(name="%s_%s" % (log_type, cls.name), args=[Constant(match.group(1))])
-        return res
+        try:
+            match = re.search(cls.regexp, log)
+            if match is not None:
+                cts = []
+                for x in range(1, cls.args_number+1):
+                    cts.append(Constant(match.group(x)))
+                res = Predicate(name="%s_%s" % (log_type, cls.name), args=cts)
+            return res
+        finally:
+            return res
 
 
 class AtLoggerId(AtLogger):
     name = "Id"
     regexp = r'ApplMessageWrapper@(?P<id>\w+)'
 
-    # @classmethod
-    # def log(cls, log, log_type):
-    #     res = None
-    #     match = re.search(r'ApplMessageWrapper@(?P<id>\w+)', log)
-    #     if match is not None:
-    #         res = Predicate(name="%s_%s" % (log_type, cls.name), args=[Constant(match.group(1))])
-    #     return res
-
 
 class AtLoggerPiiAttributeName(AtLogger):
     name = "PiiAttributeName"
     regexp = r'piiAttributeName: (?P<id>\w+)'
-
-    # @classmethod
-    # def log(cls, log, log_type):
-    #     res = None
-    #     match = re.search(r'piiAttributeName: (?P<id>\w+)', log)
-    #     if match is not None:
-    #         res = Predicate(name="%s_%s" % (log_type, cls.name), args=[Constant(match.group(1))])
-    #     return res
 
 
 class AtLoggerPiiOwner(AtLogger):
     name = "PiiOwner"
     regexp = r'piiOwner: (?P<id>\w+)'
 
-    # @classmethod
-    # def log(cls, log, log_type):
-    #     res = None
-    #     match = re.search(r'piiOwner: (?P<id>\w+)', log)
-    #     if match is not None:
-    #         res = Predicate(name="%s_%s" % (log_type, cls.name), args=[Constant(match.group(1))])
-    #     return res
-
 
 class AtLoggerDate(AtLogger):
-    enabled = False
     name = "Date"
-
-    @classmethod
-    def log(cls, log, log_type):
-        return Predicate.parse("p('x')")
+    regexp = r'^\d+-\d+-\d+ \d+:\d+:\d+'
 
 
 class AtLoggerMsg(AtLogger):
@@ -92,6 +71,40 @@ class AtLoggerMsg(AtLogger):
         return Predicate.parse("p('x')")
 
 
+class AtLoggerAccessAttempt(AtLogger):
+    name = "AccessAttempt"
+    regexp = r'access attempt by subject \'(?P<id>\w+)\': Access (?P<result>\w+) for, for action \'(?P<action>\w+)\''
+
+    @classmethod
+    def log(cls, log, log_type):
+        res = None
+        match = re.search(cls.regexp, log)
+        if match is not None:
+            res = Predicate(name="%s_%s" % (log_type, cls.name),
+                            args=[Constant(match.group('id')), Constant(match.group('result')), Constant(match.group('action'))])
+        return res
+
+
+class AtLoggerSnapshot(AtLogger):
+    name = "Snapshot"
+    regexp = r'NovaImage\{id=(?P<id>\S*),(.*)<evidenceDetectionTime>(?P<date>(.+)?)</evidenceDetectionTime>'
+
+    @classmethod
+    def log(cls, log, log_type):
+        res = None
+        match = re.search(cls.regexp, log, re.DOTALL)
+        if match is not None:
+            res = Predicate(name="%s_%s" % (log_type, cls.name),
+                            args=[Constant(match.group('id')), Constant(match.group('date'))])
+        return res
+
+
+class AtLoggerDataDeletion(AtLogger):
+    name = "DataDeletion"
+    regexp = r'.*?PII delete message.*?date: ([\d-]+) ([\d:\.]+).*'
+    args_number = 2
+
+
 ###################################################
 # AssertionToolkit main plugin
 ###################################################
@@ -99,7 +112,8 @@ class AssertionToolkit(Remote):
     """
     AssertionToolkit main plugin class
     """
-    loggers = [AtLoggerId, AtLoggerPiiAttributeName, AtLoggerPiiOwner, AtLoggerDate, AtLoggerMsg]
+    loggers = [AtLoggerId, AtLoggerPiiAttributeName, AtLoggerPiiOwner, AtLoggerAccessAttempt, AtLoggerSnapshot,
+               AtLoggerMsg, AtLoggerDate, AtLoggerDataDeletion]
 
     def __init__(self):
         super().__init__()
@@ -112,13 +126,27 @@ class AssertionToolkit(Remote):
         args.update(super_args)
         return args
 
+    AAS_whitelist = ["evidence_record_created", "snapshot_detected", "data_retention_policy_violation_detected",
+                     "notification_sent"]
+    AAS_blacklist = ["received_apple_log"]
+    APPLE_whitelist = ["received_apple_log"]
+    APPLE_blacklist = []
+
     @staticmethod
     def is_aas_log(log):
-        return "received_apple_log" not in log and "evidence_record_created" in log
+        for x in AssertionToolkit.AAS_blacklist:
+            if x in log: return False
+        for x in AssertionToolkit.AAS_whitelist:
+            if x in log: return True
+        return False
 
     @staticmethod
     def is_apple_log(log):
-        return "received_apple_log" in log and "xml" not in log
+        for x in AssertionToolkit.APPLE_blacklist:
+            if x in log: return False
+        for x in AssertionToolkit.APPLE_whitelist:
+            if x in log: return True
+        return False
 
     @staticmethod
     def get_log_type(log):
@@ -133,7 +161,6 @@ class AssertionToolkit(Remote):
         if request.method == "POST":
             res = "Action not supported !"
             action = request.POST.get('action')
-            # action = self.HTTPRequestHandler.get_request_arg(request, "action")
             if action == "run":
                 port = request.POST.get('port')
                 try:
@@ -167,8 +194,6 @@ class AssertionToolkit(Remote):
                         x.monitor()
                     return "Pushed"
             return res
-        except:
-            return res
-
-
+        except Exception as e:
+            return res + str(e)
 
