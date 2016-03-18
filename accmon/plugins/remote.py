@@ -24,12 +24,12 @@ import threading
 
 
 class Remote(Plugin):
-    server_port = 10000
-    is_running = False
 
     def __init__(self):
         super().__init__()
         setattr(self.HTTPRequestHandler, "PLUGIN", self.__class__)
+        self.server_port = 10000
+        self.is_running = False
 
     def get_template_args(self):
         super_args = super(Remote, self).get_template_args()
@@ -62,15 +62,15 @@ class Remote(Plugin):
         pass
 
     def start(self, port=10000):
-        Remote.server_port = port
-        threading.Thread(target=Remote.run, args=(self.__class__,)).start()
+        self.server_port = port
+        threading.Thread(target=Remote.run, args=(self,)).start()
         self.is_running = True
         return "Plugin started on port %s " % port
 
     @staticmethod
     def run(plugin, server_class=ThreadingSimpleServer):
         server_address = ('', plugin.server_port)
-        httpd = server_class(server_address, plugin.HTTPRequestHandler)
+        httpd = server_class(server_address, plugin.__class__.HTTPRequestHandler)
         print("Server start on port " + str(plugin.server_port))
         try:
             httpd.serve_forever()
