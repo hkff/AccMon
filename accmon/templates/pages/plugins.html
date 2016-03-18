@@ -17,7 +17,7 @@
         <div id="{{ p.name }}" class="tab-pane fade">
             <h3>{{ p.name }}</h3>
             {% with template_name=p.name|stringformat:"s"|add:".html" %}
-                {% include "fragments/plugins/"|add:template_name %}
+                {% include "fragments/plugins/"|add:template_name with args=p.get_template_args only %}
             {% endwith %}
         </div>
         {% endfor %}

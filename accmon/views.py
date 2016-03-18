@@ -76,8 +76,6 @@ def show_help(request):
 @user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
 def show_plugins(request):
     args = {"plugins": Sysmon.plugins}
-    for p in Sysmon.plugins:
-        args.update(p.get_template_args())
     return render(request, 'pages/plugins.html', args)
 
 
@@ -266,7 +264,7 @@ def api_register_actor_formulas(request, actor_name):
     return HttpResponse("ok")
 
 
-@user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login')
+# @user_passes_test(lambda u: u.is_superuser, login_url='sysmon_login') # disabled FOR demo only
 @csrf_exempt
 def register_formula(request):
     formula = request.POST.get("formula", None)
