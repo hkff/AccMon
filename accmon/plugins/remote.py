@@ -84,8 +84,8 @@ class Remote(Plugin):
         try:
             if path.startswith("/event"):
                 e = Event.parse(args.get("event")[0])
-                e.step = datetime.now()
                 if e is not None:
+                    e.step = datetime.now()
                     cls.main_mon.push_event(e)
                     for x in Remote.monitors:
                         x.monitor()

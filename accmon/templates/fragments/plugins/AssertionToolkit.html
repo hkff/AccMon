@@ -1,0 +1,98 @@
+<div class="row">
+    {% if args.remote_is_running %}
+    <div class="col-lg-3">
+        <div class="panel panel-success">
+            <div class="panel-heading">Server port</div>
+            <div class="panel-body">
+                <input type="number" class="form-control" aria-label="Server port" placeholder="Server port" id="{{args.name}}_serverport" min="1" value="13000"></br>
+                <button type="button" class="form-control btn btn-default" aria-label="Stop" id="{{args.name}}_stop" onclick="{{args.name}}_stop()">
+                    <span class="glyphicon glyphicon-ok"></span> Stop
+                </button>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-lg-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">Server port</div>
+            <div class="panel-body">
+                <input type="number" class="form-control" aria-label="Server port" placeholder="Server port" id="{{args.name}}_serverport" min="1" value="13000"></br>
+                <button type="button" class="form-control btn btn-default" aria-label="Run" id="{{args.name}}_run" onclick="{{args.name}}_run()">
+                    <span class="glyphicon glyphicon-ok"></span> Run
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="col-lg-9">
+        <div class="panel panel-default">
+            <div class="panel-heading">Attributes to Log</div>
+            <div class="panel-body">
+                {% for rule in args.loggers %}
+                    {% if rule.enabled %}
+                    <span class="label label-success" style="font-size: 100%; margin-right: 10px;">
+                        {{ rule.name }}
+                        <input type="checkbox" checked onchange="update_rule('{{ rule.name }}', 'OFF')">
+                    </span>
+                    {% else %}
+                    <span class="label label-danger" style="font-size: 100%; margin-right: 10px;">
+                        {{ rule.name }}
+                        <input type="checkbox" onchange="update_rule('{{ rule.name }}', 'ON')">
+                    </span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="panel-group" id="accordion">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"> Full Trace </a>
+                </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p> Events logged from AAS and APPLE.</p>
+                </div>
+                <table class="table">
+                    <tbody>
+                    {% for t in args.trace.events %}
+                        <tr>
+                            <td> {{ forloop.counter }}</td>
+                            <td class="col-md-2"> {{ t.step }}</td>
+                            <td> {{ t }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="application/javascript">
+
+function {{args.name}}_run() {
+    var port = $('#{{args.name}}_serverport').val();
+    $.ajax({
+        dataType: 'text',
+        type:'POST',
+        url: '{% url 'plugin' args.name %}',
+        data: {
+            action: 'run',
+            port: port
+        },
+        success: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function update_rule(rule, status) {
+    // TODO
+}
+</script>
