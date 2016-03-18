@@ -38,8 +38,10 @@ class Sandbox(Plugin):
             return HttpResponse("Only POST method is allowed")
 
     def get_template_args(self):
+        super_args = super(Sandbox, self).get_template_args()
         trace_providers = ['HTTP', 'VIEW', 'RESPONSE']
-        return {"sandbox_trace_providers": trace_providers}
+        args = {"sandbox_trace_providers": trace_providers}
+        return super_args.update(args)
 
     def monitor(self, formula, trace):
         tr = ""

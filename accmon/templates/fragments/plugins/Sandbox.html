@@ -30,7 +30,7 @@
     <label for="trace_selector">or select a trace provider :</label>
     <select class="form-control" id="trace_selector">
         <option></option>
-        {% for x in sandbox_trace_providers %}
+        {% for x in args.sandbox_trace_providers %}
             <option value="{{ x }}">{{ x }}</option>
         {% endfor %}
     </select>

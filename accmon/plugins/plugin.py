@@ -32,7 +32,7 @@ class Plugin:
         setattr(self.__class__, "main_mon", Fodtlmon("true", Trace()))
 
     def get_template_args(self):
-        return {}
+        return {"name": self.name}
 
     def handle_request(self, request):
         return HttpResponseBase("")

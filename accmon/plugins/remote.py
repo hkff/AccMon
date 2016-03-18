@@ -25,12 +25,30 @@ import threading
 
 class Remote(Plugin):
     server_port = 10000
+    is_running = False
 
     def __init__(self):
         super().__init__()
 
+    def get_template_args(self):
+        super_args = super(Remote, self).get_template_args()
+        args = {"remote_is_running": self.is_running}
+        return super_args.update(args)
+
     def handle_request(self, request):
-        pass
+        if request.method == "POST":
+            res = "Action not supported !"
+            action = request.POST.get('action')
+            if action == "run":
+                port = request.POST.get('port')
+                try:
+                    port = int(port)
+                except:
+                    port = 10000
+                res = self.start(port)
+            return HttpResponse(res)
+        else:
+            return HttpResponse("Only POST method is allowed")
 
     # Threading server
     class ThreadingSimpleServer(ThreadingMixIn, HTTPServer):
@@ -40,15 +58,16 @@ class Remote(Plugin):
     class ForkingSimpleServer(ForkingMixIn, HTTPServer):
         pass
 
-    @staticmethod
-    def start(port=10000):
+    def start(self, port=10000):
         Remote.server_port = port
         threading.Thread(target=Remote.run).start()
+        self.is_running = True
+        return "Plugin started on port %s " % port
 
     @staticmethod
     def run(server_class=ThreadingSimpleServer):
         server_address = ('', Remote.server_port)
-        httpd = server_class(server_address, Remote.HTTPRequestHandler)
+        httpd = server_class(server_address, HTTPRequestHandler)
         print("Server start on port " + str(Remote.server_port))
         try:
             httpd.serve_forever()
@@ -56,63 +75,65 @@ class Remote(Plugin):
             print("Stopping server...")
         httpd.server_close()
 
-    class HTTPRequestHandler(SimpleHTTPRequestHandler):
-
-        @staticmethod
-        def get_arg(args, name, method):
-            try:
-                if method == "GET":
-                    return args[name]
-                elif method == "POST":
-                    return args[name][0]
+    @classmethod
+    def handle_req(cls, path, args, method):
+        res = "Error"
+        try:
+            if path.startswith("/event"):
+                e = Event.parse(args.get("event")[0])
+                e.step = datetime.now()
+                if e is not None:
+                    cls.main_mon.push_event(e)
+                    for x in Remote.monitors:
+                        x.monitor()
+                    return "Pushed"
                 else:
-                    return "Method error"
-            except:
-                return None
+                    return "Bad event format !"
+            return res
+        except:
+            return res
 
-        def do_GET(self):
-            # print("[GET] " + self.path)
-            p = self.path
-            k = urlparse(p).query
-            args = parse_qs(k)
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            path = p.replace(k, "")
-            if path[-1] == "?":
-                path = path[:-1]
-            res = self.handle_req(path, args, "GET")
-            self.wfile.write(res.encode("utf-8"))
 
-        def do_POST(self):
-            k = urlparse(self.path).query
-            var_len = int(self.headers['Content-Length'])
-            post_vars = self.rfile.read(var_len).decode('utf-8')
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
+class HTTPRequestHandler(SimpleHTTPRequestHandler):
 
-            if len(post_vars) == 0:
-                args = parse_qs(k)
+    @staticmethod
+    def get_arg(args, name, method):
+        try:
+            if method == "GET":
+                return args[name]
+            elif method == "POST":
+                return args[name][0]
             else:
-                args = parse_qs(post_vars, encoding="utf8")
+                return "Method error"
+        except:
+            return None
 
-            res = self.handle_req(self.path, args, "POST")
-            self.wfile.write(res.encode("utf-8"))
+    def do_GET(self):
+        # print("[GET] " + self.path)
+        p = self.path
+        k = urlparse(p).query
+        args = parse_qs(k)
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        path = p.replace(k, "")
+        if path[-1] == "?":
+            path = path[:-1]
+        res = self.handle_req(path, args, "GET")
+        self.wfile.write(res.encode("utf-8"))
 
-        def handle_req(self, path, args, method):
-            res = "Error"
-            try:
-                if path.startswith("/event"):
-                    e = Event.parse(args.get("event")[0])
-                    e.step = datetime.now()
-                    if e is not None:
-                        Remote.main_mon.push_event(e)
-                        for x in Remote.monitors:
-                            x.monitor()
-                        return "Pushed"
-                    else:
-                        return "Bad event format !"
-                return res
-            except:
-                return res
+    def do_POST(self):
+        k = urlparse(self.path).query
+        var_len = int(self.headers['Content-Length'])
+        post_vars = self.rfile.read(var_len).decode('utf-8')
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+
+        if len(post_vars) == 0:
+            args = parse_qs(k)
+        else:
+            args = parse_qs(post_vars, encoding="utf8")
+
+        res = self.handle_req(self.path, args, "POST")
+        self.wfile.write(res.encode("utf-8"))

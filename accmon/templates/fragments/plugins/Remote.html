@@ -1,1 +1,45 @@
-remote plugin content
+{% if args.remote_is_running %}
+<div class="col-lg-3">
+    <div class="panel panel-success">
+        <div class="panel-heading">Server port</div>
+        <div class="panel-body">
+            <input type="number" class="form-control" aria-label="Server port" placeholder="Server port" id="remote_serverport" min="1" value="10000"></br>
+            <button type="button" class="form-control btn btn-default" aria-label="Stop" id="remote_stop" onclick="remote_stop()">
+                <span class="glyphicon glyphicon-ok"></span> Stop
+            </button>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="col-lg-3">
+    <div class="panel panel-default">
+        <div class="panel-heading">Server port</div>
+        <div class="panel-body">
+            <input type="number" class="form-control" aria-label="Server port" placeholder="Server port" id="remote_serverport" min="1" value="10000"></br>
+            <button type="button" class="form-control btn btn-default" aria-label="Run" id="remote_run" onclick="remote_run()">
+                <span class="glyphicon glyphicon-ok"></span> Run
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+<script type="application/javascript">
+
+function remote_run() {
+    var port = $('#remote_serverport').val();
+    $.ajax({
+        dataType: 'text',
+        type:'POST',
+        url: '{% url 'plugin' 'Remote' %}',
+        data: {
+            action: 'run',
+            port: port
+        },
+        success: function(response){
+            console.log(response)
+        }
+    });
+}
+</script>
