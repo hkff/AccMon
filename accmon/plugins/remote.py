@@ -40,7 +40,6 @@ class Remote(Plugin):
 
     def handle_request(self, request):
         res = super(Remote, self).handle_request(request)
-        print(res)
         if res is not None: return res
 
         if request.method == "POST":

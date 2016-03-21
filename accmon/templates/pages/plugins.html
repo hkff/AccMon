@@ -25,6 +25,9 @@
 </div>
 
 <script type="application/javascript">
+{% for p in plugins %}
+    $('.nav-tabs a[href="#{{ p.name }}"').on('shown.bs.tab', function(e){render_plugin('{{ p.name }}')});
+{% endfor %}
 
 function render_plugin(plugin) {
     var base = '{% url 'plugin' 'plugin_name' %}';
@@ -36,14 +39,12 @@ function render_plugin(plugin) {
             action: 'render'
         },
         success: function(response){
-{#            $('#Remote').empty().append("<h3>"+plugin+"</h3>" + response);#}
             rend(plugin, response);
         }
     });
 }
 
 function rend(plugin, content) {
-    console.log(content)
     $('#'+plugin).empty().append("<h3>"+plugin+"</h3>" + content);
 }
 

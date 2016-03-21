@@ -4,7 +4,7 @@
         <div class="panel panel-success">
             <div class="panel-heading">Server port</div>
             <div class="panel-body">
-                <input type="number" class="form-control" aria-label="Server port" placeholder="Server port" id="{{args.name}}_serverport" min="1" value="13000"></br>
+                <input type="number" class="form-control" aria-label="Server port" placeholder="Server port" id="{{args.name}}_serverport" min="1" value="{{args.server_port}}"></br>
                 <button type="button" class="form-control btn btn-default" aria-label="Stop" id="{{args.name}}_stop" onclick="{{args.name}}_stop()">
                     <span class="glyphicon glyphicon-ok"></span> Stop
                 </button>
@@ -14,7 +14,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">Server port</div>
             <div class="panel-body">
-                <input type="number" class="form-control" aria-label="Server port" placeholder="Server port" id="{{args.name}}_serverport" min="1" value="13000"></br>
+                <input type="number" class="form-control" aria-label="Server port" placeholder="Server port" id="{{args.name}}_serverport" min="1" value="{{args.server_port}}"></br>
                 <button type="button" class="form-control btn btn-default" aria-label="Run" id="{{args.name}}_run" onclick="{{args.name}}_run()">
                     <span class="glyphicon glyphicon-ok"></span> Run
                 </button>
@@ -62,14 +62,14 @@
     </div>
 </div>
 <div class="row">
-    <div class="panel-group" id="accordion">
+    <div class="panel-group" id="{{args.name}}_accordion">
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"> Full Trace </a>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#{{args.name}}_collapseOne"> Full Trace </a>
                 </h4>
             </div>
-            <div id="collapseOne" class="panel-collapse collapse">
+            <div id="{{args.name}}_collapseOne" class="panel-collapse collapse">
                 <div class="panel-body">
                     <p> Events logged from AAS and APPLE.</p>
                 </div>

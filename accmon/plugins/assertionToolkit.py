@@ -131,7 +131,8 @@ class AssertionToolkit(Remote):
 
     def get_template_args(self):
         super_args = super(Remote, self).get_template_args()
-        args = {"trace": self.main_mon.trace, "loggers": self.loggers, "remote_is_running": self.is_running}
+        args = {"trace": self.main_mon.trace, "loggers": self.loggers, "remote_is_running": self.is_running,
+                "server_port": self.server_port}
         args.update(super_args)
         return args
 
