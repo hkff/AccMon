@@ -205,3 +205,6 @@ class AssertionToolkit(Remote):
         except Exception as e:
             return res + str(e)
 
+    class HTTPRequestHandler(Remote.HTTPRequestHandler):
+        pass
+

@@ -27,6 +27,7 @@ class Remote(Plugin):
 
     def __init__(self):
         super().__init__()
+        print(self)
         setattr(self.HTTPRequestHandler, "PLUGIN", self.__class__)
         self.server_port = 10000
         self.is_running = False
@@ -97,7 +98,9 @@ class Remote(Plugin):
             return res
 
     class HTTPRequestHandler(SimpleHTTPRequestHandler):
-
+        """
+        Important : to subclass by other plugins that inherit from Remote
+        """
         @staticmethod
         def get_arg(args, name, method):
             try:
