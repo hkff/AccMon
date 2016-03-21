@@ -27,6 +27,7 @@ class AtLogger:
     name = ""
     regexp = ""
     args_number = 1
+    description = ""
 
     @classmethod
     def log(cls, log, log_type):
@@ -130,7 +131,7 @@ class AssertionToolkit(Remote):
 
     def get_template_args(self):
         super_args = super(Remote, self).get_template_args()
-        args = {"trace": self.main_mon.trace, "loggers": self.loggers}
+        args = {"trace": self.main_mon.trace, "loggers": self.loggers, "remote_is_running": self.is_running}
         args.update(super_args)
         return args
 

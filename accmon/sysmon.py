@@ -395,11 +395,9 @@ class Sysmon:
             control.initialize()
 
         # Import plugins
-        from accmon.plugins import system, arduino, remote, sandbox, apache, assertionToolkit
-        Sysmon.plugins = [system.System(), arduino.Arduino(), remote.Remote(), sandbox.Sandbox(), apache.Apache(),
+        from accmon.plugins import remote, system, arduino, sandbox, apache, assertionToolkit
+        Sysmon.plugins = [remote.Remote(), system.System(), arduino.Arduino(), sandbox.Sandbox(), apache.Apache(),
                           assertionToolkit.AssertionToolkit()]
-        # Sysmon.plugins[2].start(10000)
-        # Sysmon.plugins[1].connect()
 
     @staticmethod
     def check_logged_predicates():

@@ -1,6 +1,6 @@
 <div class="row">
-    {% if args.remote_is_running %}
     <div class="col-lg-3">
+    {% if args.remote_is_running %}
         <div class="panel panel-success">
             <div class="panel-heading">Server port</div>
             <div class="panel-body">
@@ -10,9 +10,7 @@
                 </button>
             </div>
         </div>
-    </div>
     {% else %}
-    <div class="col-lg-3">
         <div class="panel panel-default">
             <div class="panel-heading">Server port</div>
             <div class="panel-body">
@@ -22,26 +20,43 @@
                 </button>
             </div>
         </div>
-    </div>
     {% endif %}
+    </div>
 
     <div class="col-lg-9">
         <div class="panel panel-default">
             <div class="panel-heading">Attributes to Log</div>
             <div class="panel-body">
-                {% for rule in args.loggers %}
-                    {% if rule.enabled %}
-                    <span class="label label-success" style="font-size: 100%; margin-right: 10px;">
-                        {{ rule.name }}
-                        <input type="checkbox" checked onchange="update_rule('{{ rule.name }}', 'OFF')">
-                    </span>
-                    {% else %}
-                    <span class="label label-danger" style="font-size: 100%; margin-right: 10px;">
-                        {{ rule.name }}
-                        <input type="checkbox" onchange="update_rule('{{ rule.name }}', 'ON')">
-                    </span>
-                    {% endif %}
-                {% endfor %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Log rule</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                     {% for rule in args.loggers %}
+                      <tr>
+                        <td> {{ rule.name }} </td>
+                        <td>
+                            {% if rule.enabled %}
+                            <span class="label label-success" style="font-size: 100%; margin-right: 10px;">
+                                <input type="checkbox" checked onchange="update_rule('{{ rule.name }}', 'OFF')"> ON
+                            </span>
+                            {% else %}
+                             <span class="label label-danger" style="font-size: 100%; margin-right: 10px;">
+                                <input type="checkbox" onchange="update_rule('{{ rule.name }}', 'ON')"> OFF
+                            </span>
+                            {% endif %}
+                        </td>
+                          <td> {{ rule.description }} </td>
+                      </tr>
+                     {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             </div>
         </div>
     </div>
