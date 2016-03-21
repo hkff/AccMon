@@ -38,7 +38,7 @@ function remote_run() {
             port: port
         },
         success: function(response){
-            console.log(response)
+            render_plugin('{{ args.name }}');
         }
     });
 }

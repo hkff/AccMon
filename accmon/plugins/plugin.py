@@ -15,6 +15,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+
+from django.shortcuts import render
 from accmon.sysmon import *
 from django.http import HttpResponse
 
@@ -35,7 +37,22 @@ class Plugin:
         return {"name": self.name}
 
     def handle_request(self, request):
-        return HttpResponseBase("")
+        if request.method == "POST":
+            action = request.POST.get('action')
+        else:
+            action = request.GET.get('action')
+
+        if action == "render":
+            return self.render(request)
+
+        return None
+
+    def render(self, request):
+        try:
+            template_name = self.name + ".html"
+            return render(request, "fragments/plugins/" + template_name, {"args": self.get_template_args()})
+        except Exception as e:
+            return HttpResponse(e)
 
     @classmethod
     def add_rule(cls, name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,

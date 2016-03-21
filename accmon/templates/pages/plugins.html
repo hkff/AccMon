@@ -23,4 +23,30 @@
         {% endfor %}
     </div>
 </div>
+
+<script type="application/javascript">
+
+function render_plugin(plugin) {
+    var base = '{% url 'plugin' 'plugin_name' %}';
+    $.ajax({
+        dataType: 'text',
+        type:'POST',
+        url:  base.replace('plugin_name', plugin),
+        data: {
+            action: 'render'
+        },
+        success: function(response){
+{#            $('#Remote').empty().append("<h3>"+plugin+"</h3>" + response);#}
+            rend(plugin, response);
+        }
+    });
+}
+
+function rend(plugin, content) {
+    console.log(content)
+    $('#'+plugin).empty().append("<h3>"+plugin+"</h3>" + content);
+}
+
+</script>
+
 {% endblock %}

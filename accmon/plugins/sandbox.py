@@ -25,6 +25,9 @@ class Sandbox(Plugin):
         self.traces = ['HTTP', 'VIEW', 'RESPONSE']
 
     def handle_request(self, request):
+        res = super(Sandbox, self).handle_request(request)
+        if res is not None: return res
+
         if request.method == "POST":
             res = "Action not supported !"
             action = request.POST.get('action')

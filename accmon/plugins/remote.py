@@ -39,6 +39,10 @@ class Remote(Plugin):
         return args
 
     def handle_request(self, request):
+        res = super(Remote, self).handle_request(request)
+        print(res)
+        if res is not None: return res
+
         if request.method == "POST":
             res = "Action not supported !"
             action = request.POST.get('action')

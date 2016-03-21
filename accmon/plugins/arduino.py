@@ -29,7 +29,8 @@ class Arduino(Plugin):
         self.connector = None
 
     def handle_request(self, request):
-        pass
+        res = super(Arduino, self).handle_request(request)
+        if res is not None: return res
 
     def get_template_args(self):
         super_args = super(Arduino, self).get_template_args()

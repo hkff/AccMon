@@ -30,4 +30,5 @@ class Apache(Plugin):
         super().__init__()
 
     def handle_request(self, request):
-        pass
+        res = super(Apache, self).handle_request(request)
+        if res is not None: return res

@@ -24,4 +24,5 @@ class System(Plugin):
         super().__init__()
 
     def handle_request(self, request):
-        pass
+        res = super(System, self).handle_request(request)
+        if res is not None: return res

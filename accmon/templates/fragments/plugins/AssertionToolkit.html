@@ -87,7 +87,8 @@ function {{args.name}}_run() {
             port: port
         },
         success: function(response){
-            console.log(response)
+            console.log(response);
+            render_plugin('{{ args.name }}');
         }
     });
 }

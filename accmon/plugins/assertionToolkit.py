@@ -166,6 +166,9 @@ class AssertionToolkit(Remote):
         return res
 
     def handle_request(self, request):
+        res = super(AssertionToolkit, self).handle_request(request)
+        if res is not None: return res
+
         if request.method == "POST":
             res = "Action not supported !"
             action = request.POST.get('action')
