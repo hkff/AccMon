@@ -114,6 +114,34 @@ class AtLoggerDataDeletion(AtLogger):
         return res
 
 
+class AtLoggerEvidenceRecordCreated(AtLogger):
+    name = "EvidenceRecordCreated"
+    regexp = r'evidence_record_created'
+
+    @classmethod
+    def log(cls, log, log_type):
+        res = None
+        match = re.search(cls.regexp, log)
+        if match is not None:
+            res = Predicate(name="%s_%s" % (log_type, cls.name),
+                            args=[Constant("%s" % ('RECORD'))])
+        return res
+
+
+class AtLoggerPolicyViolationDetected(AtLogger):
+    name = "PolicyViolationDetected"
+    regexp = r'policy_violation_detected (?P<id>\S*)'
+
+    @classmethod
+    def log(cls, log, log_type):
+        res = None
+        match = re.search(cls.regexp, log)
+        if match is not None:
+            res = Predicate(name="%s_%s" % (log_type, cls.name),
+                            args=[Constant("%s" % (match.group('id')))])
+        return res
+
+
 ###################################################
 # AssertionToolkit main plugin
 ###################################################
@@ -122,7 +150,8 @@ class AssertionToolkit(Remote):
     AssertionToolkit main plugin class
     """
     loggers = [AtLoggerId, AtLoggerPiiAttributeName, AtLoggerPiiOwner, AtLoggerAccessAttempt, AtLoggerSnapshot,
-               AtLoggerMsg, AtLoggerDate, AtLoggerDataDeletion]
+               AtLoggerMsg, AtLoggerDate, AtLoggerDataDeletion, AtLoggerEvidenceRecordCreated,
+               AtLoggerPolicyViolationDetected]
 
     def __init__(self):
         super().__init__()
@@ -137,7 +166,7 @@ class AssertionToolkit(Remote):
         return args
 
     AAS_whitelist = ["evidence_record_created", "snapshot_detected", "data_retention_policy_violation_detected",
-                     "notification_sent"]
+                     "notification_sent", "policy_violation_detected"]
     AAS_blacklist = ["received_apple_log"]
     APPLE_whitelist = ["received_apple_log"]
     APPLE_blacklist = []
