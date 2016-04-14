@@ -40,7 +40,7 @@ from django.conf import settings
 
 
 class v2(models.Model):
-            pass
+    pass
 
 
 class Violation:
@@ -69,6 +69,9 @@ class Actor:
         OFFLINE = 0,
         ONLINE = 1,
         CONNECTED = 2,
+
+        def __str__(self):
+            return str(self.name)
 
     def __init__(self, name, ip_addr, port):
         self.name = name

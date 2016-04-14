@@ -12,6 +12,7 @@
             <th>Name</th>
             <th>Status</th>
             <th>IP address</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -20,6 +21,16 @@
             <td><a href="{% url 'actor_details' a.name %}"> {{ a.name }} </a></td>
             <td>  </td>
             <td>{{ a.ip_addr }} : {{ a.port }}</td>
+            <td>
+                {% if a.status|stringformat:"s" == "ONLINE" %}
+                    <span class="label label-default">
+                {% elif a.status|stringformat:"s" == "OFFLINE" %}
+                    <span class="label label-danger">
+                {% elif a.status|stringformat:"s" == "CONNECTED" %}
+                    <span class="label label-success">
+                {% endif %}
+                {{ a.status }}</span>
+            </td>
           </tr>
          {% endfor %}
         </tbody>

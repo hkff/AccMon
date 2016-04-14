@@ -121,7 +121,8 @@ class Monitor:
             f.compute_hash(sid=self.id)
             Sysmon.main_mon.KV.add_entry(self.kv_implementation.Entry(f.fid, agent=self.name, value=Boolean3.Unknown, timestamp=0))
             sysactor = Sysmon.get_actor_by_name(f.agent)
-            sysactor.formulas.append(f)
+            if sysactor is not None:
+                sysactor.formulas.append(f)
 
         # IMPORTANT
         self.mon.reset()
@@ -166,7 +167,8 @@ class Monitor:
 
         # Update KV
         if self.location != "LOCAL":
-            self.mon.KV.update(IKVector.Entry(self.id, agent="", value=res.get("result"), timestamp=self.mon.counter))
+            agent = self.id.split("@")[0].strip()
+            self.mon.KV.update(IKVector.Entry(self.id, agent=agent, value=res.get("result"), timestamp=self.mon.counter))
 
         print(res)
         return res
@@ -433,7 +435,7 @@ class Sysmon:
 
     @staticmethod
     def add_http_rule(name: str, formula: str, description: str="", violation_formula: str=None, liveness: int=None,
-                      control_type=Monitor.MonControlType.POSTERIORI):
+                      control_type=Monitor.MonControlType.POSTERIORI, location="LOCAL"):
         """
 
         :param name:
@@ -445,7 +447,7 @@ class Sysmon:
         :return:
         """
         print("Adding http rule %s" % name)
-        mon = Mon_http(name=name, target=Monitor.MonType.HTTP, location="LOCAL", kind=Monitor.MonType.HTTP,
+        mon = Mon_http(name=name, target=Monitor.MonType.HTTP, location=location, kind=Monitor.MonType.HTTP,
                        formula=formula, description=description, debug=False, povo=True, mon_trace=Sysmon.main_mon.trace,
                        violation_formula=violation_formula, liveness=liveness, control_type=control_type)
         Sysmon.http_monitors.append(mon)
@@ -532,15 +534,15 @@ class Sysmon:
                 m.audits.append(violation_id)
 
     @staticmethod
-    def register_actor(name, addr):
+    def register_actor(name, addr, port):
         """
         Register an actor
         :param name:
         :param addr:
+        :param port:
         :return:
         """
-        # addr = addr.split(":")  # TODO check and secure
-        a = Actor(name, addr, 8080)
+        a = Actor(name, addr, port)
         Sysmon.actors.append(a)
 
     @staticmethod
@@ -587,3 +589,4 @@ class Sysmon:
                 # res.read().decode('utf-8'))
                 if kv is not None:
                     Sysmon.main_mon.update_kv(Sysmon.kv_implementation.parse(kv))
+                actor.status = Actor.ActorStatus.CONNECTED

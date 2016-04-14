@@ -275,5 +275,5 @@ def register_formula(request):
     kind = request.POST.get("kind", Monitor.MonType.HTTP)
     description = request.POST.get("description", "")
     # TODO change depending on kind
-    Sysmon.add_http_rule(formula_id, formula, description=description)
+    Sysmon.add_http_rule(formula_id, formula, description=description, location=target)
     return HttpResponse("OK")
