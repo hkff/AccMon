@@ -1,5 +1,5 @@
 """
-accmon version 1.0
+accmon version 1.1
 Copyright (C) 2016 Walid Benghabrit
 
 This program is free software: you can redistribute it and/or modify
@@ -15,11 +15,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='accmon',
-    version='1.0',
+    version='1.1',
     packages=['accmon', 'accmon/plugins'],
     package_data={
         'accmon': [
@@ -29,7 +29,7 @@ setup(
     url='https://github.com/hkff/Accmon',
     license='GPL3',
     author='Walid Benghabrit',
-    author_email='Walid.Benghabrit@mines-nantes.fr',
+    author_email='benghabrit.walid@gmail.com',
     description='Accmon is an accountability monitoring middleware for django.',
     install_requires=[
         'fodtlmon>=1.0',
