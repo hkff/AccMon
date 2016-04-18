@@ -1,9 +1,9 @@
-[![License](https://img.shields.io/badge/version-1.0-orange.svg)]()
+[![License](https://img.shields.io/badge/version-1.1-orange.svg)]()
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)]()
 [![License](https://img.shields.io/badge/python->%3D3.4-green.svg)]()
 
 # AccMon
-AccMon Version 1.0
+AccMon Version 1.1
 
 What is it?
 -----------
@@ -16,6 +16,11 @@ Note that this framework is a research prototype and should not be used in produ
 Installation
 ------------
 
+You can install accmon directly using pip3 :
+
+    https://pypi.python.org/pypi/accmon
+    $ sudo pip3 install accmon
+    
 You need PythonX.X.X >= Python3.4.0 installed on your system
 
     You need to install the following dependencies :  
