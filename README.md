@@ -8,9 +8,7 @@ AccMon Version 1.1
 What is it?
 -----------
 
-AccMon is a monitoring middleware for django, using FodtlMon a monitor based on distributed first order 
-linear temporal logic. It allows to monitor formula defined on HTTP traffic and formula defined on python code 
-function / class methods.
+AccMon is a monitoring middleware for django, using FodtlMon a monitor based on distributed first order linear temporal logic. It allows to monitor formula defined on HTTP traffic, views processing and external tools via plugins.
 Note that this framework is a research prototype and should not be used in production !
 
 Installation
