@@ -23,8 +23,8 @@ setup(
     packages=['accmon', 'accmon/plugins'],
     package_data={
         'accmon': [
-            'static/*', 'static/css/*', 'static/js/*', 'static/fonts/*',
-            'templates/*', 'templates/pages/*', 'templates/fragments/*', 'templates/fragments/plugins/*'
+            'static/*.', 'static/css/*', 'static/js/*', 'static/fonts/*',
+            'templates/*.', 'templates/pages/*.', 'templates/fragments/*.', 'templates/fragments/plugins/*'
         ]},
     url='https://github.com/hkff/Accmon',
     license='GPL3',
