@@ -33,6 +33,7 @@ setup(
     description='Accmon is an accountability monitoring middleware for django.',
     install_requires=[
         'fodtlmon>=1.0',
-        'pyserial>=3.0'
+        'pyserial>=3.0',
+        'django>=1.8',
     ]
 )
