@@ -585,8 +585,8 @@ class Sysmon:
                 data = urllib.parse.urlencode(data)
                 data = data.encode('ascii')
                 res = urllib.request.urlopen(actor.ip_addr + "/mon/sysmon/remote/register_formula/", data)  # FIXME
-                kv = res.info().get('KV')
-                # res.read().decode('utf-8'))
+                # kv = res.info().get('KV')
+                kv = res.read().decode('utf-8')
                 if kv is not None:
                     Sysmon.main_mon.update_kv(Sysmon.kv_implementation.parse(kv))
                 actor.status = Actor.ActorStatus.CONNECTED

@@ -276,4 +276,23 @@ def register_formula(request):
     description = request.POST.get("description", "")
     # TODO change depending on kind
     Sysmon.add_http_rule(formula_id, formula, description=description, location=target)
-    return HttpResponse("OK")
+    return HttpResponse(Sysmon.main_mon.KV)
+
+
+@csrf_exempt
+def get_kv(request, actor_name):
+    if request.method == "GET":
+        actor = Sysmon.get_actor_by_name(actor_name)
+        if actor is not None:
+            data = {
+                "target": HOSTNAME,
+                "KV": Sysmon.main_mon.KV
+            }
+            data = urllib.parse.urlencode(data)
+            data = data.encode('ascii')
+            res = urllib.request.urlopen(actor.ip_addr + "/mon/sysmon/remote/get_kv/", data)  # FIXME
+            kv = res.read().decode('utf-8')
+            if kv is not None:
+                Sysmon.main_mon.update_kv(Sysmon.kv_implementation.parse(kv))
+    else:
+        return HttpResponse(Sysmon.main_mon.KV)

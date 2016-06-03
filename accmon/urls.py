@@ -48,5 +48,6 @@ urlpatterns = [
 
     # Actors API #
     url(r'^sysmon/remote/register_formula/$', views.register_formula, name='register_formula'),
+    url(r'^sysmon/remote/get_kv/(?P<actor_name>.*)/$', views.get_kv, name='get_kv')
 
 ]

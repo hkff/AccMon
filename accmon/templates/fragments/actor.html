@@ -2,6 +2,9 @@
     <div class="panel-heading">
         <h3 class="panel-title"> {{ actor.name }}
         <div style="float: right">
+            <button type="button" class="btn btn-default btn-xs" title="Update" onclick="update()">
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+            </button>
             <button type="button" class="btn btn-default btn-xs" title="Register formulas" onclick="register_formulas()">
                 <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>
             </button>
@@ -52,6 +55,17 @@ function register_formulas() {
         data: {
             actor_name: "{{ actor.name }}"
         },
+        success: function(response){
+            location.reload();
+        }
+    });
+}
+
+function update() {
+    $.ajax({
+        dataType: 'text',
+        type:'GET',
+        url: '{% url 'get_kv' actor.name %}',
         success: function(response){
             location.reload();
         }
